@@ -1,5 +1,5 @@
 // next.config.js
-/** @type {import('next').NextConfig} */
+/** @type {{experimental: {serverActions: boolean}}} */
 const nextConfig = {
     experimental: {
         serverActions: true,

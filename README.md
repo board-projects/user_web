@@ -1,7 +1,7 @@
-# 🧑‍💻 DrMonk Chat - Frontend (Next.js)
+# 🧑‍💻 DrMonk Board - Frontend (Next.js)
 
-This is the **frontend** of the **DrMonk Chat Application**, built with [Next.js](https://nextjs.org/).  
-It works together with the [NestJS backend](https://github.com/yourusername/nestjs-chat-backend) and a PostgreSQL database.
+This is the **frontend** of the **DrMonk Board Application**, built with [Next.js](https://nextjs.org/).  
+It works together with the [NestJS backend](https://github.com/board-projects/user_web) and a PostgreSQL database.
 
 🔗 Live Demo: [https://www.drmonk.ir](https://www.drmonk.ir)
 
@@ -11,7 +11,7 @@ It works together with the [NestJS backend](https://github.com/yourusername/nest
 - ⚡ Built with **Next.js 15+** (React + Server Components)
 - 🎨 Modern UI with TailwindCSS
 - 🔒 Authentication & secure API communication with backend
-- 💬 Real-time chat interface
+- 💬 Real-time board interface
 - 🌐 REST API integration with NestJS
 - 📱 Responsive design (mobile-friendly)
 

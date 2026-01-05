@@ -18,25 +18,3 @@
     --foreground: #ededed;
   }
 }
-
-body {
-  margin: 0;
-  background: radial-gradient(circle, #020617, #000);
-  height: 100vh;
-  display: grid;
-  place-items: center;
-}
-
-.scene {
-  transform: scale(3);
-}
-
-.sprite {
-  display: grid;
-  image-rendering: pixelated;
-}
-
-.px {
-  width: 6px;
-  height: 6px;
-}

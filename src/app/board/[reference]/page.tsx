@@ -1,10 +1,12 @@
     "use client";
 
+    import { useParams } from "next/navigation";
     import React, { useEffect, useRef, useState } from "react";
     import { io, Socket } from "socket.io-client";
     import {Rnd} from "react-rnd";
     import CodeMirror from "@uiw/react-codemirror";
     import { javascript } from "@codemirror/lang-javascript";
+    import {ToastContainer, toast, Bounce} from 'react-toastify';
 
     import { TbRectangle } from "react-icons/tb";
     import { FaRegCircle } from "react-icons/fa";
@@ -201,9 +203,35 @@
             lastPos.current = null;
         };
 
+        const copyToClipboard = (text: string) => {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            toast.info('The link copied to clipboard', {
+                position: "bottom-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Bounce,
+            });
+        };
+
+        const params = useParams();
+        const reference = params.reference;
+
         return (
             <div style={{ textAlign: "center" }}>
-                <div className="z-50 absolute bg-stone-200 grid grid-cols-2">
+                <ToastContainer />
+                <div className="z-50 absolute bg-stone-200 grid grid-cols-2 m-1">
                     <div>
                         <input type='color' defaultValue='#6DD9B5' onChange={(e: any) => setColor(e.target.value)}/>
                     </div>
@@ -223,6 +251,22 @@
                         <FaRegCircle />
                     </div>
                 </div>
+                <div
+                    onClick={() => copyToClipboard(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${reference}`)}
+                    className='
+                        absolute right-0
+                        bg-cyan-500
+                        text-cyan-950
+                        rounded-sm
+                        px-4 m-1
+                        cursor-pointer
+                        hover:bg-cyan-600
+                        hover:text-cyan-100
+                        transition'
+                >
+                    <strong>Invite</strong>
+                </div>
+
                 <canvas
                     ref={canvasRef}
                     width={window.innerWidth}

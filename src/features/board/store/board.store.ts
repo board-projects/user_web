@@ -1,4 +1,3 @@
-// src/features/board/store/board.store.ts
 import { create } from "zustand";
 
 import { createPenSlice, PenSlice } from "./slices/pen.slice";

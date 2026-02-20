@@ -60,7 +60,6 @@ export default function BoardPageClient() {
 
             <ToastContainer />
 
-            {/* ❌ اینا نباید زوم شن */}
             <Toolbar
                 onAddRect={() => addShape(createRect())}
                 onAddCircle={() => addShape(createCircle())}

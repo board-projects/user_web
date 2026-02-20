@@ -32,7 +32,8 @@
     "ts-jest": "^29.4.0",
     "typeorm": "^0.3.25",
     "universal-cookie": "^8.0.1",
-    "zod": "^4.0.5"
+    "zod": "^4.0.5",
+    "zustand": "^5.0.11"
   },
   "eslintConfig": {
     "extends": [
@@ -46,7 +47,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "8",
     "eslint-config-next": "15.3.5",
     "tailwindcss": "^4",
     "typescript": "^5"

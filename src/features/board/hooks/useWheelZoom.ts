@@ -3,7 +3,7 @@
 import { RefObject, useEffect } from "react";
 import { useBoardStore } from "@/features/board/store/board.store";
 
-export function useWheelZoom(containerRef: RefObject<HTMLElement>) {
+export function useWheelZoom(containerRef: RefObject<HTMLElement | null>) {
     const zoom = useBoardStore((s) => s.zoom);
     const zoomAt = useBoardStore((s) => s.zoomAt);
 

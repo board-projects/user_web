@@ -1,10 +1,10 @@
-import Cookies from 'universal-cookie';
-import ToastService from './ToastService';
+import Cookies from "universal-cookie";
+import ToastService from "./ToastService";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const METHOD_GET = 'GET';
-const METHOD_POST = 'POST';
-const APPLICATION_JSON = 'application/json';
+const METHOD_GET = "GET";
+const METHOD_POST = "POST";
+const APPLICATION_JSON = "application/json";
 
 interface ApiResponse {
   message: string;
@@ -17,9 +17,9 @@ class RequestService {
 
   constructor(endpoint: string) {
     this.endpoint = endpoint;
-    this.cookies = new Cookies(null, { path: '/' });
+    this.cookies = new Cookies(null, { path: "/" });
   }
-  async get(params = ''): Promise<any> {
+  async get(params = ""): Promise<any> {
     try {
       const response = await fetch(BASE_URL + this.endpoint + params, {
         method: METHOD_GET,
@@ -43,7 +43,7 @@ class RequestService {
         method: METHOD_POST,
         headers: {
           ...this.getHeaders(),
-          ...(isFormData ? {} : { 'Content-Type': APPLICATION_JSON }),
+          ...(isFormData ? {} : { "Content-Type": APPLICATION_JSON }),
         },
         body: isFormData ? payload : JSON.stringify(payload),
       });
@@ -66,7 +66,7 @@ class RequestService {
   private getHeaders(): Record<string, string> {
     return {
       Accept: APPLICATION_JSON,
-      Authorization: 'Bearer ' + this.cookies.get('token'),
+      Authorization: "Bearer " + this.cookies.get("token"),
     };
   }
 }

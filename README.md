@@ -8,6 +8,7 @@ It works together with the [NestJS backend](https://github.com/board-projects/us
 ---
 
 ## 🚀 Features
+
 - ⚡ Built with **Next.js 15+** (React + Server Components)
 - 🎨 Modern UI with TailwindCSS
 - 🔒 Authentication & secure API communication with backend
@@ -18,6 +19,7 @@ It works together with the [NestJS backend](https://github.com/board-projects/us
 ---
 
 ## 🛠️ Tech Stack
+
 - [Next.js](https://nextjs.org/) – React Framework
 - [TailwindCSS](https://tailwindcss.com/) – Styling
 - [TypeScript](https://www.typescriptlang.org/) – Strong typing
@@ -34,3 +36,4 @@ Clone the repository and install dependencies:
 git clone https://github.com/messenger-project/user_web.git
 cd user_web
 npm install
+```

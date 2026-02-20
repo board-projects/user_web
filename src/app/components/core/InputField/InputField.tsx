@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import React, { useId } from 'react';
-import clsx from 'clsx';
+import React, { useId } from "react";
+import clsx from "clsx";
 import Input from "@/app/components/core/Input/Input";
 
 interface InputFiledProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -25,9 +25,8 @@ const InputField = React.forwardRef<HTMLInputElement, InputFiledProps>(
       id,
       ...props
     },
-    ref
+    ref,
   ) => {
-
     const reactId = useId();
     const inputId = id || reactId;
 
@@ -37,8 +36,8 @@ const InputField = React.forwardRef<HTMLInputElement, InputFiledProps>(
           <label
             htmlFor={inputId}
             className={clsx(
-              'text-sm font-medium text-gray-700 text-start',
-              labelClassName
+              "text-sm font-medium text-gray-700 text-start",
+              labelClassName,
             )}
           >
             {label}
@@ -52,15 +51,15 @@ const InputField = React.forwardRef<HTMLInputElement, InputFiledProps>(
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           className={clsx(
-            'border-gray-300 focus:border-blue-500 focus:ring-blue-500',
-            error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-            inputClassName
+            "border-gray-300 focus:border-blue-500 focus:ring-blue-500",
+            error && "border-red-500 focus:border-red-500 focus:ring-red-500",
+            inputClassName,
           )}
         />
         {error && (
           <p
             id={`${inputId}-error`}
-            className={clsx('text-xs text-red-600 mt-1', errorClassName)}
+            className={clsx("text-xs text-red-600 mt-1", errorClassName)}
             role="alert"
           >
             {error}
@@ -68,9 +67,9 @@ const InputField = React.forwardRef<HTMLInputElement, InputFiledProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-InputField.displayName = 'InputField';
+InputField.displayName = "InputField";
 
 export default InputField;

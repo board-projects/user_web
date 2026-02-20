@@ -6,17 +6,16 @@ import { createShapesSlice, ShapesSlice } from "./slices/shapes.slice";
 import { createBlocksSlice, BlocksSlice } from "./slices/blocks.slice";
 import { createLinesSlice, LinesSlice } from "./slices/lines.slice";
 
-export type BoardState =
-    & PenSlice
-    & ViewportSlice
-    & ShapesSlice
-    & BlocksSlice
-    & LinesSlice;
+export type BoardState = PenSlice &
+  ViewportSlice &
+  ShapesSlice &
+  BlocksSlice &
+  LinesSlice;
 
 export const useBoardStore = create<BoardState>((set, get) => ({
-    ...createPenSlice(set),
-    ...createViewportSlice(set, get),
-    ...createShapesSlice(set),
-    ...createBlocksSlice(set),
-    ...createLinesSlice(set),
+  ...createPenSlice(set),
+  ...createViewportSlice(set, get),
+  ...createShapesSlice(set),
+  ...createBlocksSlice(set),
+  ...createLinesSlice(set),
 }));

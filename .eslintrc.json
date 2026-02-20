@@ -13,18 +13,20 @@
     },
     "project": "./tsconfig.json"
   },
-  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "plugins": ["react", "@typescript-eslint"],
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "next/core-web-vitals",
+    "prettier"
   ],
   "rules": {
     "semi": ["error", "always"],
-    "quotes": ["error", "single"],
-    "prettier/prettier": ["error"],
-    "react/react-in-jsx-scope": "off"
+    "quotes": 0,
+    "react/react-in-jsx-scope": "off",
+
+    "@typescript-eslint/no-explicit-any": 0
   },
   "settings": {
     "react": {

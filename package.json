@@ -7,7 +7,8 @@
     "build": "next build",
     "test": "jest",
     "start": "PORT=4040 next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.4",
@@ -47,8 +48,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "8",
+    "eslint": "8.57.0",
     "eslint-config-next": "15.3.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

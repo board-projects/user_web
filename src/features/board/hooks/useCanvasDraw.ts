@@ -25,10 +25,7 @@ export function useCanvasDraw(args: {
     // هر چیزی که draggable/resizable هست
     if (el.closest('[data-interactive="true"]')) return true;
 
-    // UI مثل toolbar/button ها
-    if (el.closest('[data-ui="true"]')) return true;
-
-    return false;
+    return !!el.closest('[data-ui="true"]');
   };
 
   const getWorldPos = useCallback(

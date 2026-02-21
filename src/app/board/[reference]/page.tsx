@@ -8,6 +8,8 @@ import { useBoardStore } from "@/features/board/store/board.store";
 import { useBoardSocket } from "@/features/board/hooks/useBoardSocket";
 import { useCanvasDraw } from "@/features/board/hooks/useCanvasDraw";
 import { useWheelZoom } from "@/features/board/hooks/useWheelZoom";
+import { useCanvasRedraw } from "@/features/board/hooks/useCanvasRedraw";
+import { usePan } from "@/features/board/hooks/usePan";
 
 import { Toolbar } from "@/features/board/ui/Toolbar";
 import { InviteButton } from "@/features/board/ui/InviteButton";
@@ -27,9 +29,11 @@ export default function BoardPageClient() {
   const reference = params.reference;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  useWheelZoom(containerRef);
+  const boardAreaRef = useRef<HTMLDivElement | null>(null);
+
+  useWheelZoom(boardAreaRef);
+  usePan(boardAreaRef);
 
   const penColor = useBoardStore((s) => s.penColor);
   const penSize = useBoardStore((s) => s.penSize);
@@ -38,18 +42,22 @@ export default function BoardPageClient() {
   const addCodeBlock = useBoardStore((s) => s.addCodeBlock);
   const addLine = useBoardStore((s) => s.addLine);
 
+  const zoom = useBoardStore((s) => s.zoom);
+  const panX = useBoardStore((s) => s.panX);
+  const panY = useBoardStore((s) => s.panY);
+  const lines = useBoardStore((s) => s.lines);
+
   const { emitDrawLine } = useBoardSocket({
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL!,
     onDrawLine: (line) => {
-      draw.drawLine(line);
       addLine(line);
     },
   });
 
   const draw = useCanvasDraw({
     canvasRef,
+    boardAreaRef,
     penColor,
-    containerRef,
     penSize,
     onLine: (line) => {
       emitDrawLine(line);
@@ -57,13 +65,12 @@ export default function BoardPageClient() {
     },
   });
 
+  useCanvasRedraw({ canvasRef, lines, zoom, panX, panY });
+
   const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${reference}`;
 
   return (
-    <div
-      ref={containerRef}
-      className="relative h-screen w-screen overflow-hidden"
-    >
+    <div className="relative h-screen w-screen overflow-hidden">
       <ToastContainer />
 
       <Toolbar
@@ -84,16 +91,23 @@ export default function BoardPageClient() {
         }
       />
 
-      <BoardViewport>
-        <CanvasStage
-          canvasRef={canvasRef}
-          onMouseDown={draw.onMouseDown}
-          onMouseMove={draw.onMouseMove}
-          onMouseUp={draw.onMouseUp}
-        />
-        <ShapesLayer />
-        <CodeBlocksLayer />
-      </BoardViewport>
+      <div
+        ref={boardAreaRef}
+        className="absolute inset-0"
+        style={{ touchAction: "none" }}
+        onPointerDown={draw.onPointerDown}
+        onPointerMove={draw.onPointerMove}
+        onPointerUp={draw.onPointerUp}
+        onPointerCancel={draw.onPointerUp}
+        onPointerLeave={draw.onPointerUp}
+      >
+        <CanvasStage canvasRef={canvasRef} />
+
+        <BoardViewport>
+          <ShapesLayer />
+          <CodeBlocksLayer />
+        </BoardViewport>
+      </div>
     </div>
   );
 }

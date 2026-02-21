@@ -6,7 +6,7 @@ import { useBoardStore } from "@/features/board/store/board.store";
 
 export function useCanvasDraw(args: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  containerRef: React.RefObject<HTMLElement | null>;
+  boardAreaRef: React.RefObject<HTMLElement | null>;
   penColor: string;
   penSize: number;
   onLine: (line: DrawLine) => void;
@@ -18,9 +18,22 @@ export function useCanvasDraw(args: {
   const panX = useBoardStore((s) => s.panX);
   const panY = useBoardStore((s) => s.panY);
 
+  const isInteractiveTarget = (target: EventTarget | null) => {
+    const el = target as HTMLElement | null;
+    if (!el) return false;
+
+    // هر چیزی که draggable/resizable هست
+    if (el.closest('[data-interactive="true"]')) return true;
+
+    // UI مثل toolbar/button ها
+    if (el.closest('[data-ui="true"]')) return true;
+
+    return false;
+  };
+
   const getWorldPos = useCallback(
-    (e: React.MouseEvent): Point => {
-      const el = args.containerRef.current;
+    (e: React.PointerEvent): Point => {
+      const el = args.boardAreaRef.current;
       if (!el) return { x: 0, y: 0 };
 
       const rect = el.getBoundingClientRect();
@@ -32,7 +45,7 @@ export function useCanvasDraw(args: {
         y: (screenY - panY) / zoom,
       };
     },
-    [args.containerRef, zoom, panX, panY],
+    [args.boardAreaRef, zoom, panX, panY],
   );
 
   const drawLine = useCallback(
@@ -43,8 +56,20 @@ export function useCanvasDraw(args: {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
+      const dpr = window.devicePixelRatio || 1;
+
+      ctx.save();
+      ctx.setTransform(
+        zoom * dpr,
+        0,
+        0,
+        zoom * dpr,
+        panX * dpr,
+        panY * dpr,
+      );
+
       ctx.strokeStyle = line.color;
-      ctx.lineWidth = line.size;
+      ctx.lineWidth = line.size / zoom; // ضخامت ثابت روی صفحه
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
 
@@ -52,21 +77,35 @@ export function useCanvasDraw(args: {
       ctx.moveTo(line.from.x, line.from.y);
       ctx.lineTo(line.to.x, line.to.y);
       ctx.stroke();
+
+      ctx.restore();
     },
-    [args.canvasRef],
+    [args.canvasRef, zoom, panX, panY],
   );
 
-  const onMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      // فقط دکمه چپ
+      if ((e.buttons & 1) !== 1) return;
+
+      // ✅ اگر روی shape/codeblock/ui کلیک شد، draw نکن (بذار Rnd کارشو بکنه)
+      if (isInteractiveTarget(e.target)) return;
+
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+
       setDrawing(true);
       lastPos.current = getWorldPos(e);
     },
     [getWorldPos],
   );
 
-  const onMouseMove = useCallback(
-    (e: React.MouseEvent) => {
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
       if (!drawing || !lastPos.current) return;
+      if ((e.buttons & 1) !== 1) return;
+
+      e.preventDefault();
 
       const newPos = getWorldPos(e);
 
@@ -85,10 +124,17 @@ export function useCanvasDraw(args: {
     [drawing, getWorldPos, drawLine, args],
   );
 
-  const onMouseUp = useCallback(() => {
+  const onPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!drawing) return;
+    e.preventDefault();
+
     setDrawing(false);
     lastPos.current = null;
-  }, []);
 
-  return { drawLine, onMouseDown, onMouseMove, onMouseUp };
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+  }, [drawing]);
+
+  return { drawLine, onPointerDown, onPointerMove, onPointerUp };
 }

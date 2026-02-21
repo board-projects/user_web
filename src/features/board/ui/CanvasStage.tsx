@@ -1,30 +1,35 @@
 "use client";
 
-import React from "react";
-
-export const WORLD_WIDTH = 5000;
-export const WORLD_HEIGHT = 5000;
+import React, { useEffect } from "react";
+import { useWindowSize } from "@/features/board/hooks/useWindowSize";
 
 export function CanvasStage(props: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  onMouseDown: (e: React.MouseEvent) => void;
-  onMouseMove: (e: React.MouseEvent) => void;
-  onMouseUp: () => void;
 }) {
+  const { width, height } = useWindowSize();
+
+  useEffect(() => {
+    const canvas = props.canvasRef.current;
+    if (!canvas) return;
+
+    const dpr = window.devicePixelRatio || 1;
+
+    // سایز واقعی (bitmap)
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+
+    // سایز نمایشی (CSS)
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+  }, [width, height, props.canvasRef]);
+
   return (
     <canvas
       ref={props.canvasRef}
-      width={WORLD_WIDTH}
-      height={WORLD_HEIGHT}
+      className="absolute inset-0 z-0"
       style={{
-        width: WORLD_WIDTH,
-        height: WORLD_HEIGHT,
-        cursor: "crosshair",
+        pointerEvents: "none",
       }}
-      onMouseDown={props.onMouseDown}
-      onMouseMove={props.onMouseMove}
-      onMouseUp={props.onMouseUp}
-      onMouseLeave={props.onMouseUp}
     />
   );
 }

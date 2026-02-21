@@ -23,6 +23,7 @@ import {
   createCodeBlock,
   createRect,
 } from "@/features/board/domain/factories";
+import { GridCanvas } from '@/features/board/ui/GridCanvas';
 
 export default function BoardPageClient() {
   const params = useParams<{ reference: string }>();
@@ -101,6 +102,7 @@ export default function BoardPageClient() {
         onPointerCancel={draw.onPointerUp}
         onPointerLeave={draw.onPointerUp}
       >
+        <GridCanvas />
         <CanvasStage canvasRef={canvasRef} />
 
         <BoardViewport>

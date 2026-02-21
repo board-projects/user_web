@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { DrawLine } from "@/features/board/domain/types";
 
 export function useCanvasRedraw(args: {

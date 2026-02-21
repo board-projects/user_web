@@ -80,7 +80,9 @@ export function usePan(containerRef: RefObject<HTMLElement | null>) {
 
       try {
         (e.target as Element | null)?.releasePointerCapture?.(e.pointerId);
-      } catch {}
+      } catch {
+        // intentionally empty: releasePointerCapture may throw if not captured
+      }
     };
 
     el.addEventListener("pointerdown", onPointerDown, { passive: false });

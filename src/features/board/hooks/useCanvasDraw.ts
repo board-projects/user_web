@@ -130,7 +130,9 @@ export function useCanvasDraw(args: {
 
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
+    } catch {
+      // intentionally empty: releasePointerCapture may throw if not captured
+    }
   }, [drawing]);
 
   return { drawLine, onPointerDown, onPointerMove, onPointerUp };

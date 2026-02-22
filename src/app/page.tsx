@@ -57,17 +57,38 @@ export default function Home() {
         <strong>Go to the Board</strong>
       </Link>
 
-      <div className="absolute bottom-4 text-xs sm:text-sm text-cyan-950 opacity-70 text-center">
-        Powered by{" "}
-        <strong>
+      <div className="absolute bottom-4 text-xs sm:text-sm text-cyan-950/70 text-center space-y-1">
+        <div>
+          Powered by{" "}
           <a
             href="https://www.mahankabir.ir"
             target="_blank"
-            className="hover:underline"
+            rel="noopener noreferrer"
+            className="font-semibold hover:underline"
           >
             Mahan Kabir
           </a>
-        </strong>
+        </div>
+
+        <div className="flex justify-center gap-3">
+          <a
+            href="https://www.linkedin.com/in/mahankabir"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            LinkedIn
+          </a>
+          <span>•</span>
+          <a
+            href="https://github.com/mahankabir"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            GitHub
+          </a>
+        </div>
       </div>
     </main>
   );

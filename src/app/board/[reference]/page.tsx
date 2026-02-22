@@ -24,6 +24,7 @@ import {
   createRect,
 } from "@/features/board/domain/factories";
 import { GridCanvas } from '@/features/board/ui/GridCanvas';
+import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
 
 export default function BoardPageClient() {
   const params = useParams<{ reference: string }>();
@@ -35,6 +36,16 @@ export default function BoardPageClient() {
 
   useWheelZoom(boardAreaRef);
   usePan(boardAreaRef);
+
+  const clearSelection = useBoardStore((s) => s.clearSelection);
+
+  useDeleteSelected();
+
+  const isInteractive = (t: EventTarget | null) => {
+    const el = t as HTMLElement | null;
+    if (!el) return false;
+    return !!el.closest('[data-interactive="true"]') || !!el.closest('[data-ui="true"]');
+  };
 
   const penColor = useBoardStore((s) => s.penColor);
   const penSize = useBoardStore((s) => s.penSize);
@@ -96,6 +107,10 @@ export default function BoardPageClient() {
         ref={boardAreaRef}
         className="absolute inset-0"
         style={{ touchAction: "none" }}
+        onPointerDownCapture={(e) => {
+          // اگر روی فضای خالی کلیک شد → unselect
+          if (!isInteractive(e.target)) clearSelection();
+        }}
         onPointerDown={draw.onPointerDown}
         onPointerMove={draw.onPointerMove}
         onPointerUp={draw.onPointerUp}

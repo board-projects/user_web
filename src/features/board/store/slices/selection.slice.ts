@@ -1,0 +1,37 @@
+import type { StateCreator } from "zustand";
+
+export type Selection =
+  | { type: "shape"; id: string }
+  | { type: "codeblock"; id: string }
+  | null;
+
+export type SelectionSlice = {
+  selection: Selection;
+  select: (sel: Exclude<Selection, null>) => void;
+  clearSelection: () => void;
+
+  editingCodeBlockId: string | null;
+  startEditingCodeBlock: (id: string) => void;
+  stopEditingCodeBlock: () => void;
+};
+
+export const createSelectionSlice: StateCreator<any, [], [], SelectionSlice> =
+  (set) => ({
+    selection: null,
+
+    select: (sel) =>
+      set(() => ({
+        selection: sel,
+        editingCodeBlockId: null,
+      })),
+
+    clearSelection: () =>
+      set(() => ({
+        selection: null,
+        editingCodeBlockId: null,
+      })),
+
+    editingCodeBlockId: null,
+    startEditingCodeBlock: (id) => set(() => ({ editingCodeBlockId: id })),
+    stopEditingCodeBlock: () => set(() => ({ editingCodeBlockId: null })),
+  });

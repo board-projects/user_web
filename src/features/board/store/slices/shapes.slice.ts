@@ -17,5 +17,7 @@ export const createShapesSlice = (set: any): ShapesSlice => ({
       ),
     })),
   removeShape: (id) =>
-    set((s: any) => ({ shapes: s.shapes.filter((sh: Shape) => sh.id !== id) })),
+    set((s: any) => ({
+      shapes: s.shapes.filter((sh: Shape) => sh.id !== id),
+    })),
 });

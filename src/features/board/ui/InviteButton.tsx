@@ -12,7 +12,7 @@ export function InviteButton(props: { url: string; onCopied?: () => void }) {
     <button
       data-ui="true"
       onClick={copy}
-      className="absolute right-0 bg-cyan-500 text-cyan-950 rounded-sm px-4 m-1 cursor-pointer hover:bg-cyan-600 hover:text-cyan-100 transition"
+      className="absolute right-0 z-[100] bg-cyan-500 text-cyan-950 rounded-sm px-4 m-1 cursor-pointer hover:bg-cyan-600 hover:text-cyan-100 transition"
     >
       <strong>Invite</strong>
     </button>

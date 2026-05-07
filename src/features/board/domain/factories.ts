@@ -35,3 +35,12 @@ export const createCodeBlock = (): CodeBlock => ({
   width: 400,
   height: 200,
 });
+
+export const createClozeTest = () => ({
+  id: crypto.randomUUID(),
+  type: "cloze_test" as const,
+  x: 100,
+  y: 100,
+  content: "The capital of France is {{paris}}.",
+  title: "capital name",
+});

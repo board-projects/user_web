@@ -29,3 +29,12 @@ export type CodeBlock = {
   width: number;
   height: number;
 };
+
+export type ClozeTest = {
+  id: string;
+  type: "cloze_test";
+  x: number;
+  y: number;
+  content: string;
+  title: string;
+}

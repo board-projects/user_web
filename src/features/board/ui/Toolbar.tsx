@@ -10,6 +10,7 @@ import {
   TbLockOpen,
   TbShape,
   TbPencil,
+  TbSquareRoundedLetterT,
 } from "react-icons/tb";
 import { useBoardStore } from "@/features/board/store/board.store";
 
@@ -20,12 +21,13 @@ type PresenceUser = {
   avatarUrl?: string;
 };
 
-type Tool = "pen" | "rect" | "circle" | "code";
+type Tool = "pen" | "rect" | "circle" | "code" | "cloze_test";
 
 type ToolbarProps = {
   onAddCode?: () => void;
   onAddRect?: () => void;
   onAddCircle?: () => void;
+  onAddClozeTest?: () => void;
 
   shareUrl?: string;
   onCopyLink?: () => void;
@@ -270,6 +272,18 @@ export function Toolbar(props: ToolbarProps) {
             }}
           >
             <FaCode />
+          </IconButton>
+
+          { /* Cloze test */}
+          <IconButton
+            title="Add cloze test"
+            active={tool === "cloze_test"}
+            onClick={() => {
+              setToolSafe("cloze_test");
+              props.onAddClozeTest?.();
+            }}
+          >
+            <TbSquareRoundedLetterT />
           </IconButton>
 
           {/* Shapes group */}

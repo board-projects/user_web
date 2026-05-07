@@ -20,11 +20,13 @@ import { BoardViewport } from "@/features/board/ui/BoardViewport";
 
 import {
   createCircle,
+  createClozeTest,
   createCodeBlock,
   createRect,
 } from "@/features/board/domain/factories";
 import { GridCanvas } from '@/features/board/ui/GridCanvas';
 import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
+import { ClozeTestLayer } from "@/features/board/ui/ClozeTestLayer";
 
 export default function BoardPageClient() {
   const params = useParams<{ reference: string }>();
@@ -52,6 +54,7 @@ export default function BoardPageClient() {
 
   const addShape = useBoardStore((s) => s.addShape);
   const addCodeBlock = useBoardStore((s) => s.addCodeBlock);
+  const addClozeTest = useBoardStore((s) => s.addClozeTest);
   const addLine = useBoardStore((s) => s.addLine);
 
   const zoom = useBoardStore((s) => s.zoom);
@@ -89,6 +92,7 @@ export default function BoardPageClient() {
         onAddRect={() => addShape(createRect())}
         onAddCircle={() => addShape(createCircle())}
         onAddCode={() => addCodeBlock(createCodeBlock())}
+        onAddClozeTest={() => addClozeTest(createClozeTest())}
       />
 
       <InviteButton
@@ -123,6 +127,7 @@ export default function BoardPageClient() {
         <BoardViewport>
           <ShapesLayer />
           <CodeBlocksLayer />
+          <ClozeTestLayer />
         </BoardViewport>
       </div>
     </div>

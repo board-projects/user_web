@@ -1,4 +1,8 @@
+import { AuthModal } from "@/features/auth/components/AuthModal";
 import Link from "next/link";
+import { useAuthStore } from "@/features/auth/store/auth.store";
+import { EntryActions } from "@/features/auth/components/EntryActions";
+import { AuthModalWrapper } from "@/features/auth/components/AuthModalWrapper";
 
 export const metadata = {
   title: "Real-time Collaborative Board - MahanKabir",
@@ -34,51 +38,17 @@ export const metadata = {
 };
 
 export default function Home() {
+
   return (
     <main className="relative flex h-screen justify-center items-center bg-cyan-50 px-4">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-12 p-4">
-        <Link
-          className="
-            bg-cyan-500
-            rounded-lg
-            text-cyan-950
-            shadow-xl
-            hover:shadow-lg
-            hover:bg-cyan-600
-            hover:text-cyan-100
-            transition
-            text-center
-            w-full sm:w-auto
-            px-6 py-6 text-lg
-            sm:px-12 sm:py-10 sm:text-2xl
-            md:px-20 md:py-14 md:text-3xl
-          "
-          href={`/board/${crypto.randomUUID().split("-")[0]}`}
-        >
-          <strong>Go as a Teacher</strong>
-        </Link>
+      <section className="text-center py-20">
+        <h1 className="text-5xl font-extrabold">Welcome to Collaborative Board</h1>
+        <p className="text-gray-600 mt-4">The best place for teachers and students.</p>
+        
+        <EntryActions />
+      </section>
 
-        <Link
-          className="
-            bg-lime-400
-            rounded-lg
-            text-lime-950
-            shadow-xl
-            hover:shadow-lg
-            hover:bg-lime-600
-            hover:text-lime-100
-            transition
-            text-center
-            w-full sm:w-auto
-            px-6 py-6 text-lg
-            sm:px-12 sm:py-10 sm:text-2xl
-            md:px-20 md:py-14 md:text-3xl
-          "
-          href={`/board/${crypto.randomUUID().split("-")[0]}`}
-        >
-          <strong>Go as a Student</strong>
-        </Link>
-      </div>
+      <AuthModalWrapper />
 
       <div className="absolute bottom-4 text-xs sm:text-sm text-cyan-950/70 text-center space-y-1">
         <div>

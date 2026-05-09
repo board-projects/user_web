@@ -1,22 +1,36 @@
 "use client";
 
 import React, { useState } from "react";
+import Cookies from "universal-cookie";
+import { useAuthStore } from "../store/auth.store";
+import { authApi } from "../services/auth.api";
 
 export const AuthModal = () => {
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
-  const handleSendEmail = (e: React.FormEvent) => {
+  const cookies = new Cookies(null, { path: "/" });
+  const { setLoggedIn, closeAuthModal } = useAuthStore();
+
+  const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sending email to:", email);
-    setStep("otp");
+    const res = await authApi.sendOtp(email);
+    if (res) {
+      setStep("otp");
+    }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async(e: React.FormEvent) => {
     e.preventDefault();
     const fullCode = otp.join("");
-    console.log("Verifying code:", fullCode);
+    const res = await authApi.verifyOtp(email, fullCode);
+
+    if (res && res.token) {
+      cookies.set("token", res.access_token, { path: "/", maxAge: 60 * 60 * 24 * 7 });
+      setLoggedIn(res.user); 
+      closeAuthModal();
+    }
   };
 
   const handleOtpChange = (value: string, index: number) => {

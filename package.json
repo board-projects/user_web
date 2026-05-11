@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "PORT=4040 next dev",
+    "dev": "next dev",
     "build": "next build",
     "test": "jest",
-    "start": "PORT=4040 next start",
+    "start": "next start",
     "lint": "next lint",
     "format": "prettier --write ."
   },

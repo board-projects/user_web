@@ -1,21 +1,20 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { ClozeTest } from "../domain/types";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 
 export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
-    // وضعیت برای مدیریت متن و حالت ویرایش
+
     const [isEditing, setIsEditing] = useState(false);
     const zoom = useBoardStore((s) => s.zoom);
     const selection = useBoardStore((s) => s.selection);
     const select = useBoardStore((s) => s.select);
     const updateClozeTest = useBoardStore((s) => s.updateClozeTest);
 
-    const isSelected = selection?.type === "cloze_test" && selection.id === id;
+    const isSelected = selection?.type === "cloze" && selection.id === id;
 
-    // تابع رندر متن به صورت جای خالی (حالت نمایش)
     const renderContent = () => {
         const parts = content.split(/(\[.*?\])/g);
         return parts.map((part, index) => {
@@ -34,7 +33,7 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
             }
             return <span key={index}>{part}</span>;
         });
-    }
+    };
 
     return (
         <Rnd
@@ -42,11 +41,10 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
             position={{ x, y }}
             enableResizing={false}
             onDragStop={(e, d) => updateClozeTest(id, { x: d.x, y: d.y })}
-            onPointerDown={(e) => {
+            onPointerDown={(e: { stopPropagation: () => void; }) => {
                 e.stopPropagation();
-                select({ type: "cloze_test", id });
+                select({ type: "cloze", id });
             }}
-            // غیرفعال کردن درگ وقتی کاربر در حال تایپ در textarea است
             disableDragging={isEditing}
             className={`rounded-lg border-2 bg-white p-4 shadow-lg z-[50] ${
                 isSelected ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-200"

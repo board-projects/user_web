@@ -18,7 +18,7 @@ export const EntryActions = () => {
         } else {
             router.push(`/board/new?role=${role}`);
         }
-    }
+    };
 
     return (
         <div>
@@ -36,4 +36,4 @@ export const EntryActions = () => {
             </Button>
         </div>
     );
-}
+};

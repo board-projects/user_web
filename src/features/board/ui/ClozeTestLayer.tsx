@@ -1,5 +1,5 @@
-import { useBoardStore } from "../store/board.store"
-import { ClozeTestBlock } from "./ClozeTestBlock"
+import { useBoardStore } from "../store/board.store";
+import { ClozeTestBlock } from "./ClozeTestBlock";
 
 
 export const ClozeTestLayer = () => {
@@ -20,4 +20,4 @@ export const ClozeTestLayer = () => {
             ))}
         </>
     );
-}
+};

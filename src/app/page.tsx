@@ -1,6 +1,3 @@
-import { AuthModal } from "@/features/auth/components/AuthModal";
-import Link from "next/link";
-import { useAuthStore } from "@/features/auth/store/auth.store";
 import { EntryActions } from "@/features/auth/components/EntryActions";
 import { AuthModalWrapper } from "@/features/auth/components/AuthModalWrapper";
 

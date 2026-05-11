@@ -9,4 +9,4 @@ export const AuthModalWrapper = () => {
     if (!isAuthModalOpen) return null;
     
     return <AuthModal />;
-}
+};

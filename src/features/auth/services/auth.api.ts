@@ -11,4 +11,4 @@ export const authApi = {
     verifyOtp: async (email: string, code: string) => {
         return await verifyOtpRequest.post({ email, code });
     }
-}
+};

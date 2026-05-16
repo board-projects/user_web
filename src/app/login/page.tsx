@@ -41,10 +41,10 @@ export default function LoginPage() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const fullCode = otp.join("");
+    const code = otp.join("");
     setIsLoading(true);
     try {
-      const res = await authApi.verifyOtp(email, fullCode);
+      const res = await authApi.verifyOtp(email, code);
 
       if (res && res.access_token) {
         setLoggedIn(true, res.user); 

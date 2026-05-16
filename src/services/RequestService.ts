@@ -24,6 +24,7 @@ class RequestService {
       const response = await fetch(BASE_URL + this.endpoint + params, {
         method: METHOD_GET,
         headers: this.getHeaders(),
+        credentials: "include",
       });
 
       return await response.json();
@@ -46,6 +47,7 @@ class RequestService {
           ...(isFormData ? {} : { "Content-Type": APPLICATION_JSON }),
         },
         body: isFormData ? payload : JSON.stringify(payload),
+        credentials: "include",
       });
 
       const data: ApiResponse = await response.json();
@@ -64,10 +66,16 @@ class RequestService {
   }
 
   private getHeaders(): Record<string, string> {
-    return {
+    const headers: Record<string, string> = {
       Accept: APPLICATION_JSON,
-      Authorization: "Bearer " + this.cookies.get("token"),
     };
+
+    const token = this.cookies.get("token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return headers;
   }
 }
 

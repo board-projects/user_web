@@ -19,7 +19,7 @@ async function verifyToken(token: string) {
 }
 
 export async function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("access_token")?.value;
   const { pathname } = req.nextUrl;
 
   const isProtected = PROTECTED_ROUTES.some((route) =>
@@ -34,7 +34,7 @@ export async function middleware(req: NextRequest) {
     const isValid = await verifyToken(token);
     if (!isValid) {
       const response = NextResponse.redirect(new URL("/login", req.url));
-      response.cookies.delete("token");
+      response.cookies.delete("access_token");
       return response;
     }
   }

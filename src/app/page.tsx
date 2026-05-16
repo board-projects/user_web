@@ -1,5 +1,4 @@
-import { EntryActions } from "@/features/auth/components/EntryActions";
-import { AuthModalWrapper } from "@/features/auth/components/AuthModalWrapper";
+import { EntryActions } from "@/features/main/components/EntryActions";
 
 export const metadata = {
   title: "Real-time Collaborative Board - MahanKabir",
@@ -44,8 +43,6 @@ export default function Home() {
         
         <EntryActions />
       </section>
-
-      <AuthModalWrapper />
 
       <div className="absolute bottom-4 text-xs sm:text-sm text-cyan-950/70 text-center space-y-1">
         <div>

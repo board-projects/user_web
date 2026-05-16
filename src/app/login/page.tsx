@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Cookies from "universal-cookie";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { authApi } from "@/features/auth/services/auth.api";
@@ -12,8 +11,6 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const cookies = new Cookies(null, { path: "/" });
-  
   const router = useRouter();
   const { setLoggedIn, isLoggedIn } = useAuthStore();
 

@@ -6,7 +6,7 @@ export const metadata = {
     "Draw, collaborate, and share your designs in real-time with your team. Invite anyone with a link and start designing together!",
   keywords:
     "real-time, collaborative board, online design, team design, web socket, MahanKabir",
-  authors: [{ name: "MahanKabir", url: "https://www.mahankabir.ir" }],
+  authors: [{ name: "MahanKabir", url: "https://www.mahankabir.com" }],
   openGraph: {
     title: "Real-time Collaborative Board",
     description:
@@ -48,7 +48,7 @@ export default function Home() {
         <div>
           Powered by{" "}
           <a
-            href="https://www.mahankabir.ir"
+            href="https://www.mahankabir.com"
             target="_blank"
             rel="noopener noreferrer"
             className="font-semibold hover:underline"

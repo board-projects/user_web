@@ -46,7 +46,7 @@ export default function LoginPage() {
     try {
       const res = await authApi.verifyOtp(email, code);
 
-      if (res && res.access_token) {
+      if (res && res.user) {
         setLoggedIn(true, res.user); 
         router.push("/");
       }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Cookies from "universal-cookie";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { authApi } from "@/features/auth/services/auth.api";
@@ -11,6 +12,8 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const cookies = new Cookies(null, { path: "/" });
+  
   const router = useRouter();
   const { setLoggedIn, isLoggedIn } = useAuthStore();
 
@@ -41,14 +44,25 @@ export default function LoginPage() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const code = otp.join("");
+    const fullCode = otp.join("");
     setIsLoading(true);
     try {
-      const res = await authApi.verifyOtp(email, code);
+      const res = await authApi.verifyOtp(email, fullCode);
 
-      if (res && res.user) {
-        setLoggedIn(true, res.user); 
-        router.push("/");
+      // هندل کردن مستقیم پاسخ
+      const token = res?.access_token || res?.data?.access_token;
+      const user = res?.user || res?.data?.user;
+
+      if (token) {
+        // 🌟 ست کردن مستقیم کوکی توسط فرانت‌اَند
+        // بدون نوشتن آپشن domain، مرورگر خودکار کوکی را روی دامنه فعلی (چه localhost و چه دامنه Amplify) ست می‌کند
+        document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax; Secure`;
+
+        // به روز رسانی استور زاستند
+        setLoggedIn(true, user || { email }); 
+        
+        // هدایت قطعی با متد نیتیو مرورگر برای لود کامل هدرها در میدل‌ور
+        window.location.href = "/";
       }
     } catch (error) {
       console.error("Verification failed:", error);

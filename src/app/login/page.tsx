@@ -41,24 +41,23 @@ export default function LoginPage() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const fullCode = otp.join("");
+    const code = otp.join("");
     setIsLoading(true);
     try {
-      const res = await authApi.verifyOtp(email, fullCode);
+      const res = await authApi.verifyOtp(email, code);
 
-      // هندل کردن مستقیم پاسخ
       const token = res?.access_token || res?.data?.access_token;
       const user = res?.user || res?.data?.user;
 
       if (token) {
-        // 🌟 ست کردن مستقیم کوکی توسط فرانت‌اَند
-        // بدون نوشتن آپشن domain، مرورگر خودکار کوکی را روی دامنه فعلی (چه localhost و چه دامنه Amplify) ست می‌کند
-        document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax; Secure`;
+        if (window.location.hostname.includes("dequizma.com")) {
+          document.cookie = `access_token=${token}; path=/; domain=.dequizma.com; max-age=86400; SameSite=Lax; Secure`;
+        } else {
+          document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+        }
 
-        // به روز رسانی استور زاستند
         setLoggedIn(true, user || { email }); 
         
-        // هدایت قطعی با متد نیتیو مرورگر برای لود کامل هدرها در میدل‌ور
         window.location.href = "/";
       }
     } catch (error) {

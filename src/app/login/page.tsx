@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Cookies from "universal-cookie";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { authApi } from "@/features/auth/services/auth.api";
 
@@ -13,18 +12,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
-  const cookies = new Cookies(null, { path: "/" });
   const { setLoggedIn, isLoggedIn } = useAuthStore();
 
   useEffect(() => {
-    const token = cookies.get("token");
-
-    if (!token && isLoggedIn) {
-      useAuthStore.getState().logout();
-      return;
-    }
-
-    if (token && isLoggedIn) {
+    if (isLoggedIn) {
       router.replace("/");
     }
   }, [isLoggedIn, router]);
@@ -56,7 +47,6 @@ export default function LoginPage() {
       const res = await authApi.verifyOtp(email, fullCode);
 
       if (res && res.access_token) {
-        cookies.set("token", res.access_token, { path: "/", maxAge: 60 * 60 * 24 * 7 });
         setLoggedIn(true, res.user); 
         router.push("/");
       }

@@ -17,7 +17,7 @@ export default function LoginPage() {
   const { setLoggedIn, isLoggedIn } = useAuthStore();
 
   useEffect(() => {
-    const token = cookies.get("access_token");
+    const token = cookies.get("token");
 
     if (!token && isLoggedIn) {
       useAuthStore.getState().logout();

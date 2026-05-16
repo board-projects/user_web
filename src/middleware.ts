@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const PROTECTED_ROUTES = [
-  "/board/:id"
+  "/board/"
 ];
 
 const secret = new TextEncoder().encode(

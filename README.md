@@ -1,9 +1,9 @@
-# 🧑‍💻 DrMonk Board - Frontend (Next.js)
+# 🧑‍💻 DeQuizMa Board - Frontend (Next.js)
 
-This is the **frontend** of the **DrMonk Board Application**, built with [Next.js](https://nextjs.org/).  
+This is the **frontend** of the **DeQuizMa Board Application**, built with [Next.js](https://nextjs.org/).  
 It works together with the [NestJS backend](https://github.com/board-projects/user_web) and a PostgreSQL database.
-
-🔗 Live Demo: [https://www.drmonk.ir](https://www.drmonk.ir)
+dequizma
+🔗 Live Demo: [https://www.dequizma.com](https://www.dequizma.com)
 
 ---
 
@@ -35,5 +35,5 @@ Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/messenger-project/user_web.git
 cd user_web
-npm install
+yarn install
 ```

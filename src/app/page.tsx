@@ -12,7 +12,7 @@ export const metadata = {
     description:
       "Draw and collaborate in real-time. Share your board with anyone via a link!",
     url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}`,
-    siteName: "Dr. Monk",
+    siteName: "DeQuizMa",
     images: [
       {
         url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/og-image.png`,

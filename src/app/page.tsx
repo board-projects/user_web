@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { EntryActions } from "@/features/main/components/EntryActions";
 
 export const metadata = {
@@ -34,17 +35,17 @@ export const metadata = {
 };
 
 export default function Home() {
-
   return (
-    <main className="relative flex h-screen justify-center items-center bg-cyan-50 px-4">
-      <section className="text-center py-20">
-        <h1 className="text-5xl font-extrabold">Welcome to Collaborative Board</h1>
-        <p className="text-gray-600 mt-4">The best place for teachers and students.</p>
+    <main className="relative flex h-screen w-screen justify-center items-center bg-cyan-50 px-4 overflow-hidden">
+      
+      <section className="text-center py-20 z-10 backdrop-blur-[2px] p-6 rounded-2xl">
+        <h1 className="text-5xl font-extrabold text-cyan-950">Welcome to Collaborative Board</h1>
+        <p className="text-cyan-800/80 mt-4 font-medium">The best place for teachers and students.</p>
         
         <EntryActions />
       </section>
 
-      <div className="absolute bottom-4 text-xs sm:text-sm text-cyan-950/70 text-center space-y-1">
+      <div className="absolute bottom-4 text-xs sm:text-sm text-cyan-950/70 text-center space-y-1 z-10">
         <div>
           Powered by{" "}
           <a

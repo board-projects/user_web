@@ -1,7 +1,7 @@
 import { EntryActions } from "@/features/main/components/EntryActions";
 
 export const metadata = {
-  title: "Real-time Collaborative Board - MahanKabir",
+  title: "Real-time Collaborative Board - DeQuizMa",
   description:
     "Draw, collaborate, and share your designs in real-time with your team. Invite anyone with a link and start designing together!",
   keywords:

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { EntryActions } from "@/features/main/components/EntryActions";
 
 export const metadata = {

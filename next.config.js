@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://back.dequizma.com/api/:path*',
+        destination: `${(process.env.API_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://back.dequizma.com').replace(/\/$/, '')}/:path*`,
       },
     ];
   },

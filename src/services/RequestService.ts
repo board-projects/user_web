@@ -1,7 +1,7 @@
 import Cookies from "universal-cookie";
 import ToastService from "./ToastService";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "/api";
 const METHOD_GET = "GET";
 const METHOD_POST = "POST";
 const APPLICATION_JSON = "application/json";
@@ -52,10 +52,11 @@ class RequestService {
 
       const data: ApiResponse = await response.json();
 
-      if (response.status === 200) {
+      if (response.ok) {
         ToastService.updateSuccess(data.message);
       } else {
         ToastService.updateError(data.message);
+        return null;
       }
 
       return data;
@@ -70,7 +71,7 @@ class RequestService {
       Accept: APPLICATION_JSON,
     };
 
-    const token = this.cookies.get("token");
+    const token = this.cookies.get("access_token");
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }

@@ -51,12 +51,18 @@ export function ItemPropertiesToolbar({ viewport }: { viewport: RefObject<HTMLEl
     resize.observe(board);
     resize.observe(toolbar);
     resize.observe(anchor);
+
+    // Draggable items can move via a CSS transform before their store position is saved.
+    const movement = new MutationObserver(schedule);
+    movement.observe(anchor, { attributes: true, attributeFilter: ["style"] });
+
     const unsubscribe = useBoardStore.subscribe(schedule);
     position();
 
     return () => {
       cancelAnimationFrame(frame);
       resize.disconnect();
+      movement.disconnect();
       unsubscribe();
     };
   }, [anchorSelector, viewport]);

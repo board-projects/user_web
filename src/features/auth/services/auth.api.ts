@@ -1,7 +1,7 @@
 import RequestService from "@/services/RequestService";
 
 const sendOtpRequest = new RequestService("/auth/send-otp");
-const verifyOtpRequest = new RequestService("/auth/verify-otp");
+const verifyOtpRequest = new RequestService("/api/session", "");
 
 export const authApi = {
     sendOtp: async (email: string) => {

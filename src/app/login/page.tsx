@@ -83,13 +83,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl border border-gray-100">
+    <div className="flex min-h-dvh items-center justify-center bg-gray-50 px-4 py-6">
+      <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-8 border border-gray-100">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-extrabold text-gray-900">
             {step === "email" ? "Login to Board" : "Verify OTP"}
           </h1>
-          <p className="mt-3 text-gray-600">
+          <p className="mt-3 break-words text-gray-600">
             {step === "email" 
               ? "Enter your email to get started" 
               : `We've sent a 6-digit code to ${email}`}
@@ -120,18 +120,20 @@ export default function LoginPage() {
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-6">
-            <div className="flex justify-between gap-2">
+            <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
               {otp.map((digit, index) => (
                 <input
                   key={index}
                   id={`otp-${index}`}
                   type="text"
+                  inputMode="numeric"
+                  aria-label={`Code digit ${index + 1}`}
                   maxLength={1}
                   disabled={isLoading}
                   value={digit}
                   onChange={(e) => handleOtpChange(e.target.value, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
-                  className="h-14 w-full rounded-xl border border-gray-200 text-center text-2xl font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all bg-gray-50 focus:bg-white"
+                  className="h-12 min-w-0 w-full rounded-lg sm:h-14 sm:rounded-xl border border-gray-200 text-center text-lg sm:text-2xl font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all bg-gray-50 focus:bg-white"
                 />
               ))}
             </div>

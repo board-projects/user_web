@@ -44,7 +44,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
     <form
       id={id}
       onSubmit={handleSubmit(onSubmit)}
-      className="container mx-auto p-4 rounded-lg w-2/4 bg-white text-black"
+      className="mx-auto w-full rounded-lg bg-white py-4 text-black"
     >
       <h2>{formTitle}</h2>
       <InputField

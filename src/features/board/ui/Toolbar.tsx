@@ -175,14 +175,14 @@ export function Toolbar(props: ToolbarProps) {
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
   return (
-    <div className={cn("z-50 absolute left-3 top-1/2 -translate-y-1/2", props.className)} data-ui="true">
+    <div className={cn("absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 lg:bottom-auto lg:left-3 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2", props.className)} data-ui="true">
       <div
         className={cn(
           "rounded-2xl border border-stone-200/80 bg-stone-100/60 backdrop-blur",
           "shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
         )}
       >
-        <div className="p-2 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2 p-2 lg:flex-col">
           {/* ✅ Pen group (toggle + panel) */}
           <div ref={penBtnRef} className="relative" data-ui="true">
             <IconButton
@@ -197,8 +197,8 @@ export function Toolbar(props: ToolbarProps) {
                 ref={penPanelRef}
                 data-ui="true"
                 className={cn(
-                  "absolute left-[48px] top-0",
-                  "w-44 p-3 rounded-2xl",
+                  "absolute bottom-12 left-0 lg:bottom-auto lg:left-12 lg:top-0",
+                  "max-h-[calc(100dvh-5rem)] w-44 overflow-y-auto rounded-2xl p-3",
                   "border border-stone-200/80 bg-stone-100/70 backdrop-blur",
                   "shadow-[0_10px_30px_rgba(0,0,0,0.10)]",
                   "flex flex-col gap-3"
@@ -307,11 +307,11 @@ export function Toolbar(props: ToolbarProps) {
                 ref={shapesPanelRef}
                 data-ui="true"
                 className={cn(
-                  "absolute left-[48px] top-0",
-                  "w-12 p-2 rounded-2xl",
+                  "absolute bottom-12 left-0 lg:bottom-auto lg:left-12 lg:top-0",
+                  "w-max p-2 rounded-2xl lg:w-auto",
                   "border border-stone-200/80 bg-stone-100/70 backdrop-blur",
                   "shadow-[0_10px_30px_rgba(0,0,0,0.10)]",
-                  "flex flex-col items-center gap-2"
+                  "flex items-center gap-2 lg:flex-col"
                 )}
               >
                 <IconButton
@@ -356,14 +356,14 @@ export function Toolbar(props: ToolbarProps) {
 
           {/* Presence */}
           {(props.presence?.length || props.viewerCount != null) && (
-            <div className="pt-2 border-t border-stone-200/80">
+            <div className="border-l border-stone-200/80 pl-2 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-2">
               <PresenceMini users={props.presence} viewerCount={props.viewerCount} />
             </div>
           )}
 
           {/* Share */}
           {(props.shareUrl || props.onCopyLink || props.onToggleLock) && (
-            <div className="pt-2 border-t border-stone-200/80 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 border-l border-stone-200/80 pl-2 lg:flex-col lg:border-l-0 lg:border-t lg:pl-0 lg:pt-2">
               <IconButton title="Copy share link" onClick={copy} disabled={!props.shareUrl && !props.onCopyLink}>
                 <TbCopy />
               </IconButton>

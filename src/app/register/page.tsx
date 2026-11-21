@@ -20,8 +20,8 @@ const Register = () => {
   };
 
   return (
-    <div className="container flex justify-center mx-auto h-screen items-center bg-gray-300">
-      <div className="container mx-auto p-4 rounded-lg w-6/12 bg-white text-black">
+    <div className="flex min-h-dvh items-center justify-center bg-gray-300 px-4 py-6">
+      <div className="mx-auto w-full max-w-md rounded-lg bg-white p-4 text-black sm:p-6">
         <AuthForm
           id="register"
           onSubmit={onSubmit}

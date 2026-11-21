@@ -1,3 +1,4 @@
+import { TableGrid } from "@/features/board/ui/TableGrid";
 import { useId } from "react";
 import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
@@ -74,6 +75,11 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
           </foreignObject>
         );
       })}
+      {board.tables.map((table) => (
+        <g key={table.id} transform={`translate(${table.x} ${table.y})`}>
+          <TableGrid {...table} />
+        </g>
+      ))}
     </svg>
   );
 }

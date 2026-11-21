@@ -3,6 +3,8 @@
 import React, { useLayoutEffect, useRef } from "react";
 import { DEFAULT_SHEET } from "@/features/design/domain/sheetLayout";
 import { PageBackgrounds } from "./PageBackgrounds";
+import { createTable } from "../domain/tables";
+import { TablesLayer } from "./TablesLayer";
 import { PageItemsLayer } from "./PageItemsLayer";
 
 import { useBoardStore } from "@/features/board/store/board.store";
@@ -58,6 +60,8 @@ export function BoardEditor({ reference }: { reference: string }) {
   const addShape = useBoardStore((s) => s.addShape);
   const addCodeBlock = useBoardStore((s) => s.addCodeBlock);
   const addClozeTest = useBoardStore((s) => s.addClozeTest);
+  const addTable = useBoardStore((s) => s.addTable);
+  const setTool = useBoardStore((s) => s.setTool);
   const addPage = useBoardStore((s) => s.addPage);
   const select = useBoardStore((s) => s.select);
   const addLine = useBoardStore((s) => s.addLine);
@@ -90,6 +94,12 @@ export function BoardEditor({ reference }: { reference: string }) {
         onAddStar={() => addShape(createStar())}
         onAddCode={() => addCodeBlock(createCodeBlock())}
         onAddClozeTest={() => addClozeTest(createClozeTest())}
+        onAddTable={(rows, columns) => {
+          const table = createTable({ x: (72 - panX) / zoom, y: (112 - panY) / zoom }, rows, columns);
+          addTable(table);
+          setTool("select");
+          select({ type: "table", id: table.id });
+        }}
         onAddPage={() => {
           const id = crypto.randomUUID();
           addPage({
@@ -139,6 +149,7 @@ export function BoardEditor({ reference }: { reference: string }) {
           <ShapesLayer />
           <CodeBlocksLayer />
           <ClozeTestLayer />
+          <TablesLayer />
           <DrawingLayer />
         </BoardViewport>
       </div>

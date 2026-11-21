@@ -1,5 +1,13 @@
 export type BoardId = string;
 
+export type TableItem = Point & {
+  id: string;
+  rows: number[];
+  columns: number[];
+  width: number;
+  height: number;
+};
+
 export type Point = { x: number; y: number };
 
 export type DrawLine = {

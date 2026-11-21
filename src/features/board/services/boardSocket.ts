@@ -27,7 +27,6 @@ export class BoardSocket {
   private sequence = 0;
   private epoch = 0;
   private ready = false;
-  private destroyed = false;
   private sending = false;
   private pending: Patch | null = null;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -52,17 +51,7 @@ export class BoardSocket {
     this.scheduleFlush();
   }
 
-  async waitForSync() {
-    const deadline = Date.now() + ACK_TIMEOUT_MS;
-    while (!this.destroyed && Date.now() < deadline) {
-      if (this.ready && !this.pending && !this.queued.size && !this.sending) return;
-      await new Promise((resolve) => setTimeout(resolve, BATCH_WAIT_MS));
-    }
-    throw new Error("Board changes are still syncing. Try publishing again.");
-  }
-
   destroy() {
-    this.destroyed = true;
     this.epoch++;
     this.ready = false;
     clearTimeout(this.timer);

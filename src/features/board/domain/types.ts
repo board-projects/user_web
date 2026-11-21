@@ -76,4 +76,5 @@ export type PageItem = Point & {
   height: number;
   dots: boolean;
   unit: PageUnit;
+  backgroundColor?: string;
 };

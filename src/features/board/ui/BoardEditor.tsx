@@ -3,6 +3,7 @@
 import React, { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { DEFAULT_SHEET } from "@/features/design/domain/sheetLayout";
+import { PageBackgrounds } from "./PageBackgrounds";
 import { PageItemsLayer } from "./PageItemsLayer";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 
@@ -69,7 +70,7 @@ export function BoardEditor({ reference }: { reference: string }) {
   const lines = useBoardStore((s) => s.lines);
   const selectedLines = useBoardStore((s) => s.marqueeSelection?.lines);
 
-  const { status: syncStatus, waitForSync } = useBoardSocket(process.env.NEXT_PUBLIC_BASE_URL, reference);
+  const { status: syncStatus } = useBoardSocket(process.env.NEXT_PUBLIC_BASE_URL, reference);
 
   const draw = useCanvasDraw({
     canvasRef,
@@ -114,7 +115,7 @@ export function BoardEditor({ reference }: { reference: string }) {
       />
 
       <BoardNavigation viewport={boardAreaRef} />
-      <ItemPropertiesToolbar viewport={boardAreaRef} reference={reference} waitForSync={waitForSync} />
+      <ItemPropertiesToolbar viewport={boardAreaRef} reference={reference} />
 
       <InviteButton
         url={inviteUrl}
@@ -154,6 +155,7 @@ export function BoardEditor({ reference }: { reference: string }) {
         }}
       >
         <GridCanvas />
+        <PageBackgrounds />
         <MarqueeOverlay box={marquee.box} />
         <CanvasStage canvasRef={canvasRef} />
 

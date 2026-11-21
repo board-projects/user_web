@@ -106,6 +106,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         fields: [
           { kind: "text", label: "Name", value: page.title, change: (title) => state.updatePage(id, { title }) },
+          { kind: "color", label: "Background", value: page.backgroundColor ?? "#ffffff", change: (backgroundColor) => state.updatePage(id, { backgroundColor }) },
           {
             kind: "select", label: "Resolution", value: presets.includes(resolution) ? resolution : "Custom",
             options: ["Custom", ...presets],

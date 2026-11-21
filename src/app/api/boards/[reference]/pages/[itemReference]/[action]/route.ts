@@ -21,7 +21,10 @@ export async function POST(req: NextRequest, { params }: {
 
   try {
     const path = `boards/${encodeURIComponent(reference)}/pages/${encodeURIComponent(itemReference)}/${action}`;
-    const response = await backendPost(path, credentials);
+    const snapshot = action === "publish" && req.headers.get("content-type")?.includes("application/json")
+      ? await req.json()
+      : undefined;
+    const response = await backendPost(path, { ...credentials, snapshot });
     return NextResponse.json(await response.json(), { status: response.status });
   } catch {
     return NextResponse.json({ message: "Page action is temporarily unavailable" }, { status: 502 });

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useBoardStore } from "@/features/board/store/board.store";
+import { capturePage } from "../domain/capturePage";
 import { applyBoardChanges, EMPTY_BOARD, type BoardUpdate } from "@/features/board/domain/boardSync";
 import { propertyButtonClass } from "@/features/board/ui/properties/ItemPropertyControl";
 import type { SheetLayout } from "../domain/sheetLayout";
@@ -32,8 +34,8 @@ function PrintablePage({ page, close }: { page: PrintPage; close: () => void }) 
   );
 }
 
-export function PageItemActions({ reference, itemId, waitForSync }: {
-  reference: string; itemId: string; waitForSync: () => Promise<void>;
+export function PageItemActions({ reference, itemId }: {
+  reference: string; itemId: string;
 }) {
   const [pending, setPending] = useState<"preview" | "publish" | null>(null);
   const [print, setPrint] = useState<PrintPage | null>(null);
@@ -47,12 +49,22 @@ export function PageItemActions({ reference, itemId, waitForSync }: {
     setError("");
     setCopied(false);
     try {
-      await waitForSync();
-      const response = await fetch(`/api/boards/${encodeURIComponent(reference)}/pages/${encodeURIComponent(itemId)}/${action}`, { method: "POST" });
+      const board = useBoardStore.getState();
+      const page = board.sheets.find((item) => item.id === itemId);
+      if (!page) throw new Error("Page item not found");
+      const capture = capturePage(board, page);
+      if (action === "preview") {
+        setPrint(capture);
+        return;
+      }
+      const response = await fetch(`/api/boards/${encodeURIComponent(reference)}/pages/${encodeURIComponent(itemId)}/publish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page: capture.page, changes: capture.snapshot.changes }),
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.message === "string" ? data.message : "Page action failed");
-      if (action === "preview") setPrint(data as PrintPage);
-      else if (typeof data.reference === "string") setLink(new URL(`/test/${encodeURIComponent(data.reference)}`, window.location.origin).href);
+      if (typeof data.reference === "string") setLink(new URL(`/test/${encodeURIComponent(data.reference)}`, window.location.origin).href);
       else throw new Error("Published link is unavailable");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Page action failed");

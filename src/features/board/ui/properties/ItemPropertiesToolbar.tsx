@@ -75,6 +75,18 @@ export function ItemPropertiesToolbar({ viewport }: {
 
   if (!properties || !anchorSelector) return null;
 
+  const deleteButton = (
+    <button
+      type="button"
+      title="Delete selected item"
+      aria-label="Delete selected item"
+      className={`${propertyButtonClass} text-red-700`}
+      onClick={() => useBoardStore.getState().deleteSelected()}
+    >
+      <FaTrash aria-hidden="true" />
+    </button>
+  );
+
   return (
     <div
       key={anchorSelector}
@@ -90,18 +102,9 @@ export function ItemPropertiesToolbar({ viewport }: {
       style={{ maxWidth: isPage ? "min(14rem, calc(100% - 1rem))" : "calc(100% - 1rem)", visibility: "hidden" }}
     >
       {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
-      {isPage && (
-        <PageItemActions key={selection.id} itemId={selection.id} />
-      )}
-      <button
-        type="button"
-        title="Delete selected item"
-        aria-label="Delete selected item"
-        className={`${propertyButtonClass} text-red-700`}
-        onClick={() => useBoardStore.getState().deleteSelected()}
-      >
-        <FaTrash aria-hidden="true" />
-      </button>
+      {isPage
+        ? <PageItemActions key={selection.id} itemId={selection.id} deleteButton={deleteButton} />
+        : deleteButton}
     </div>
   );
 }

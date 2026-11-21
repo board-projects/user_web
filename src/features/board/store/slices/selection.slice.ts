@@ -68,14 +68,15 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
 
         const has = (type: Exclude<Selection, null>["type"], id: string) =>
           items?.has(selectionKey(type, id)) ?? false;
+        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id);
         return {
           shapes: state.shapes.filter((shape) => !has("shape", shape.id)),
           codeBlocks: state.codeBlocks.filter((block) => !has("codeblock", block.id)),
           clozeTests: state.clozeTests.filter((cloze) => !has("cloze", cloze.id)),
           connections: state.connections.filter((connection) =>
             !has("connection", connection.id) &&
-            !has("shape", connection.sourceId) &&
-            !has("shape", connection.targetId),
+            !endpointDeleted(connection.sourceId) &&
+            !endpointDeleted(connection.targetId),
           ),
           lines: lines?.size ? state.lines.filter((line) => !lines.has(line)) : state.lines,
           connectionDraft: null,

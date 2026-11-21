@@ -1,3 +1,4 @@
+import { getConnectableItems } from "../../domain/connectableItems";
 import type { StateCreator } from "zustand";
 import type { Point, ShapeConnection, ShapePort } from "../../domain/types";
 import { findNearbyShapePort, type ShapePortTarget } from "../../domain/shapeGeometry";
@@ -24,7 +25,7 @@ export type ConnectionsSlice = {
 };
 
 function getSnapTarget(state: BoardState, sourceId: string, pointer: Point) {
-  return findNearbyShapePort(state.shapes, sourceId, pointer, SNAP_RADIUS_PX / state.zoom);
+  return findNearbyShapePort(getConnectableItems(state), sourceId, pointer, SNAP_RADIUS_PX / state.zoom);
 }
 
 export const createConnectionsSlice: StateCreator<BoardState, [], [], ConnectionsSlice> = (set) => ({
@@ -32,7 +33,7 @@ export const createConnectionsSlice: StateCreator<BoardState, [], [], Connection
   connectionDraft: null,
 
   startConnection: (sourceId, sourcePort, pointer) => set((state) =>
-    state.shapes.some((shape) => shape.id === sourceId)
+    getConnectableItems(state).some((shape) => shape.id === sourceId)
       ? { connectionDraft: { sourceId, sourcePort, pointer, snapTarget: null } }
       : state,
   ),
@@ -55,7 +56,7 @@ export const createConnectionsSlice: StateCreator<BoardState, [], [], Connection
 
     const { sourceId, sourcePort } = draft;
     const target = pointer ? getSnapTarget(state, sourceId, pointer) ?? fallbackTarget : null;
-    if (!target || sourceId === target.id || !state.shapes.some((shape) => shape.id === target.id)) {
+    if (!target || sourceId === target.id || !getConnectableItems(state).some((shape) => shape.id === target.id)) {
       return { connectionDraft: null };
     }
 

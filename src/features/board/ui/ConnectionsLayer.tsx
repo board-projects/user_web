@@ -1,6 +1,7 @@
 "use client";
 
 import { ConnectionStroke } from "./ConnectionStroke";
+import { getConnectableItems } from "../domain/connectableItems";
 import { useMemo } from "react";
 import { getShapePortPoint } from "../domain/shapeGeometry";
 import { useBoardStore } from "../store/board.store";
@@ -10,18 +11,23 @@ export function ConnectionsLayer() {
   const zoom = useBoardStore((state) => state.zoom);
   const connections = useBoardStore((state) => state.connections);
   const shapes = useBoardStore((state) => state.shapes);
+  const codeBlocks = useBoardStore((state) => state.codeBlocks);
+  const clozeTests = useBoardStore((state) => state.clozeTests);
   const selection = useBoardStore((state) => state.selection);
   const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
   const updateConnection = useBoardStore((state) => state.updateConnection);
   const select = useBoardStore((state) => state.select);
   const draft = useBoardStore((state) => state.connectionDraft);
   const connecting = draft !== null;
-  const shapeById = useMemo(() => new Map(shapes.map((shape) => [shape.id, shape])), [shapes]);
+  const itemById = useMemo(() =>
+    new Map(getConnectableItems({ shapes, codeBlocks, clozeTests }).map((item) => [item.id, item])),
+    [shapes, codeBlocks, clozeTests],
+  );
 
-  const draftSource = draft ? shapeById.get(draft.sourceId) : undefined;
+  const draftSource = draft ? itemById.get(draft.sourceId) : undefined;
   const previewStart = draft && draftSource ? getShapePortPoint(draftSource, draft.sourcePort) : null;
   const snapTarget = draft?.snapTarget;
-  const snapShape = snapTarget ? shapeById.get(snapTarget.id) : undefined;
+  const snapShape = snapTarget ? itemById.get(snapTarget.id) : undefined;
   const previewEnd = snapTarget && snapShape ? getShapePortPoint(snapShape, snapTarget.port) : draft?.pointer;
 
   return (
@@ -39,8 +45,8 @@ export function ConnectionsLayer() {
         />
       )}
       {connections.map((connection) => {
-        const source = shapeById.get(connection.sourceId);
-        const target = shapeById.get(connection.targetId);
+        const source = itemById.get(connection.sourceId);
+        const target = itemById.get(connection.targetId);
         if (!source || !target) return null;
 
         const selected = (selection?.type === "connection" && selection.id === connection.id)

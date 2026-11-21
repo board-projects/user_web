@@ -1,4 +1,5 @@
-import { SHAPE_PORTS, type Point, type Shape, type ShapePort } from "./types";
+import { SHAPE_PORTS, type Point, type ShapePort } from "./types";
+import type { ConnectableItem } from "./connectableItems";
 
 const STAR_POINTS = [
   [50, 0], [62, 36], [100, 38], [70, 61], [81, 100],
@@ -8,12 +9,12 @@ const STAR_POINTS = [
 export const STAR_CLIP_PATH =
   `polygon(${STAR_POINTS.map(([x, y]) => `${x}% ${y}%`).join(", ")})`;
 
-const center = (shape: Shape): Point => ({
+const center = (shape: ConnectableItem): Point => ({
   x: shape.x + shape.width / 2,
   y: shape.y + shape.height / 2,
 });
 
-function getShapeBoundaryPoint(shape: Shape, toward: Point): Point {
+function getShapeBoundaryPoint(shape: ConnectableItem, toward: Point): Point {
   const midpoint = center(shape);
   const dx = (toward.x - midpoint.x) / (shape.width / 2);
   const dy = (toward.y - midpoint.y) / (shape.height / 2);
@@ -53,7 +54,7 @@ export const PORT_DIRECTION: Record<ShapePort, Point> = {
   left: { x: -1, y: 0 },
 };
 
-export function getShapePortPoint(shape: Shape, port: ShapePort): Point {
+export function getShapePortPoint(shape: ConnectableItem, port: ShapePort): Point {
   const midpoint = center(shape);
   const direction = PORT_DIRECTION[port];
   return getShapeBoundaryPoint(shape, {
@@ -62,7 +63,7 @@ export function getShapePortPoint(shape: Shape, port: ShapePort): Point {
   });
 }
 
-export function getNearestShapePort(shape: Shape, point: Point): ShapePort {
+export function getNearestShapePort(shape: ConnectableItem, point: Point): ShapePort {
   let nearest: ShapePort = "top";
   let shortest = Infinity;
   for (const port of SHAPE_PORTS) {
@@ -79,7 +80,7 @@ export function getNearestShapePort(shape: Shape, point: Point): ShapePort {
 export type ShapePortTarget = { id: string; port: ShapePort };
 
 export function findNearbyShapePort(
-  shapes: readonly Shape[],
+  shapes: readonly ConnectableItem[],
   sourceId: string,
   pointer: Point,
   radius: number,

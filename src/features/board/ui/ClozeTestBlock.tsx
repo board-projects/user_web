@@ -2,6 +2,8 @@
 
 import React from "react";
 import { ClozeTest } from "../domain/types";
+import { CLOZE_SIZE, clozeConnectable } from "../domain/connectableItems";
+import { ConnectionPorts } from "./ConnectionPorts";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
@@ -14,6 +16,7 @@ export const ClozeTestBlock = ({ id, content, title, x, y }: ClozeTest) => {
     const stopEditing = useBoardStore((s) => s.stopEditingClozeTest);
     const zoom = useBoardStore((s) => s.zoom);
     const selection = useBoardStore((s) => s.selection);
+    const connected = useBoardStore((s) => s.connections.some(({ sourceId, targetId }) => sourceId === id || targetId === id));
     const dragItem = useBoardItemDrag();
     const updateClozeTest = useBoardStore((s) => s.updateClozeTest);
 
@@ -32,7 +35,7 @@ export const ClozeTestBlock = ({ id, content, title, x, y }: ClozeTest) => {
                         type="text" 
                         placeholder="..."
                         style={{ width: `${answer.length + 2}ch` }} // تنظیم عرض بر اساس طول کلمه
-                        className="mx-1 border-b-2 border-blue-500 bg-blue-50 text-center outline-none focus:border-blue-700"
+                        className="mx-1 max-w-full border-b-2 border-blue-500 bg-blue-50 text-center outline-none focus:border-blue-700"
                         data-interactive="true"
                     />
                 );
@@ -45,21 +48,24 @@ export const ClozeTestBlock = ({ id, content, title, x, y }: ClozeTest) => {
         <Rnd
             data-interactive="true"
             data-board-selection-key={key}
+            data-board-connectable-id={id}
+            cancel="[data-connection-handle], input, textarea"
             scale={zoom}
             position={{ x, y }}
+            size={CLOZE_SIZE}
             enableResizing={false}
-            {...dragItem({ type: "cloze", id }, { x, y }, (position) => updateClozeTest(id, position))}
+            {...dragItem({ type: "cloze", id }, { x, y }, (position) => updateClozeTest(id, position), connected)}
             onPointerDown={(e: { stopPropagation: () => void; }) => {
                 e.stopPropagation();
                 if (!isEditing) selectBoardItem({ type: "cloze", id });
             }}
             disableDragging={isEditing}
-            className={`rounded-lg border-2 bg-white p-4 shadow-lg z-[50] ${
-                isSelected || inMarquee ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-200"
-            }`}
+            className="z-50"
         >
-            <div 
-                className="flex flex-col gap-2 min-w-[200px]"
+            <div
+                className={`flex h-full w-full flex-col gap-2 overflow-auto break-words rounded-lg border-2 bg-white p-4 shadow-lg ${
+                    isSelected || inMarquee ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-200"
+                }`}
                 onDoubleClick={() => startEditing(id)}
             >
                 <div className="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
@@ -74,7 +80,7 @@ export const ClozeTestBlock = ({ id, content, title, x, y }: ClozeTest) => {
                         onChange={(e) => updateClozeTest(id, { content: e.target.value })}
                         onBlur={stopEditing}
                         className="w-full text-gray-800 leading-loose outline-none bg-gray-50 p-2 rounded border border-dashed border-gray-300 resize-none overflow-hidden"
-                        style={{ height: 'auto' }}
+                        rows={3}
                         data-interactive="true"
                     />
                 ) : (
@@ -89,6 +95,7 @@ export const ClozeTestBlock = ({ id, content, title, x, y }: ClozeTest) => {
                     </div>
                 )}
             </div>
+            <ConnectionPorts item={clozeConnectable({ id, x, y })} selected={isSelected} />
         </Rnd>
     );
 };

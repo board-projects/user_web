@@ -7,13 +7,14 @@ import {
   connectorPath,
   getConnectorPoints,
 } from "../domain/connectorGeometry";
-import type { Shape, ShapeConnection } from "../domain/types";
+import type { ConnectableItem } from "../domain/connectableItems";
+import type { ShapeConnection } from "../domain/types";
 import { selectionKey } from "../store/slices/selection.slice";
 
 type Props = {
   connection: ShapeConnection;
-  source: Shape;
-  target: Shape;
+  source: ConnectableItem;
+  target: ConnectableItem;
   selected: boolean;
   interactive: boolean;
   zoom: number;

@@ -1,6 +1,7 @@
 import { segmentIntersectsBox, type SelectionBox } from "./marqueeGeometry";
+import type { ConnectableItem } from "./connectableItems";
 import { getShapePortPoint, PORT_DIRECTION } from "./shapeGeometry";
-import type { Point, Shape, ShapeConnection } from "./types";
+import type { Point, ShapeConnection } from "./types";
 
 const distance = (a: Point, b: Point) => Math.hypot(b.x - a.x, b.y - a.y);
 const interpolate = (a: Point, b: Point, t: number): Point =>
@@ -8,7 +9,7 @@ const interpolate = (a: Point, b: Point, t: number): Point =>
 const extend = (point: Point, vector: Point, length: number): Point =>
   ({ x: point.x + vector.x * length, y: point.y + vector.y * length });
 
-export function getConnectorPoints(connection: ShapeConnection, source: Shape, target: Shape): Point[] {
+export function getConnectorPoints(connection: ShapeConnection, source: ConnectableItem, target: ConnectableItem): Point[] {
   const from = getShapePortPoint(source, connection.sourcePort);
   const to = getShapePortPoint(target, connection.targetPort);
   const length = distance(from, to);

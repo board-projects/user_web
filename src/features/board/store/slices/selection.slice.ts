@@ -8,6 +8,7 @@ export type Selection =
   | { type: "connection"; id: string }
   | { type: "codeblock"; id: string }
   | { type: "cloze"; id: string }
+  | { type: "page"; id: string }
   | null;
 
 export type MarqueeSelection = {
@@ -99,11 +100,12 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
 
         const has = (type: Exclude<Selection, null>["type"], id: string) =>
           items?.has(selectionKey(type, id)) ?? false;
-        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id);
+        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id) || has("page", id);
         return {
           shapes: state.shapes.filter((shape) => !has("shape", shape.id)),
           codeBlocks: state.codeBlocks.filter((block) => !has("codeblock", block.id)),
           clozeTests: state.clozeTests.filter((cloze) => !has("cloze", cloze.id)),
+          sheets: state.sheets.filter((page) => !has("page", page.id)),
           connections: state.connections.filter((connection) =>
             !has("connection", connection.id) &&
             !endpointDeleted(connection.sourceId) &&
@@ -131,7 +133,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       });
       const moveItems = <T extends Point & { id: string }>(
         items: T[],
-        type: "shape" | "codeblock" | "cloze",
+        type: "shape" | "codeblock" | "cloze" | "page",
       ) => items.map((item) => selected.items.has(selectionKey(type, item.id)) ? translate(item) : item);
 
       const lines = new Set<DrawLine>();
@@ -147,6 +149,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         shapes: moveItems(state.shapes, "shape"),
         codeBlocks: moveItems(state.codeBlocks, "codeblock"),
         clozeTests: moveItems(state.clozeTests, "cloze"),
+        sheets: moveItems(state.sheets, "page"),
         lines: nextLines,
         marqueeSelection: {
           ...selected,

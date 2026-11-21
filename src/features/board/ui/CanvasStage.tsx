@@ -5,12 +5,8 @@ import { useWindowSize } from "@/features/board/hooks/useWindowSize";
 
 export function CanvasStage(props: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  viewportWidth?: number;
-  viewportHeight?: number;
 }) {
-  const windowSize = useWindowSize();
-  const width = props.viewportWidth ?? windowSize.width;
-  const height = props.viewportHeight ?? windowSize.height;
+  const { width, height } = useWindowSize();
 
   useEffect(() => {
     const canvas = props.canvasRef.current;

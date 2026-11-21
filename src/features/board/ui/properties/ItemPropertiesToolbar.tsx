@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, type RefObject } from "react";
+import { PageItemActions } from "@/features/design/ui/PageItemActions";
 import { FaTrash } from "react-icons/fa";
 import { useBoardStore } from "../../store/board.store";
 import { selectionKey } from "../../store/slices/selection.slice";
@@ -8,7 +9,11 @@ import { getItemProperties, getSelectedBoardItem } from "./itemProperties";
 import { ItemPropertyControl, propertyButtonClass } from "./ItemPropertyControl";
 import { getPropertiesToolbarPosition } from "./toolbarPosition";
 
-export function ItemPropertiesToolbar({ viewport }: { viewport: RefObject<HTMLElement | null> }) {
+export function ItemPropertiesToolbar({ viewport, reference, waitForSync }: {
+  viewport: RefObject<HTMLElement | null>;
+  reference: string;
+  waitForSync: () => Promise<void>;
+}) {
   const selection = useBoardStore((state) => state.selection);
   const selectedItem = useBoardStore((state) => getSelectedBoardItem(state, state.selection));
   const marquee = useBoardStore((state) => state.marqueeSelection);
@@ -80,6 +85,9 @@ export function ItemPropertiesToolbar({ viewport }: { viewport: RefObject<HTMLEl
       style={{ maxWidth: "calc(100% - 1rem)", visibility: "hidden" }}
     >
       {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
+      {selection?.type === "page" && (
+        <PageItemActions key={selection.id} reference={reference} itemId={selection.id} waitForSync={waitForSync} />
+      )}
       <button
         type="button"
         title="Delete selected item"

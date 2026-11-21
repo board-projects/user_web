@@ -1,5 +1,6 @@
 export type SheetLayout = { width: number; height: number; dots: boolean };
-export type RulerUnit = "px" | "mm" | "cm" | "in";
+export type { PageUnit as RulerUnit } from "@/features/board/domain/types";
+import type { PageUnit as RulerUnit } from "@/features/board/domain/types";
 
 export const SHEET_PRESETS = [
   { title: "Phone", width: 360, height: 800 },
@@ -26,10 +27,3 @@ export function rulerTicks(length: number, scale: number, unit: RulerUnit) {
   }));
 }
 
-export function isSheetLayout(value: unknown): value is SheetLayout {
-  if (!value || typeof value !== "object") return false;
-  const { width, height, dots } = value as Partial<SheetLayout>;
-  const dimension = (n: unknown): n is number =>
-    typeof n === "number" && Number.isInteger(n) && n >= SHEET_LIMITS.min && n <= SHEET_LIMITS.max;
-  return dimension(width) && dimension(height) && typeof dots === "boolean";
-}

@@ -1,5 +1,5 @@
-import { DesignWorkspace } from "@/features/design/ui/DesignWorkspace";
+import { redirect } from "next/navigation";
 
-export default function BoardDesignPage({ params }: { params: { reference: string } }) {
-  return <DesignWorkspace key={params.reference} reference={params.reference} />;
+export default function LegacyBoardDesignPage({ params }: { params: { reference: string } }) {
+  redirect(`/board/${encodeURIComponent(params.reference)}`);
 }

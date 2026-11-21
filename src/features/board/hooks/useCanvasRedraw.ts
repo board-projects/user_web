@@ -12,8 +12,6 @@ export function useCanvasRedraw(args: {
   zoom: number;
   panX: number;
   panY: number;
-  viewportWidth?: number;
-  viewportHeight?: number;
 }) {
   useEffect(() => {
     const canvas = args.canvasRef.current;
@@ -42,5 +40,5 @@ export function useCanvasRedraw(args: {
       const selectionMargin = args.selectedLines?.has(line) ? 4 / args.zoom : 0;
       paintDrawingSegment(ctx, line, selectionMargin);
     }
-  }, [args.canvasRef, args.lines, args.selectedLines, args.zoom, args.panX, args.panY, args.viewportWidth, args.viewportHeight]);
+  }, [args.canvasRef, args.lines, args.selectedLines, args.zoom, args.panX, args.panY]);
 }

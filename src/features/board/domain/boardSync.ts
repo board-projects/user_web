@@ -1,6 +1,6 @@
 import type { BoardState } from "../store/board.store";
 
-const COLLECTIONS = ["shapes", "codeBlocks", "clozeTests", "connections", "lines"] as const;
+const COLLECTIONS = ["shapes", "codeBlocks", "clozeTests", "connections", "lines", "sheets"] as const;
 type Collection = typeof COLLECTIONS[number];
 
 export type BoardContent = Pick<BoardState, Collection>;
@@ -12,7 +12,7 @@ export type BoardChange = {
 export type BoardUpdate = { revision: number; changes: BoardChange[] };
 
 export const EMPTY_BOARD: BoardContent = {
-  shapes: [], codeBlocks: [], clozeTests: [], connections: [], lines: [],
+  shapes: [], codeBlocks: [], clozeTests: [], connections: [], lines: [], sheets: [],
 };
 
 export const changeKey = ({ kind, id }: BoardChange) => `${kind}:${id}`;

@@ -1,5 +1,6 @@
-import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES } from "../../domain/types";
+import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
 import { clozeConnectable } from "../../domain/connectableItems";
+import { SHEET_LIMITS, SHEET_PRESETS } from "@/features/design/domain/sheetLayout";
 import type { BoardState } from "../../store/board.store";
 import type { Selection } from "../../store/slices/selection.slice";
 
@@ -18,6 +19,7 @@ export function getSelectedBoardItem(state: BoardState, selection: Selection) {
   switch (selection?.type) {
     case "shape": return state.shapes.find((item) => item.id === selection.id);
     case "codeblock": return state.codeBlocks.find((item) => item.id === selection.id);
+    case "page": return state.sheets.find((item) => item.id === selection.id);
     case "cloze": return state.clozeTests.find((item) => item.id === selection.id);
     case "connection": return state.connections.find((item) => item.id === selection.id);
   }
@@ -29,15 +31,16 @@ function sizeFields(
   minWidth: number,
   minHeight: number,
   square = false,
+  max = 4000,
 ): ItemProperty[] {
   const widthField: ItemProperty = {
-    kind: "number", label: square ? "Size" : "Width", value: width, min: minWidth, max: 4000,
+    kind: "number", label: square ? "Size" : "Width", value: width, min: minWidth, max,
     change: (value) => resize(square ? { width: value, height: value } : { width: value }),
   };
   if (square) return [widthField];
 
   return [widthField, {
-    kind: "number", label: "Height", value: height, min: minHeight, max: 4000,
+    kind: "number", label: "Height", value: height, min: minHeight, max,
     change: (value) => resize({ height: value }),
   }];
 }
@@ -91,6 +94,35 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
           { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
           ...sizeFields(clozeConnectable(item), (size) => state.updateClozeTest(id, size), 140, 100),
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
+        ],
+      };
+    }
+    case "page": {
+      const page = state.sheets.find((item) => item.id === id);
+      if (!page) return null;
+      const resolution = `${page.width} × ${page.height}`;
+      const presets = SHEET_PRESETS.map(({ width, height }) => `${width} × ${height}`);
+
+      return {
+        fields: [
+          { kind: "text", label: "Name", value: page.title, change: (title) => state.updatePage(id, { title }) },
+          {
+            kind: "select", label: "Resolution", value: presets.includes(resolution) ? resolution : "Custom",
+            options: ["Custom", ...presets],
+            change: (value) => {
+              const preset = SHEET_PRESETS.find(({ width, height }) => `${width} × ${height}` === value);
+              if (preset) state.updatePage(id, { width: preset.width, height: preset.height });
+            },
+          },
+          ...sizeFields(page, (size) => state.updatePage(id, size), SHEET_LIMITS.min, SHEET_LIMITS.min, false, SHEET_LIMITS.max),
+          {
+            kind: "select", label: "Rulers", value: page.unit, options: PAGE_UNITS,
+            change: (value) => {
+              const unit = PAGE_UNITS.find((option) => option === value);
+              if (unit) state.updatePage(id, { unit });
+            },
+          },
+          { kind: "toggle", label: "Dots", value: page.dots, change: (dots) => state.updatePage(id, { dots }) },
         ],
       };
     }

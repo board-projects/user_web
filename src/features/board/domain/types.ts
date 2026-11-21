@@ -65,3 +65,15 @@ export type ClozeTest = {
   content: string;
   title: string;
 }
+
+export const PAGE_UNITS = ["px", "mm", "cm", "in"] as const;
+export type PageUnit = (typeof PAGE_UNITS)[number];
+
+export type PageItem = Point & {
+  id: string;
+  title: string;
+  width: number;
+  height: number;
+  dots: boolean;
+  unit: PageUnit;
+};

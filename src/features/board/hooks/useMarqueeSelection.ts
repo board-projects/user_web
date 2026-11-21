@@ -21,7 +21,13 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
   for (const element of area.querySelectorAll("[data-board-selection-key]")) {
     if (!(element instanceof HTMLElement)) continue;
     const key = element.dataset.boardSelectionKey;
-    if (key && boxesIntersect(screenBox, element.getBoundingClientRect())) items.add(key);
+    const bounds = element.getBoundingClientRect();
+    // Selecting content inside a page does not pull the containing page into the selection.
+    const hits = element.hasAttribute("data-board-page-frame")
+      ? screenBox.left <= bounds.left && screenBox.top <= bounds.top &&
+        screenBox.right >= bounds.right && screenBox.bottom >= bounds.bottom
+      : boxesIntersect(screenBox, bounds);
+    if (key && hits) items.add(key);
   }
 
   const rect = area.getBoundingClientRect();

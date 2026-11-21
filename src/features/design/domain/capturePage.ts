@@ -1,16 +1,16 @@
 import type { BoardChange, BoardContent } from "@/features/board/domain/boardSync";
 import { clozeConnectable } from "@/features/board/domain/connectableItems";
+import { pageContainsItem, pageContainsPoint } from "@/features/board/domain/pageGeometry";
 import type { PageItem, Point } from "@/features/board/domain/types";
 
 export function capturePage(board: BoardContent, page: PageItem) {
   const { x, y, width, height } = page;
-  const contains = (point: Point) => point.x >= x && point.y >= y && point.x <= x + width && point.y <= y + height;
   const local = (point: Point) => ({ x: point.x - x, y: point.y - y });
   const changes: BoardChange[] = [];
   const included = new Set<string>();
 
   const add = (kind: "shapes" | "codeBlocks" | "clozeTests", item: BoardContent[typeof kind][number], size: { width: number; height: number }) => {
-    if (!contains(item) || !contains({ x: item.x + size.width, y: item.y + size.height })) return;
+    if (!pageContainsItem(page, { ...item, ...size })) return;
     changes.push({ kind, id: item.id, item: { ...item, ...local(item) } });
     included.add(item.id);
   };
@@ -18,7 +18,7 @@ export function capturePage(board: BoardContent, page: PageItem) {
   for (const item of board.codeBlocks) add("codeBlocks", item, item);
   for (const item of board.clozeTests) add("clozeTests", item, clozeConnectable(item));
   for (const line of board.lines) {
-    if (contains(line.from) && contains(line.to)) {
+    if (pageContainsPoint(page, line.from) && pageContainsPoint(page, line.to)) {
       changes.push({ kind: "lines", id: line.id, item: { ...line, from: local(line.from), to: local(line.to) } });
     }
   }

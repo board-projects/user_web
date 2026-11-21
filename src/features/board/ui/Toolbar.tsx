@@ -37,6 +37,7 @@ type ToolbarProps = {
   viewerCount?: number;
 
   className?: string;
+  docked?: boolean;
 };
 
 function cn(...v: Array<string | false | null | undefined>) {
@@ -140,6 +141,9 @@ function PresenceMini({ users = [], viewerCount }: { users?: PresenceUser[]; vie
 }
 
 export function Toolbar(props: ToolbarProps) {
+  const panelPlacement = props.docked
+    ? "absolute left-0 top-12"
+    : "absolute bottom-12 left-0 lg:bottom-auto lg:left-12 lg:top-0";
   const tool = useBoardStore((s) => s.tool);
   const setTool = useBoardStore((s) => s.setTool);
   const panMode = useBoardStore((s) => s.panMode);
@@ -176,14 +180,14 @@ export function Toolbar(props: ToolbarProps) {
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
   return (
-    <div className={cn("absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-50 -translate-x-1/2 lg:bottom-auto lg:left-3 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2", props.className)} data-ui="true">
+    <div className={cn("z-50", props.docked ? "relative inline-flex" : "absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 lg:bottom-auto lg:left-3 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2", props.className)} data-ui="true">
       <div
         className={cn(
           "rounded-2xl border border-stone-200/80 bg-stone-100/60 backdrop-blur",
           "shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
         )}
       >
-        <div className="flex items-center gap-2 p-2 lg:flex-col">
+        <div className={cn("flex items-center gap-2 p-2", !props.docked && "lg:flex-col")}>
           <IconButton
             title="Select"
             active={tool === "select" && !panMode}
@@ -215,7 +219,7 @@ export function Toolbar(props: ToolbarProps) {
                 ref={penPanelRef}
                 data-ui="true"
                 className={cn(
-                  "absolute bottom-12 left-0 lg:bottom-auto lg:left-12 lg:top-0",
+                  panelPlacement,
                   "max-h-[calc(100dvh-5rem)] w-44 overflow-y-auto rounded-2xl p-3",
                   "border border-stone-200/80 bg-stone-100/70 backdrop-blur",
                   "shadow-[0_10px_30px_rgba(0,0,0,0.10)]",
@@ -319,11 +323,12 @@ export function Toolbar(props: ToolbarProps) {
                 ref={shapesPanelRef}
                 data-ui="true"
                 className={cn(
-                  "absolute bottom-12 left-0 lg:bottom-auto lg:left-12 lg:top-0",
+                  panelPlacement,
                   "w-max p-2 rounded-2xl lg:w-auto",
                   "border border-stone-200/80 bg-stone-100/70 backdrop-blur",
                   "shadow-[0_10px_30px_rgba(0,0,0,0.10)]",
-                  "flex items-center gap-2 lg:flex-col"
+                  "flex items-center gap-2",
+                  !props.docked && "lg:flex-col"
                 )}
               >
                 <IconButton

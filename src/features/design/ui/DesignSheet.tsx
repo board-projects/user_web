@@ -1,0 +1,79 @@
+import { useId } from "react";
+import type { BoardContent } from "@/features/board/domain/boardSync";
+import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
+import { connectorArrow, connectorDashArray, connectorMidpoint, connectorPath, getConnectorPoints } from "@/features/board/domain/connectorGeometry";
+import { STAR_POINTS } from "@/features/board/domain/shapeGeometry";
+import type { SheetLayout } from "../domain/sheetLayout";
+
+export function DesignSheet({ layout, board, title }: { layout: SheetLayout; board: BoardContent; title: string }) {
+  const gridId = useId();
+  const items = new Map(getConnectableItems(board).map((item) => [item.id, item]));
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox={`0 0 ${layout.width} ${layout.height}`}
+      width={layout.width}
+      height={layout.height}
+      className="block h-auto w-full overflow-hidden"
+      role="img"
+      aria-label={title}
+    >
+      <defs>
+        <pattern id={gridId} width={16} height={16} patternUnits="userSpaceOnUse">
+          <circle cx={1} cy={1} r={0.8} fill="#94a3b8" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="white" />
+      {layout.dots && <rect width="100%" height="100%" fill={`url(#${gridId})`} />}
+      {board.lines.map((line) => (
+        <line key={line.id} x1={line.from.x} y1={line.from.y} x2={line.to.x} y2={line.to.y}
+          stroke={line.color} strokeWidth={line.size} strokeLinecap="round" />
+      ))}
+      {board.connections.map((connection) => {
+        const source = items.get(connection.sourceId);
+        const target = items.get(connection.targetId);
+        if (!source || !target) return null;
+        const points = getConnectorPoints(connection, source, target);
+        const midpoint = connectorMidpoint(points);
+        const color = connection.color ?? "#44403c";
+        const width = connection.size ?? 2;
+        const arrow = connection.arrow !== false ? connectorArrow(points, Math.max(12, width * 1.4)) : undefined;
+        return (
+          <g key={connection.id}>
+            <path d={connectorPath(points)} fill="none" stroke={color} strokeWidth={width}
+              strokeLinecap="round" strokeLinejoin="round" strokeDasharray={connectorDashArray(connection)} />
+            {arrow && <polygon points={arrow} fill={color} />}
+            {connection.label && <text x={midpoint.x} y={midpoint.y} textAnchor="middle" dominantBaseline="central"
+              fontSize={13} stroke="white" strokeWidth={5} paintOrder="stroke">{connection.label}</text>}
+          </g>
+        );
+      })}
+      {board.shapes.map((shape) => {
+        const { x, y, width, height, color } = shape;
+        if (shape.type === "circle") return <ellipse key={shape.id} cx={x + width / 2} cy={y + height / 2} rx={width / 2} ry={height / 2} fill={color} />;
+        if (shape.type === "star") {
+          const points = STAR_POINTS.map(([px, py]) => `${x + width * px / 100},${y + height * py / 100}`).join(" ");
+          return <polygon key={shape.id} points={points} fill={color} />;
+        }
+        return <rect key={shape.id} x={x} y={y} width={width} height={height} fill={color} />;
+      })}
+      {board.codeBlocks.map((block) => (
+        <foreignObject key={block.id} x={block.x} y={block.y} width={block.width} height={block.height}>
+          <pre className="m-0 h-full overflow-hidden whitespace-pre-wrap break-words rounded-lg bg-stone-900 p-3 font-mono text-sm text-white">{block.code}</pre>
+        </foreignObject>
+      ))}
+      {board.clozeTests.map((cloze) => {
+        const { x, y, width, height } = clozeConnectable(cloze);
+        return (
+          <foreignObject key={cloze.id} x={x} y={y} width={width} height={height}>
+            <div className="h-full overflow-hidden break-words rounded-lg border border-stone-200 bg-white p-4 text-sm text-stone-800">
+              <strong className="mb-2 block">{cloze.title || "Cloze Test"}</strong>
+              <div className="whitespace-pre-wrap">{cloze.content.replace(/\[[^\]]*\]|\{\{[^}]*\}\}/g, "______")}</div>
+            </div>
+          </foreignObject>
+        );
+      })}
+    </svg>
+  );
+}

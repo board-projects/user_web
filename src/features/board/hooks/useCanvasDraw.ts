@@ -14,7 +14,7 @@ export function useCanvasDraw(args: {
   const [drawing, setDrawing] = useState(false);
   const lastPos = useRef<Point | null>(null);
 
-  const connecting = useBoardStore((s) => s.connecting);
+  const connecting = useBoardStore((s) => s.connectionDraft !== null);
   const zoom = useBoardStore((s) => s.zoom);
   const panX = useBoardStore((s) => s.panX);
   const panY = useBoardStore((s) => s.panY);

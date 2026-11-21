@@ -13,7 +13,7 @@ const center = (shape: Shape): Point => ({
   y: shape.y + shape.height / 2,
 });
 
-function boundaryPoint(shape: Shape, toward: Point): Point {
+export function getShapeBoundaryPoint(shape: Shape, toward: Point): Point {
   const midpoint = center(shape);
   const dx = (toward.x - midpoint.x) / (shape.width / 2);
   const dy = (toward.y - midpoint.y) / (shape.height / 2);
@@ -48,7 +48,7 @@ function boundaryPoint(shape: Shape, toward: Point): Point {
 
 export function getConnectionEndpoints(source: Shape, target: Shape) {
   return {
-    from: boundaryPoint(source, center(target)),
-    to: boundaryPoint(target, center(source)),
+    from: getShapeBoundaryPoint(source, center(target)),
+    to: getShapeBoundaryPoint(target, center(source)),
   };
 }

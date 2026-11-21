@@ -10,6 +10,7 @@ export function BoardViewport({ children }: { children: React.ReactNode }) {
 
   return (
     <div
+      data-board-viewport
       className="absolute inset-0 z-20"
       style={{
         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,

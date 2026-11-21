@@ -22,6 +22,6 @@ export const createShapesSlice: StateCreator<BoardState, [], [], ShapesSlice> = 
     set((s) => ({
       shapes: s.shapes.filter((sh) => sh.id !== id),
       connections: s.connections.filter(({ sourceId, targetId }) => sourceId !== id && targetId !== id),
-      connectionSourceId: s.connectionSourceId === id ? null : s.connectionSourceId,
+      connectionDraft: s.connectionDraft?.sourceId === id ? null : s.connectionDraft,
     })),
 });

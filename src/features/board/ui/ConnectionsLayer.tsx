@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getConnectionEndpoints } from "../domain/shapeGeometry";
+import { getConnectionEndpoints, getShapeBoundaryPoint } from "../domain/shapeGeometry";
 import { useBoardStore } from "../store/board.store";
 
 export function ConnectionsLayer() {
@@ -9,11 +9,27 @@ export function ConnectionsLayer() {
   const shapes = useBoardStore((state) => state.shapes);
   const selection = useBoardStore((state) => state.selection);
   const select = useBoardStore((state) => state.select);
-  const connecting = useBoardStore((state) => state.connecting);
+  const draft = useBoardStore((state) => state.connectionDraft);
+  const connecting = draft !== null;
   const shapeById = useMemo(() => new Map(shapes.map((shape) => [shape.id, shape])), [shapes]);
+
+  const draftSource = draft ? shapeById.get(draft.sourceId) : undefined;
+  const previewStart = draft && draftSource ? getShapeBoundaryPoint(draftSource, draft.pointer) : null;
 
   return (
     <svg className="pointer-events-none absolute inset-0 z-30 h-full w-full overflow-visible">
+      {draft && previewStart && (
+        <line
+          x1={previewStart.x}
+          y1={previewStart.y}
+          x2={draft.pointer.x}
+          y2={draft.pointer.y}
+          stroke="#2563eb"
+          strokeWidth={2}
+          strokeDasharray="5 4"
+          vectorEffect="non-scaling-stroke"
+        />
+      )}
       {connections.map((connection) => {
         const source = shapeById.get(connection.sourceId);
         const target = shapeById.get(connection.targetId);

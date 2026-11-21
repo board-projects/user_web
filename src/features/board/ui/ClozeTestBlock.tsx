@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { ClozeTest } from "../domain/types";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 
-export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
+export const ClozeTestBlock = ({ id, content, title, x, y }: ClozeTest) => {
 
-    const [isEditing, setIsEditing] = useState(false);
+    const isEditing = useBoardStore((s) => s.editingClozeTestId === id);
+    const startEditing = useBoardStore((s) => s.startEditingClozeTest);
+    const stopEditing = useBoardStore((s) => s.stopEditingClozeTest);
     const zoom = useBoardStore((s) => s.zoom);
     const selection = useBoardStore((s) => s.selection);
     const dragItem = useBoardItemDrag();
@@ -49,7 +51,7 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
             {...dragItem({ type: "cloze", id }, { x, y }, (position) => updateClozeTest(id, position))}
             onPointerDown={(e: { stopPropagation: () => void; }) => {
                 e.stopPropagation();
-                selectBoardItem({ type: "cloze", id });
+                if (!isEditing) selectBoardItem({ type: "cloze", id });
             }}
             disableDragging={isEditing}
             className={`rounded-lg border-2 bg-white p-4 shadow-lg z-[50] ${
@@ -58,10 +60,10 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
         >
             <div 
                 className="flex flex-col gap-2 min-w-[200px]"
-                onDoubleClick={() => setIsEditing(true)}
+                onDoubleClick={() => startEditing(id)}
             >
                 <div className="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">Cloze Test</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">{title || "Cloze Test"}</span>
                     {isEditing && <span className="text-[10px] text-green-600 font-bold">Editing...</span>}
                 </div>
 
@@ -70,7 +72,7 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
                         autoFocus
                         value={content}
                         onChange={(e) => updateClozeTest(id, { content: e.target.value })}
-                        onBlur={() => setIsEditing(false)}
+                        onBlur={stopEditing}
                         className="w-full text-gray-800 leading-loose outline-none bg-gray-50 p-2 rounded border border-dashed border-gray-300 resize-none overflow-hidden"
                         style={{ height: 'auto' }}
                         data-interactive="true"

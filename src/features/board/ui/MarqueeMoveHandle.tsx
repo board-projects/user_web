@@ -17,6 +17,7 @@ export function MarqueeMoveHandle() {
       title="Drag selected items"
       aria-label="Drag selected items"
       data-interactive="true"
+      data-board-drawing-selection
       className="absolute z-[60] grid h-9 w-9 touch-none cursor-move place-items-center rounded-lg bg-blue-700 text-white shadow"
       style={{
         left: selection.anchor.x,

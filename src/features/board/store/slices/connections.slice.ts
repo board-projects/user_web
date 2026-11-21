@@ -19,6 +19,7 @@ export type ConnectionsSlice = {
   moveConnection: (pointer: Point) => void;
   finishConnection: (pointer: Point | null, fallbackTarget: ShapePortTarget | null) => void;
   cancelConnecting: () => void;
+  updateConnection: (id: string, style: Pick<ShapeConnection, "color" | "size" | "dashed">) => void;
   removeConnection: (id: string) => void;
 };
 
@@ -75,6 +76,12 @@ export const createConnectionsSlice: StateCreator<BoardState, [], [], Connection
   }),
 
   cancelConnecting: () => set((state) => state.connectionDraft ? { connectionDraft: null } : state),
+
+  updateConnection: (id, style) => set((state) => ({
+    connections: state.connections.map((connection) =>
+      connection.id === id ? { ...connection, ...style } : connection,
+    ),
+  })),
 
   removeConnection: (id) => set((state) => ({
     connections: state.connections.filter((connection) => connection.id !== id),

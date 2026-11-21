@@ -15,6 +15,7 @@ import { useCanvasRedraw } from "@/features/board/hooks/useCanvasRedraw";
 import { usePan } from "@/features/board/hooks/usePan";
 
 import { BoardNavigation } from "@/features/board/ui/BoardNavigation";
+import { ItemPropertiesToolbar } from "@/features/board/ui/properties/ItemPropertiesToolbar";
 import { Toolbar } from "@/features/board/ui/Toolbar";
 import { InviteButton } from "@/features/board/ui/InviteButton";
 import { CanvasStage } from "@/features/board/ui/CanvasStage";
@@ -98,6 +99,7 @@ export default function BoardPageClient() {
       />
 
       <BoardNavigation viewport={boardAreaRef} />
+      <ItemPropertiesToolbar viewport={boardAreaRef} />
 
       <InviteButton
         url={inviteUrl}

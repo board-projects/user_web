@@ -35,17 +35,19 @@ export function useCanvasRedraw(args: {
     );
 
     for (const line of args.lines) {
-      ctx.strokeStyle = args.selectedLines?.has(line) ? "#2563eb" : line.color;
-
-      // ✅ ضخامت ثابت روی صفحه (مثل miro)
-      ctx.lineWidth = line.size / args.zoom;
-
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
 
       ctx.beginPath();
       ctx.moveTo(line.from.x, line.from.y);
       ctx.lineTo(line.to.x, line.to.y);
+      if (args.selectedLines?.has(line)) {
+        ctx.strokeStyle = "#93c5fd";
+        ctx.lineWidth = (line.size + 4) / args.zoom;
+        ctx.stroke();
+      }
+      ctx.strokeStyle = line.color;
+      ctx.lineWidth = line.size / args.zoom;
       ctx.stroke();
     }
   }, [args.canvasRef, args.lines, args.selectedLines, args.zoom, args.panX, args.panY]);

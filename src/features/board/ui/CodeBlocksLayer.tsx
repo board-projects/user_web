@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Rnd } from "react-rnd";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -30,6 +30,10 @@ export function CodeBlocksLayer() {
 
   // نگه داشتن ref به EditorView هر بلاک برای focus کردن
   const viewsRef = useRef<Record<string, EditorView | null>>({});
+
+  useEffect(() => {
+    if (editingCodeBlockId) viewsRef.current[editingCodeBlockId]?.focus();
+  }, [editingCodeBlockId]);
 
   const blurActiveElement = () => {
     const el = document.activeElement as HTMLElement | null;
@@ -82,8 +86,10 @@ export function CodeBlocksLayer() {
             // ✅ اینجا دیگه stopEditingCodeBlock نزن! فقط select کن
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
-              selectBoardItem({ type: "codeblock", id: block.id });
-              if (!isEditing) blurActiveElement(); // وقتی ادیت نیستیم، فوکوس رو بگیر تا Delete کار کنه
+              if (!isEditing) {
+                selectBoardItem({ type: "codeblock", id: block.id });
+                blurActiveElement();
+              } // وقتی ادیت نیستیم، فوکوس رو بگیر تا Delete کار کنه
             }}
           >
             <div
@@ -98,18 +104,15 @@ export function CodeBlocksLayer() {
               }}
               onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
                 e.stopPropagation();
-                selectBoardItem({ type: "codeblock", id: block.id });
-                if (!isEditing) blurActiveElement();
+                if (!isEditing) {
+                  selectBoardItem({ type: "codeblock", id: block.id });
+                  blurActiveElement();
+                }
               }}
               onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
                 select({ type: "codeblock", id: block.id });
                 startEditingCodeBlock(block.id);
-
-                // ✅ بعد از فعال شدن edit، فوکوس بده به ادیتور
-                requestAnimationFrame(() => {
-                  viewsRef.current[block.id]?.focus();
-                });
               }}
             >
               {selected && (
@@ -157,9 +160,6 @@ export function CodeBlocksLayer() {
                     e.stopPropagation();
                     select({ type: "codeblock", id: block.id });
                     startEditingCodeBlock(block.id);
-                    requestAnimationFrame(() => {
-                      viewsRef.current[block.id]?.focus();
-                    });
                   }}
                 />
               )}

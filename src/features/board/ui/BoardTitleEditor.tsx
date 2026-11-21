@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { TbCheck, TbPencil, TbX } from "react-icons/tb";
+import { useRef, useState } from "react";
 
 type Props = {
   title: string;
@@ -9,81 +8,60 @@ type Props = {
   rename: (name: string) => Promise<void>;
 };
 
-const buttonClass = "grid h-9 w-9 shrink-0 place-items-center rounded-md text-cyan-900 hover:bg-cyan-100 focus-visible:outline-2 disabled:opacity-50";
+const titleClass = "min-w-0 rounded-lg bg-white/90 px-2 py-1 text-sm font-semibold text-cyan-950 shadow-sm sm:text-base";
 
 export function BoardTitleEditor({ title, canRename, rename }: Props) {
   const [draft, setDraft] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const input = useRef<HTMLInputElement | null>(null);
-  const trigger = useRef<HTMLButtonElement | null>(null);
-  const editing = draft !== null;
+  const cancelled = useRef(false);
 
-  useEffect(() => {
-    if (!editing) return;
-    input.current?.focus();
-    input.current?.select();
-  }, [editing]);
-
-  const close = () => {
-    setDraft(null);
-    setError("");
-    requestAnimationFrame(() => trigger.current?.focus());
-  };
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    const next = draft?.trim();
-    if (!next || saving) return;
-    if (next === title) {
-      close();
+  const save = async (value: string) => {
+    const next = value.trim();
+    if (cancelled.current || !next || next === title) {
+      setDraft(null);
       return;
     }
+
     setSaving(true);
-    setError("");
     try {
       await rename(next);
-      close();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to rename the board");
     } finally {
+      setDraft(null);
       setSaving(false);
     }
   };
 
-  if (!editing) {
-    return (
-      <div className="flex min-w-0 items-center gap-1 rounded-lg bg-white/90 px-2 shadow-sm">
-        <h1 title={title} className="min-w-0 truncate py-1 text-sm font-semibold text-cyan-950 sm:text-base">{title}</h1>
-        {canRename && (
-          <button ref={trigger} type="button" className={buttonClass} aria-label="Rename board" title="Rename board"
-            onClick={() => setDraft(title)}>
-            <TbPencil aria-hidden="true" />
-          </button>
-        )}
-      </div>
-    );
-  }
+  if (!canRename) return <h1 className={`${titleClass} truncate`} title={title}>{title}</h1>;
 
   return (
-    <form className="relative flex min-w-0 items-center gap-0.5 rounded-lg border border-cyan-200 bg-white px-1 shadow-sm" onSubmit={submit}
-      onKeyDown={(event) => {
-        if (event.key !== "Escape" || saving) return;
-        event.preventDefault();
-        event.stopPropagation();
-        close();
-      }}
-    >
-      <input ref={input} type="text" required maxLength={80} value={draft ?? ""} disabled={saving}
-        aria-label="Board name" className="h-9 w-36 min-w-0 rounded px-1.5 text-base text-cyan-950 outline-none focus:ring-2 focus:ring-cyan-500 sm:w-56"
-        onChange={(event) => setDraft(event.target.value)} />
-      <button type="submit" className={buttonClass} aria-label="Save board name" title="Save board name" disabled={saving || !draft?.trim()}>
-        <TbCheck aria-hidden="true" />
-      </button>
-      <button type="button" className={buttonClass} aria-label="Cancel rename" title="Cancel rename" disabled={saving} onClick={close}>
-        <TbX aria-hidden="true" />
-      </button>
+    <div className="relative min-w-0">
+      <input
+        type="text"
+        aria-label="Board name"
+        aria-busy={saving}
+        title="Click to rename board"
+        maxLength={80}
+        value={draft ?? title}
+        readOnly={saving}
+        className={`${titleClass} w-36 cursor-text truncate border border-transparent outline-none hover:border-cyan-200 focus:border-cyan-500 focus:bg-white sm:w-56`}
+        onFocus={() => {
+          cancelled.current = false;
+          setError("");
+        }}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={(event) => { if (!saving) void save(event.currentTarget.value); }}
+        onKeyDown={(event) => {
+          if (event.nativeEvent.isComposing || (event.key !== "Enter" && event.key !== "Escape")) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.key === "Escape") cancelled.current = true;
+          event.currentTarget.blur();
+        }}
+      />
       {error && <p role="alert" className="absolute left-0 top-full mt-1 w-full rounded border border-red-200 bg-white p-2 text-xs text-red-700">{error}</p>}
-    </form>
+    </div>
   );
 }

@@ -46,7 +46,7 @@ export function PageItemsLayer() {
               topLeft: "pointer-events-auto", topRight: "pointer-events-auto",
               bottomLeft: "pointer-events-auto", bottomRight: "pointer-events-auto",
             }}
-            onResize={connected ? resize : undefined}
+            onResize={resize}
             onResizeStop={resize}
             dragHandleClassName="page-item-drag-handle"
             cancel="[data-connection-handle]"

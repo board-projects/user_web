@@ -1,28 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ACCESS_COOKIE,
-  LEGACY_ACCESS_COOKIE,
   REFRESH_COOKIE,
   accessCookieOptions,
   authRequest,
+  getSessionCredentials,
 } from "@/features/auth/services/session.server";
 
 export async function middleware(req: NextRequest) {
-  const accessToken = req.cookies.get(ACCESS_COOKIE)?.value ?? req.cookies.get(LEGACY_ACCESS_COOKIE)?.value;
-  const refreshToken = req.cookies.get(REFRESH_COOKIE)?.value;
+  const credentials = getSessionCredentials(req);
+  const accessToken = credentials.access_token;
 
   const loginUrl = new URL("/login", req.url);
   const destination = req.nextUrl.clone();
   destination.searchParams.delete("_rsc");
   loginUrl.searchParams.set("next", destination.pathname + destination.search);
 
-  if (!accessToken && !refreshToken) return NextResponse.redirect(loginUrl);
+  if (!accessToken && !credentials.refresh_token) return NextResponse.redirect(loginUrl);
 
   try {
-    const upstream = await authRequest("session", {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    const upstream = await authRequest("session", credentials);
 
     if (upstream.status === 401) {
       const response = NextResponse.redirect(loginUrl);
@@ -49,5 +46,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/board/:path*"],
+  matcher: ["/board/:path*", "/dashboard"],
 };

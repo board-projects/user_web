@@ -4,10 +4,12 @@ import React from "react";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 
+import { SHAPE_PORTS } from "../domain/types";
 import { ShapeConnectionHandle } from "./ShapeConnectionHandle";
 import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
 
 export function ShapesLayer() {
+  const connecting = useBoardStore((s) => s.connectionDraft !== null);
   const connections = useBoardStore((s) => s.connections);
   const connectedIds = React.useMemo(
     () => new Set(connections.flatMap(({ sourceId, targetId }) => [sourceId, targetId])),
@@ -82,7 +84,9 @@ export function ShapesLayer() {
                   style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
                 />
               )}
-              {selected && <ShapeConnectionHandle shapeId={shape.id} />}
+              {(selected || connecting) && SHAPE_PORTS.map((port) => (
+                <ShapeConnectionHandle key={port} shape={shape} port={port} />
+              ))}
               {selected && (
                 <button
                   type="button"

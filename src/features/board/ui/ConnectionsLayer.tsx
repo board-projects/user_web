@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getConnectionEndpoints, getShapeBoundaryPoint } from "../domain/shapeGeometry";
+import { getShapePortPoint } from "../domain/shapeGeometry";
 import { useBoardStore } from "../store/board.store";
 
 export function ConnectionsLayer() {
@@ -14,7 +14,7 @@ export function ConnectionsLayer() {
   const shapeById = useMemo(() => new Map(shapes.map((shape) => [shape.id, shape])), [shapes]);
 
   const draftSource = draft ? shapeById.get(draft.sourceId) : undefined;
-  const previewStart = draft && draftSource ? getShapeBoundaryPoint(draftSource, draft.pointer) : null;
+  const previewStart = draft && draftSource ? getShapePortPoint(draftSource, draft.sourcePort) : null;
 
   return (
     <svg className="pointer-events-none absolute inset-0 z-30 h-full w-full overflow-visible">
@@ -35,7 +35,8 @@ export function ConnectionsLayer() {
         const target = shapeById.get(connection.targetId);
         if (!source || !target) return null;
 
-        const { from, to } = getConnectionEndpoints(source, target);
+        const from = getShapePortPoint(source, connection.sourcePort);
+        const to = getShapePortPoint(target, connection.targetPort);
         const points = { x1: from.x, y1: from.y, x2: to.x, y2: to.y };
         const selected = selection?.type === "connection" && selection.id === connection.id;
         const selectConnection = () => select({ type: "connection", id: connection.id });

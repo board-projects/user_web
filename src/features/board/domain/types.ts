@@ -21,10 +21,15 @@ export type Shape = {
   color: string;
 };
 
+export const SHAPE_PORTS = ["top", "right", "bottom", "left"] as const;
+export type ShapePort = (typeof SHAPE_PORTS)[number];
+
 export type ShapeConnection = {
   id: string;
   sourceId: string;
+  sourcePort: ShapePort;
   targetId: string;
+  targetPort: ShapePort;
 };
 
 export type CodeBlock = {

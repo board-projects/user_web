@@ -41,12 +41,14 @@ export function PageItemActions({ reference, itemId }: {
   const [print, setPrint] = useState<PrintPage | null>(null);
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
+  const [signInRequired, setSignInRequired] = useState(false);
   const [copied, setCopied] = useState(false);
   const closePrint = useCallback(() => setPrint(null), []);
 
   const run = async (action: "preview" | "publish") => {
     setPending(action);
     setError("");
+    setSignInRequired(false);
     setCopied(false);
     try {
       const board = useBoardStore.getState();
@@ -62,6 +64,10 @@ export function PageItemActions({ reference, itemId }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ page: capture.page, changes: capture.snapshot.changes }),
       });
+      if (response.status === 401) {
+        setSignInRequired(true);
+        return;
+      }
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.message === "string" ? data.message : "Page action failed");
       if (typeof data.reference === "string") setLink(new URL(`/test/${encodeURIComponent(data.reference)}`, window.location.origin).href);
@@ -92,6 +98,16 @@ export function PageItemActions({ reference, itemId }: {
               setError("Open the test page to copy its address.");
             }
           }}>{copied ? "Copied" : "Copy link"}</button>
+        </>
+      )}
+      {signInRequired && (
+        <>
+          <span role="status" className="shrink-0 px-2 text-xs text-stone-700">Sign in again, then retry Publish here.</span>
+          <a className={`${propertyButtonClass} inline-flex items-center`}
+            href={`/login?next=${encodeURIComponent(`/board/${encodeURIComponent(reference)}`)}`}
+            target="_blank" rel="noopener noreferrer">
+            Sign in
+          </a>
         </>
       )}
       {error && <span role="alert" className="shrink-0 px-2 text-xs text-red-700">{error}</span>}

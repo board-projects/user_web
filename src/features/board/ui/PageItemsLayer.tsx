@@ -67,7 +67,7 @@ export function PageItemsLayer() {
             </button>
             {selected && (
               <>
-                <div className="absolute bottom-[calc(100%+1.75rem)] left-0">
+                <div className="absolute left-0 top-full">
                   <SheetRuler axis="horizontal" length={page.width} scale={1} unit={page.unit} />
                 </div>
                 <div className="absolute right-full top-0">

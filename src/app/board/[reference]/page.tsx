@@ -23,6 +23,7 @@ import {
   createClozeTest,
   createCodeBlock,
   createRect,
+  createStar,
 } from "@/features/board/domain/factories";
 import { GridCanvas } from '@/features/board/ui/GridCanvas';
 import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
@@ -91,6 +92,7 @@ export default function BoardPageClient() {
       <Toolbar
         onAddRect={() => addShape(createRect())}
         onAddCircle={() => addShape(createCircle())}
+        onAddStar={() => addShape(createStar())}
         onAddCode={() => addCodeBlock(createCodeBlock())}
         onAddClozeTest={() => addClozeTest(createClozeTest())}
       />

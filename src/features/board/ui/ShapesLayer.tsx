@@ -4,6 +4,9 @@ import React from "react";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 
+const STAR_CLIP_PATH =
+  "polygon(50% 0%, 62% 36%, 100% 38%, 70% 61%, 81% 100%, 50% 76%, 19% 100%, 30% 61%, 0% 38%, 38% 36%)";
+
 export function ShapesLayer() {
   const shapes = useBoardStore((s) => s.shapes);
   const updateShape = useBoardStore((s) => s.updateShape);
@@ -18,6 +21,8 @@ export function ShapesLayer() {
     <div className="absolute inset-0 z-40 pointer-events-none">
       {shapes.map((shape) => {
         const selected = selection?.type === "shape" && selection.id === shape.id;
+
+        const isStar = shape.type === "star";
 
         return (
           <Rnd
@@ -38,7 +43,7 @@ export function ShapesLayer() {
               })
             }
             enableResizing
-            lockAspectRatio={shape.type === "circle"}
+            lockAspectRatio={shape.type === "circle" || isStar}
             className="pointer-events-auto"
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
@@ -49,13 +54,20 @@ export function ShapesLayer() {
               style={{
                 width: "100%",
                 height: "100%",
-                backgroundColor: shape.color,
+                backgroundColor: isStar ? "transparent" : shape.color,
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
                 outline: selected ? "2px solid rgba(0,0,0,0.6)" : "none",
                 outlineOffset: 2,
                 position: "relative",
               }}
             >
+              {isStar && (
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0"
+                  style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
+                />
+              )}
               {selected && (
                 <button
                   type="button"

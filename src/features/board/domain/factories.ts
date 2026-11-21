@@ -27,6 +27,17 @@ export const createCircle = () =>
     color: randomColor(),
   }) satisfies Shape;
 
+export const createStar = () =>
+  ({
+    id: crypto.randomUUID(),
+    type: "star",
+    x: 100,
+    y: 100,
+    width: 120,
+    height: 120,
+    color: randomColor(),
+  }) satisfies Shape;
+
 export const createCodeBlock = (): CodeBlock => ({
   id: crypto.randomUUID(),
   code: "",

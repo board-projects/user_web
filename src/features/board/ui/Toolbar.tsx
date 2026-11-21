@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { FaCode, FaRegCircle } from "react-icons/fa";
+import { FaCode, FaRegCircle, FaRegStar } from "react-icons/fa";
 import {
   TbRectangle,
   TbUsers,
@@ -21,12 +21,13 @@ type PresenceUser = {
   avatarUrl?: string;
 };
 
-type Tool = "pen" | "rect" | "circle" | "code" | "cloze_test";
+type Tool = "pen" | "rect" | "circle" | "star" | "code" | "cloze_test";
 
 type ToolbarProps = {
   onAddCode?: () => void;
   onAddRect?: () => void;
   onAddCircle?: () => void;
+  onAddStar?: () => void;
   onAddClozeTest?: () => void;
 
   shareUrl?: string;
@@ -146,6 +147,7 @@ export function Toolbar(props: ToolbarProps) {
   const penSize = useBoardStore((s) => s.penSize);
   const setPenSize = useBoardStore((s) => (s as any).setPenSize as ((n: number) => void) | undefined);
 
+  const isShapeTool = tool === "rect" || tool === "circle" || tool === "star";
   const [shapesOpen, setShapesOpen] = useState(false);
   const shapesBtnRef = useRef<HTMLDivElement | null>(null);
   const shapesPanelRef = useRef<HTMLDivElement | null>(null);
@@ -290,13 +292,13 @@ export function Toolbar(props: ToolbarProps) {
           <div ref={shapesBtnRef} className="relative" data-ui="true">
             <IconButton
               title="Shapes"
-              active={tool === "rect" || tool === "circle"}
+              active={isShapeTool}
               onClick={() => setShapesOpen((v) => !v)}
             >
               <TbShape />
             </IconButton>
 
-            {(tool === "rect" || tool === "circle") && (
+            {isShapeTool && (
               <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-stone-900 ring-2 ring-stone-100" />
             )}
 
@@ -334,6 +336,18 @@ export function Toolbar(props: ToolbarProps) {
                   }}
                 >
                   <FaRegCircle />
+                </IconButton>
+
+                <IconButton
+                  title="Star"
+                  active={tool === "star"}
+                  onClick={() => {
+                    setToolSafe("star");
+                    props.onAddStar?.();
+                    setShapesOpen(false);
+                  }}
+                >
+                  <FaRegStar />
                 </IconButton>
               </div>
             )}

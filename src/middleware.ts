@@ -8,6 +8,8 @@ import {
 } from "@/features/auth/services/session.server";
 
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname.startsWith("/test/")) return NextResponse.next();
+
   const credentials = getSessionCredentials(req);
   const accessToken = credentials.access_token;
 
@@ -46,5 +48,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/board/:path*", "/dashboard"],
+  matcher: ["/board/:path*", "/dashboard", "/test/:reference"],
 };

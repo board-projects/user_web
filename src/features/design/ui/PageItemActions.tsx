@@ -38,6 +38,7 @@ export function PageItemActions({ itemId }: { itemId: string }) {
   const [publishing, setPublishing] = useState(false);
   const [print, setPrint] = useState<PrintPage | null>(null);
   const [error, setError] = useState("");
+  const [publishedPath, setPublishedPath] = useState("");
   const running = useRef(false);
   const closePrint = useCallback(() => setPrint(null), []);
 
@@ -45,6 +46,7 @@ export function PageItemActions({ itemId }: { itemId: string }) {
     if (running.current) return;
     running.current = true;
     setError("");
+    let publicTab: Window | null = null;
     try {
       const board = useBoardStore.getState();
       const page = board.sheets.find((item) => item.id === itemId);
@@ -54,6 +56,10 @@ export function PageItemActions({ itemId }: { itemId: string }) {
         setPrint(capture);
         return;
       }
+
+      // Open while the click still grants popup permission.
+      publicTab = window.open("about:blank", "_blank");
+      if (publicTab) publicTab.opener = null;
 
       setPublishing(true);
       const response = await fetch("/api/test/publications", {
@@ -66,8 +72,13 @@ export function PageItemActions({ itemId }: { itemId: string }) {
       if (!response.ok) throw new Error(typeof data.message === "string" ? data.message : "Could not publish the page");
       if (typeof data.reference !== "string") throw new Error("Published link is unavailable");
 
-      window.location.assign(`/test/${encodeURIComponent(data.reference)}`);
+      const path = `/test/${encodeURIComponent(data.reference)}`;
+      setPublishedPath(path);
+      if (publicTab && !publicTab.closed) {
+        publicTab.location.replace(new URL(path, window.location.origin).href);
+      }
     } catch (cause) {
+      publicTab?.close();
       setError(cause instanceof Error ? cause.message : "Page action failed");
     } finally {
       running.current = false;
@@ -83,6 +94,11 @@ export function PageItemActions({ itemId }: { itemId: string }) {
       <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("publish")}>
         {publishing ? "Publishing…" : "Publish"}
       </button>
+      {publishedPath && (
+        <a className={`${propertyButtonClass} inline-flex items-center`} href={publishedPath} target="_blank" rel="noopener noreferrer">
+          Open public page
+        </a>
+      )}
       {error && <span role="alert" className="shrink-0 px-2 text-xs text-red-700">{error}</span>}
       {print && <PrintablePage page={print} close={closePrint} />}
     </>

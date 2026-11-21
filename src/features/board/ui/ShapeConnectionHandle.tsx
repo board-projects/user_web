@@ -30,7 +30,10 @@ export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: Sha
       aria-label={`Drag to connect from the ${port} side`}
       title={`Connect from ${port}`}
       className={`absolute z-30 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-blue-600 shadow cursor-crosshair ${snapped ? "bg-blue-600 ring-4 ring-blue-200" : "bg-white"}`}
-      style={{ left: position.x - shape.x, top: position.y - shape.y }}
+      style={{
+        left: `${((position.x - shape.x) / shape.width) * 100}%`,
+        top: `${((position.y - shape.y) / shape.height) * 100}%`,
+      }}
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => {
         if (event.button !== 0 || !event.isPrimary) return;

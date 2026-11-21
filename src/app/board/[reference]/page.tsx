@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 
@@ -37,7 +37,13 @@ import { ClozeTestLayer } from "@/features/board/ui/ClozeTestLayer";
 
 export default function BoardPageClient() {
   const params = useParams<{ reference: string }>();
-  const reference = params.reference;
+  return <BoardRoom key={params.reference} reference={params.reference} />;
+}
+
+function BoardRoom({ reference }: { reference: string }) {
+  useLayoutEffect(() => {
+    useBoardStore.setState(useBoardStore.getInitialState(), true);
+  }, []);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -66,9 +72,8 @@ export default function BoardPageClient() {
 
   const { emitDrawLine } = useBoardSocket({
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL!,
-    onDrawLine: (line) => {
-      addLine(line);
-    },
+    reference,
+    onDrawLine: addLine,
   });
 
   const draw = useCanvasDraw({
@@ -84,7 +89,7 @@ export default function BoardPageClient() {
 
   useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY });
 
-  const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${reference}`;
+  const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${encodeURIComponent(reference)}`;
 
   return (
     <div className="relative h-dvh w-full overflow-hidden">

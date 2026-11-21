@@ -1,22 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import { BoardSocket } from "../services/boardSocket";
-import { DrawLine } from "../domain/types";
+import type { DrawLine } from "../domain/types";
 
-export function useBoardSocket(opts: {
+export function useBoardSocket({
+  baseUrl,
+  reference,
+  onDrawLine,
+}: {
   baseUrl: string;
+  reference: string;
   onDrawLine: (line: DrawLine) => void;
 }) {
-  const ref = useRef<BoardSocket | null>(null);
+  const socket = useRef<BoardSocket | null>(null);
 
-  useEffect(() => {
-    ref.current = new BoardSocket(opts.baseUrl, {
-      onDrawLine: opts.onDrawLine,
-    });
-    return () => ref.current?.destroy();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opts.baseUrl]);
+  useLayoutEffect(() => {
+    const connection = new BoardSocket(baseUrl, reference, { onDrawLine });
+    socket.current = connection;
+    return () => {
+      socket.current = null;
+      connection.destroy();
+    };
+  }, [baseUrl, reference, onDrawLine]);
 
-  return {
-    emitDrawLine: (line: DrawLine) => ref.current?.emitDrawLine(line),
-  };
+  const emitDrawLine = useCallback((line: DrawLine) => socket.current?.emitDrawLine(line), []);
+  return { emitDrawLine };
 }

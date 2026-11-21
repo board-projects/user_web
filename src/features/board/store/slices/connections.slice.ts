@@ -1,18 +1,19 @@
 import type { StateCreator } from "zustand";
-import type { Point, ShapeConnection } from "../../domain/types";
+import type { Point, ShapeConnection, ShapePort } from "../../domain/types";
 import type { BoardState } from "../board.store";
 
 type ConnectionDraft = {
   sourceId: string;
+  sourcePort: ShapePort;
   pointer: Point;
 };
 
 export type ConnectionsSlice = {
   connections: ShapeConnection[];
   connectionDraft: ConnectionDraft | null;
-  startConnection: (sourceId: string, pointer: Point) => void;
+  startConnection: (sourceId: string, sourcePort: ShapePort, pointer: Point) => void;
   moveConnection: (pointer: Point) => void;
-  finishConnection: (targetId: string | null) => void;
+  finishConnection: (target: { id: string; port: ShapePort } | null) => void;
   cancelConnecting: () => void;
   removeConnection: (id: string) => void;
 };
@@ -21,9 +22,9 @@ export const createConnectionsSlice: StateCreator<BoardState, [], [], Connection
   connections: [],
   connectionDraft: null,
 
-  startConnection: (sourceId, pointer) => set((state) =>
+  startConnection: (sourceId, sourcePort, pointer) => set((state) =>
     state.shapes.some((shape) => shape.id === sourceId)
-      ? { connectionDraft: { sourceId, pointer } }
+      ? { connectionDraft: { sourceId, sourcePort, pointer } }
       : state,
   ),
 
@@ -33,20 +34,23 @@ export const createConnectionsSlice: StateCreator<BoardState, [], [], Connection
       : state,
   ),
 
-  finishConnection: (targetId) => set((state) => {
+  finishConnection: (target) => set((state) => {
     const draft = state.connectionDraft;
     if (!draft) return state;
 
-    const { sourceId } = draft;
-    if (!targetId || sourceId === targetId || !state.shapes.some((shape) => shape.id === targetId)) {
+    const { sourceId, sourcePort } = draft;
+    if (!target || sourceId === target.id || !state.shapes.some((shape) => shape.id === target.id)) {
       return { connectionDraft: null };
     }
 
+    const { id: targetId, port: targetPort } = target;
     const existing = state.connections.find((connection) =>
-      (connection.sourceId === sourceId && connection.targetId === targetId) ||
-      (connection.sourceId === targetId && connection.targetId === sourceId),
+      (connection.sourceId === sourceId && connection.sourcePort === sourcePort &&
+        connection.targetId === targetId && connection.targetPort === targetPort) ||
+      (connection.sourceId === targetId && connection.sourcePort === targetPort &&
+        connection.targetId === sourceId && connection.targetPort === sourcePort),
     );
-    const connection = existing ?? { id: crypto.randomUUID(), sourceId, targetId };
+    const connection = existing ?? { id: crypto.randomUUID(), sourceId, sourcePort, targetId, targetPort };
 
     return {
       connectionDraft: null,

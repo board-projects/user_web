@@ -1,6 +1,8 @@
 "use client";
 
 import type { PointerEvent } from "react";
+import { getNearestShapePort, getShapePortPoint } from "../domain/shapeGeometry";
+import { SHAPE_PORTS, type Shape, type ShapePort } from "../domain/types";
 import { useBoardStore } from "../store/board.store";
 
 function getBoardPoint(event: PointerEvent<HTMLButtonElement>) {
@@ -12,17 +14,19 @@ function getBoardPoint(event: PointerEvent<HTMLButtonElement>) {
   return { x: (event.clientX - rect.left) / zoom, y: (event.clientY - rect.top) / zoom };
 }
 
-export function ShapeConnectionHandle({ shapeId }: { shapeId: string }) {
+export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: ShapePort }) {
+  const position = getShapePortPoint(shape, port);
   const { startConnection, moveConnection, finishConnection, cancelConnecting } =
     useBoardStore.getState();
 
   return (
     <button
       type="button"
-      data-connection-handle
-      aria-label="Drag to connect to another shape"
-      title="Drag to connect"
-      className="absolute -right-6 top-1/2 z-10 h-4 w-4 -translate-y-1/2 touch-none rounded-full border-2 border-blue-600 bg-white shadow cursor-crosshair"
+      data-connection-handle={port}
+      aria-label={`Drag to connect from the ${port} side`}
+      title={`Connect from ${port}`}
+      className="absolute z-30 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-blue-600 bg-white shadow cursor-crosshair"
+      style={{ left: position.x - shape.x, top: position.y - shape.y }}
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => {
         if (event.button !== 0 || !event.isPrimary) return;
@@ -32,7 +36,7 @@ export function ShapeConnectionHandle({ shapeId }: { shapeId: string }) {
         event.preventDefault();
         event.stopPropagation();
         event.currentTarget.setPointerCapture(event.pointerId);
-        startConnection(shapeId, point);
+        startConnection(shape.id, port, position);
       }}
       onPointerMove={(event) => {
         if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
@@ -43,7 +47,17 @@ export function ShapeConnectionHandle({ shapeId }: { shapeId: string }) {
         if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
         const target = document.elementFromPoint(event.clientX, event.clientY);
         const targetId = target?.closest<HTMLElement>("[data-shape-id]")?.dataset.shapeId;
-        finishConnection(targetId ?? null);
+        const targetShape = useBoardStore.getState().shapes.find(({ id }) => id === targetId);
+        const point = getBoardPoint(event);
+        if (!targetShape || !point) {
+          finishConnection(null);
+          return;
+        }
+
+        const handle = target?.closest<HTMLElement>("[data-connection-handle]");
+        const targetPort = SHAPE_PORTS.find((side) => handle?.dataset.connectionHandle === side)
+          ?? getNearestShapePort(targetShape, point);
+        finishConnection({ id: targetShape.id, port: targetPort });
       }}
       onLostPointerCapture={cancelConnecting}
     />

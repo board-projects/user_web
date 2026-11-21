@@ -14,6 +14,7 @@ import { usePan } from "@/features/board/hooks/usePan";
 import { Toolbar } from "@/features/board/ui/Toolbar";
 import { InviteButton } from "@/features/board/ui/InviteButton";
 import { CanvasStage } from "@/features/board/ui/CanvasStage";
+import { ConnectionsLayer } from "@/features/board/ui/ConnectionsLayer";
 import { ShapesLayer } from "@/features/board/ui/ShapesLayer";
 import { CodeBlocksLayer } from "@/features/board/ui/CodeBlocksLayer";
 import { BoardViewport } from "@/features/board/ui/BoardViewport";
@@ -127,6 +128,7 @@ export default function BoardPageClient() {
         <CanvasStage canvasRef={canvasRef} />
 
         <BoardViewport>
+          <ConnectionsLayer />
           <ShapesLayer />
           <CodeBlocksLayer />
           <ClozeTestLayer />

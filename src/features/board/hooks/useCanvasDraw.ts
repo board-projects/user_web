@@ -14,6 +14,7 @@ export function useCanvasDraw(args: {
   const [drawing, setDrawing] = useState(false);
   const lastPos = useRef<Point | null>(null);
 
+  const connecting = useBoardStore((s) => s.connecting);
   const zoom = useBoardStore((s) => s.zoom);
   const panX = useBoardStore((s) => s.panX);
   const panY = useBoardStore((s) => s.panY);
@@ -86,7 +87,7 @@ export function useCanvasDraw(args: {
       if ((e.buttons & 1) !== 1) return;
 
       // ✅ اگر روی shape/codeblock/ui کلیک شد، draw نکن (بذار Rnd کارشو بکنه)
-      if (isInteractiveTarget(e.target)) return;
+      if (connecting || isInteractiveTarget(e.target)) return;
 
       e.preventDefault();
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -94,7 +95,7 @@ export function useCanvasDraw(args: {
       setDrawing(true);
       lastPos.current = getWorldPos(e);
     },
-    [getWorldPos],
+    [connecting, getWorldPos],
   );
 
   const onPointerMove = useCallback(

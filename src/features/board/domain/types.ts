@@ -21,6 +21,12 @@ export type Shape = {
   color: string;
 };
 
+export type ShapeConnection = {
+  id: string;
+  sourceId: string;
+  targetId: string;
+};
+
 export type CodeBlock = {
   id: string;
   code: string;

@@ -8,13 +8,16 @@ import { createLinesSlice, LinesSlice } from "./slices/lines.slice";
 import { createSelectionSlice, SelectionSlice } from '@/features/board/store/slices/selection.slice';
 import { createClozeTestSlice, ClozeTestSlice } from '@/features/board/store/slices/cloze.slice';
 
+import { createConnectionsSlice, ConnectionsSlice } from "./slices/connections.slice";
+
 export type BoardState = PenSlice &
   ViewportSlice &
   ShapesSlice &
   BlocksSlice &
   LinesSlice &
   SelectionSlice &
-  ClozeTestSlice;
+  ClozeTestSlice &
+  ConnectionsSlice;
 
 export const useBoardStore = create<BoardState>((set, get, store) => ({
   ...createPenSlice(set),
@@ -24,4 +27,5 @@ export const useBoardStore = create<BoardState>((set, get, store) => ({
   ...createLinesSlice(set),
   ...createSelectionSlice(set, get, store),
   ...createClozeTestSlice(set),
+  ...createConnectionsSlice(set, get, store),
 }));

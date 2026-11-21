@@ -57,10 +57,10 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-screen w-screen grid grid-cols-12 md:grid-cols-12 gap-2 p-2 bg-gray-900 text-gray-50">
+    <div className="grid h-dvh min-h-0 w-full grid-cols-[minmax(0,1fr)] gap-2 bg-gray-900 p-2 text-gray-50 md:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
       {/* Contacts Drawer for mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-2/3 bg-gray-800 transform ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 md:hidden `}
+        className={`fixed inset-y-0 left-0 z-50 w-[min(80vw,20rem)] overflow-y-auto bg-gray-800 transform ${isDrawerOpen ? "translate-x-0" : "invisible -translate-x-full"} transition-transform duration-300 md:hidden `}
       >
         <div className="p-4 flex justify-between items-center bg-gray-700">
           <h2 className="text-lg font-semibold">Contacts</h2>
@@ -75,8 +75,9 @@ export default function Chat() {
           {contacts.map((contact) => (
             <Link
               key={contact.id}
-              className="block p-2 rounded hover:bg-gray-600"
+              className="block break-words p-2 rounded hover:bg-gray-600"
               href={`/c/${contact.id}`}
+              onClick={() => setIsDrawerOpen(false)}
             >
               {contact.email}
             </Link>
@@ -85,11 +86,11 @@ export default function Chat() {
       </div>
 
       {/* Sidebar for desktop */}
-      <div className="hidden md:block col-span-3 bg-gray-800 rounded p-2 overflow-y-auto space-y-2">
+      <div className="hidden min-h-0 min-w-0 md:block bg-gray-800 rounded p-2 overflow-y-auto space-y-2">
         {contacts.map((contact) => (
           <Link
             key={contact.id}
-            className="block p-2 rounded hover:bg-gray-700"
+            className="block break-words p-2 rounded hover:bg-gray-700"
             href={`/c/${contact.id}`}
           >
             {contact.email}
@@ -98,21 +99,22 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="col-span-12 md:col-span-9 grid grid-rows-12 gap-2">
-        <div className="row-span-11 overflow-y-scroll p-2 bg-gray-800 rounded space-y-2">
+      <div className="grid min-h-0 min-w-0 grid-rows-[minmax(0,1fr)_auto] gap-2">
+        <div className="min-h-0 overflow-y-auto p-2 bg-gray-800 rounded space-y-2">
           {messages.map((m, i) => (
             <div
               key={i}
-              className="w-fit max-w-xs p-2 bg-gray-600 rounded-b-md rounded-r-md shadow-md"
+              className="w-fit max-w-full break-words p-2 sm:max-w-xs bg-gray-600 rounded-b-md rounded-r-md shadow-md"
             >
               <strong>{m.user}:</strong> {m.text}
             </div>
           ))}
         </div>
-        <div className="row-span-1 flex items-center space-x-2 p-2 bg-gray-800 rounded">
+        <div className="flex min-w-0 items-center gap-2 p-2 bg-gray-800 rounded">
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="md:hidden bg-gray-600 px-4 py-2 rounded hover:bg-gray-500"
+            aria-label="Open contacts"
+            className="shrink-0 md:hidden bg-gray-600 px-3 py-2 rounded hover:bg-gray-500"
           >
             ☰
           </button>
@@ -124,11 +126,11 @@ export default function Chat() {
               if (e.key === "Enter") sendMessage();
             }}
             placeholder="Write..."
-            className="flex-grow p-2 bg-gray-700 rounded focus:outline-none"
+            className="min-w-0 flex-1 p-2 bg-gray-700 rounded focus:outline-none"
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500"
+            className="shrink-0 bg-blue-600 px-3 py-2 rounded hover:bg-blue-500"
           >
             Send
           </button>

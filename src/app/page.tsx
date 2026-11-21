@@ -35,9 +35,9 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <main className="relative flex h-dvh w-screen flex-col justify-between items-center bg-cyan-50 px-4 py-6 overflow-hidden">
+    <main className="relative flex min-h-dvh w-full flex-col justify-between items-center bg-cyan-50 gap-4 px-4 py-4 sm:py-6">
       
-      <div className="h-4 hidden sm:block" />
+      <div className="hidden h-4 sm:block" />
 
       <section className="flex flex-col items-center text-center max-w-xl w-full my-auto">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cyan-950 tracking-tight leading-tight">

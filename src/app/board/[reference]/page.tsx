@@ -11,6 +11,7 @@ import { useWheelZoom } from "@/features/board/hooks/useWheelZoom";
 import { useCanvasRedraw } from "@/features/board/hooks/useCanvasRedraw";
 import { usePan } from "@/features/board/hooks/usePan";
 
+import { BoardNavigation } from "@/features/board/ui/BoardNavigation";
 import { Toolbar } from "@/features/board/ui/Toolbar";
 import { InviteButton } from "@/features/board/ui/InviteButton";
 import { CanvasStage } from "@/features/board/ui/CanvasStage";
@@ -87,7 +88,7 @@ export default function BoardPageClient() {
   const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${reference}`;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div className="relative h-dvh w-full overflow-hidden">
       <ToastContainer />
 
       <Toolbar
@@ -97,6 +98,8 @@ export default function BoardPageClient() {
         onAddCode={() => addCodeBlock(createCodeBlock())}
         onAddClozeTest={() => addClozeTest(createClozeTest())}
       />
+
+      <BoardNavigation viewport={boardAreaRef} />
 
       <InviteButton
         url={inviteUrl}

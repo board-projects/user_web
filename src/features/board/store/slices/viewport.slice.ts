@@ -3,6 +3,8 @@ const clamp = (v: number, min: number, max: number) =>
 
 export type ViewportSlice = {
   zoom: number;
+  panMode: boolean;
+  togglePanMode: () => void;
   panX: number;
   panY: number;
 
@@ -12,6 +14,8 @@ export type ViewportSlice = {
 
 export const createViewportSlice = (set: any, get: any): ViewportSlice => ({
   zoom: 1,
+  panMode: false,
+  togglePanMode: () => set({ panMode: !get().panMode }),
   panX: 0,
   panY: 0,
 

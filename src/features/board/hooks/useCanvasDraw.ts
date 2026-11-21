@@ -84,7 +84,7 @@ export function useCanvasDraw(args: {
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       // فقط دکمه چپ
-      if ((e.buttons & 1) !== 1) return;
+      if (e.defaultPrevented || useBoardStore.getState().panMode || (e.buttons & 1) !== 1) return;
 
       // ✅ اگر روی shape/codeblock/ui کلیک شد، draw نکن (بذار Rnd کارشو بکنه)
       if (connecting || isInteractiveTarget(e.target)) return;

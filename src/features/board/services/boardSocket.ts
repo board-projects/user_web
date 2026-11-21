@@ -1,28 +1,35 @@
-import { io, Socket } from "socket.io-client";
-import { DrawLine } from "../domain/types";
+import { io, type Socket } from "socket.io-client";
+import type { DrawLine } from "../domain/types";
 
 type Handlers = {
-  onDrawLine?: (line: DrawLine) => void;
+  onDrawLine: (line: DrawLine) => void;
 };
 
 export class BoardSocket {
-  private socket: Socket;
+  private readonly socket: Socket;
+  private ready = false;
 
-  constructor(
-    baseUrl: string,
-    private handlers: Handlers = {},
-  ) {
-    this.socket = io(baseUrl, { transports: ["websocket"] });
-    this.socket.on("draw-line", (line: DrawLine) =>
-      this.handlers.onDrawLine?.(line),
-    );
+  constructor(baseUrl: string, reference: string, handlers: Handlers) {
+    const origin = new URL(baseUrl || "/", window.location.origin);
+    const namespace = new URL("/board", origin);
+    this.socket = io(namespace.href, {
+      autoConnect: false,
+      transports: ["websocket"],
+      auth: { reference },
+    });
+
+    this.socket.on("board-ready", () => { this.ready = true; });
+    this.socket.on("disconnect", () => { this.ready = false; });
+    this.socket.on("draw-line", handlers.onDrawLine);
+    this.socket.connect();
   }
 
   emitDrawLine(line: DrawLine) {
-    this.socket.emit("draw-line", line);
+    if (this.ready && this.socket.connected) this.socket.emit("draw-line", line);
   }
 
   destroy() {
+    this.ready = false;
     this.socket.removeAllListeners();
     this.socket.disconnect();
   }

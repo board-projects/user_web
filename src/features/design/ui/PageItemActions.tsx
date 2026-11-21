@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useBoardStore } from "@/features/board/store/board.store";
 import { capturePage } from "../domain/capturePage";
@@ -34,7 +34,7 @@ function PrintablePage({ page, close }: { page: PrintPage; close: () => void }) 
   );
 }
 
-export function PageItemActions({ itemId }: { itemId: string }) {
+export function PageItemActions({ itemId, deleteButton }: { itemId: string; deleteButton: ReactNode }) {
   const [publishing, setPublishing] = useState(false);
   const [print, setPrint] = useState<PrintPage | null>(null);
   const [error, setError] = useState("");
@@ -88,12 +88,15 @@ export function PageItemActions({ itemId }: { itemId: string }) {
 
   return (
     <>
-      <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("preview")}>
-        Export PDF
-      </button>
-      <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("publish")}>
-        {publishing ? "Publishing…" : "Publish"}
-      </button>
+      <div className="flex shrink-0 items-center gap-1 overflow-x-auto">
+        <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("preview")}>
+          Export PDF
+        </button>
+        <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("publish")}>
+          {publishing ? "Publishing…" : "Publish"}
+        </button>
+        {deleteButton}
+      </div>
       {publishedPath && (
         <a className={`${propertyButtonClass} inline-flex items-center`} href={publishedPath} target="_blank" rel="noopener noreferrer">
           Open public page

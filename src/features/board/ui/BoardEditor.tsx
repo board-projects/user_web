@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useLayoutEffect, useRef, type ReactNode } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
-import type { BoardSyncStatus } from "../services/boardSocket";
+import { DEFAULT_SHEET } from "@/features/design/domain/sheetLayout";
+import { PageItemsLayer } from "./PageItemsLayer";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 
 import { useBoardStore } from "@/features/board/store/board.store";
@@ -36,13 +37,7 @@ import { GridCanvas } from '@/features/board/ui/GridCanvas';
 import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
 import { ClozeTestLayer } from "@/features/board/ui/ClozeTestLayer";
 
-type Props = {
-  reference: string;
-  sheet?: { width: number; height: number; dots: boolean; scale: number };
-  renderDesign?: (editor: ReactNode, sync: { status: BoardSyncStatus; waitForSync: () => Promise<void> }, toolbar: ReactNode) => ReactNode;
-};
-
-export function BoardEditor({ reference, sheet, renderDesign }: Props) {
+export function BoardEditor({ reference }: { reference: string }) {
   useLayoutEffect(() => {
     useBoardStore.setState(useBoardStore.getInitialState(), true);
   }, []);
@@ -51,17 +46,8 @@ export function BoardEditor({ reference, sheet, renderDesign }: Props) {
 
   const boardAreaRef = useRef<HTMLDivElement | null>(null);
 
-  const disabledNavigation = useRef<HTMLDivElement | null>(null);
-  const navigation = sheet ? disabledNavigation : boardAreaRef;
-  useWheelZoom(navigation);
-  usePan(navigation);
-
-  const scale = sheet?.scale;
-  const viewportWidth = sheet && sheet.width * sheet.scale;
-  const viewportHeight = sheet && sheet.height * sheet.scale;
-  useLayoutEffect(() => {
-    if (scale !== undefined) useBoardStore.setState({ zoom: scale, panX: 0, panY: 0 });
-  }, [scale]);
+  useWheelZoom(boardAreaRef);
+  usePan(boardAreaRef);
 
   const marquee = useMarqueeSelection();
 
@@ -73,6 +59,8 @@ export function BoardEditor({ reference, sheet, renderDesign }: Props) {
   const addShape = useBoardStore((s) => s.addShape);
   const addCodeBlock = useBoardStore((s) => s.addCodeBlock);
   const addClozeTest = useBoardStore((s) => s.addClozeTest);
+  const addPage = useBoardStore((s) => s.addPage);
+  const select = useBoardStore((s) => s.select);
   const addLine = useBoardStore((s) => s.addLine);
 
   const zoom = useBoardStore((s) => s.zoom);
@@ -91,49 +79,44 @@ export function BoardEditor({ reference, sheet, renderDesign }: Props) {
     onLine: addLine,
   });
 
-  useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY, viewportWidth, viewportHeight });
+  useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY });
 
   const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${encodeURIComponent(reference)}`;
 
-  const toolbar = (
-      <Toolbar
-        docked={!!sheet}
-        onAddRect={() => addShape(createRect())}
-        onAddCircle={() => addShape(createCircle())}
-        onAddStar={() => addShape(createStar())}
-        onAddCode={() => addCodeBlock(createCodeBlock())}
-        onAddClozeTest={() => addClozeTest(createClozeTest())}
-      />
-  );
-
-  const editor = (
-    <div
-      className={`relative overflow-hidden bg-white ${sheet ? "" : "h-dvh w-full"}`}
-      style={sheet ? { width: viewportWidth, height: viewportHeight } : undefined}
-    >
+  return (
+    <div className="relative h-dvh w-full overflow-hidden bg-white">
       <ToastContainer />
-      {!sheet && <div data-ui="true" className="absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50 flex max-w-[calc(100%-7rem)] flex-col items-start gap-1.5">
+      <div data-ui="true" className="absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50 flex max-w-[calc(100%-7rem)] flex-col items-start gap-1.5">
         <Link href="/dashboard" className="inline-flex min-h-10 items-center rounded-lg border border-cyan-200 bg-white px-3 text-sm font-semibold text-cyan-900 shadow-sm hover:bg-cyan-50">
           Dashboard
         </Link>
-        {(
-          <Link href={`/board/${encodeURIComponent(reference)}/design`} className="inline-flex min-h-10 items-center rounded-lg border border-cyan-200 bg-white px-3 text-sm font-semibold text-cyan-900 shadow-sm hover:bg-cyan-50">
-            Test designer
-          </Link>
-        )}
         {syncStatus !== "connected" && (
           <div role="status" className="pointer-events-none rounded-md bg-stone-900 px-3 py-2 text-xs text-white">
             {syncStatus === "offline" ? "Board sync offline. Reconnecting…" : "Connecting to board…"}
           </div>
         )}
-      </div>}
+      </div>
 
-      {!sheet && toolbar}
+      <Toolbar
+        onAddRect={() => addShape(createRect())}
+        onAddCircle={() => addShape(createCircle())}
+        onAddStar={() => addShape(createStar())}
+        onAddCode={() => addCodeBlock(createCodeBlock())}
+        onAddClozeTest={() => addClozeTest(createClozeTest())}
+        onAddPage={() => {
+          const id = crypto.randomUUID();
+          addPage({
+            id, title: "Untitled page", unit: "px",
+            x: (72 - panX) / zoom, y: (112 - panY) / zoom, ...DEFAULT_SHEET,
+          });
+          select({ type: "page", id });
+        }}
+      />
 
-      {!sheet && <BoardNavigation viewport={boardAreaRef} />}
-      <ItemPropertiesToolbar viewport={boardAreaRef} />
+      <BoardNavigation viewport={boardAreaRef} />
+      <ItemPropertiesToolbar viewport={boardAreaRef} reference={reference} waitForSync={waitForSync} />
 
-      {!sheet && <InviteButton
+      <InviteButton
         url={inviteUrl}
         onCopied={() =>
           toast.info("The link copied to clipboard", {
@@ -143,7 +126,7 @@ export function BoardEditor({ reference, sheet, renderDesign }: Props) {
             transition: Bounce,
           })
         }
-      />}
+      />
 
       <div
         ref={boardAreaRef}
@@ -170,17 +153,12 @@ export function BoardEditor({ reference, sheet, renderDesign }: Props) {
           draw.onPointerUp(event);
         }}
       >
-        {!sheet && <GridCanvas />}
-        {sheet?.dots && (
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{
-            backgroundImage: "radial-gradient(circle, #94a3b8 0.8px, transparent 1px)",
-            backgroundSize: `${16 * sheet.scale}px ${16 * sheet.scale}px`,
-          }} />
-        )}
+        <GridCanvas />
         <MarqueeOverlay box={marquee.box} />
-        <CanvasStage canvasRef={canvasRef} viewportWidth={viewportWidth} viewportHeight={viewportHeight} />
+        <CanvasStage canvasRef={canvasRef} />
 
         <BoardViewport>
+          <PageItemsLayer />
           <ConnectionsLayer />
           <ShapesLayer />
           <CodeBlocksLayer />
@@ -191,5 +169,4 @@ export function BoardEditor({ reference, sheet, renderDesign }: Props) {
     </div>
   );
 
-  return renderDesign ? renderDesign(editor, { status: syncStatus, waitForSync }, toolbar) : editor;
 }

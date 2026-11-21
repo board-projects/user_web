@@ -3,6 +3,7 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { boxBetween, boxesIntersect, segmentIntersectsBox } from "../domain/marqueeGeometry";
 import { connectorIntersectsBox, getConnectorPoints } from "../domain/connectorGeometry";
+import { getConnectableItems } from "../domain/connectableItems";
 import type { Point } from "../domain/types";
 import { useBoardStore } from "../store/board.store";
 import { selectionKey } from "../store/slices/selection.slice";
@@ -28,7 +29,7 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
     y: (point.y - rect.top - state.panY) / state.zoom,
   });
   const worldBox = boxBetween(toWorld(start), toWorld(end));
-  const shapes = new Map(state.shapes.map((shape) => [shape.id, shape]));
+  const shapes = new Map(getConnectableItems(state).map((item) => [item.id, item]));
   for (const connection of state.connections) {
     const source = shapes.get(connection.sourceId);
     const target = shapes.get(connection.targetId);

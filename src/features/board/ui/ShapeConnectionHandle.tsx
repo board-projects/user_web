@@ -2,7 +2,8 @@
 
 import type { PointerEvent } from "react";
 import { getNearestShapePort, getShapePortPoint } from "../domain/shapeGeometry";
-import { SHAPE_PORTS, type Shape, type ShapePort } from "../domain/types";
+import { getConnectableItems, type ConnectableItem } from "../domain/connectableItems";
+import { SHAPE_PORTS, type ShapePort } from "../domain/types";
 import { useBoardStore } from "../store/board.store";
 
 function getBoardPoint(event: PointerEvent<HTMLButtonElement>) {
@@ -14,12 +15,12 @@ function getBoardPoint(event: PointerEvent<HTMLButtonElement>) {
   return { x: (event.clientX - rect.left) / zoom, y: (event.clientY - rect.top) / zoom };
 }
 
-export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: ShapePort }) {
+export function ShapeConnectionHandle({ item, port }: { item: ConnectableItem; port: ShapePort }) {
   const snapped = useBoardStore((state) => {
     const target = state.connectionDraft?.snapTarget;
-    return target?.id === shape.id && target.port === port;
+    return target?.id === item.id && target.port === port;
   });
-  const position = getShapePortPoint(shape, port);
+  const position = getShapePortPoint(item, port);
   const { startConnection, moveConnection, finishConnection, cancelConnecting } =
     useBoardStore.getState();
 
@@ -31,8 +32,8 @@ export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: Sha
       title={`Connect from ${port}`}
       className={`absolute z-30 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-blue-600 shadow cursor-crosshair ${snapped ? "bg-blue-600 ring-4 ring-blue-200" : "bg-white"}`}
       style={{
-        left: `${((position.x - shape.x) / shape.width) * 100}%`,
-        top: `${((position.y - shape.y) / shape.height) * 100}%`,
+        left: `${((position.x - item.x) / item.width) * 100}%`,
+        top: `${((position.y - item.y) / item.height) * 100}%`,
       }}
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => {
@@ -43,7 +44,7 @@ export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: Sha
         event.preventDefault();
         event.stopPropagation();
         event.currentTarget.setPointerCapture(event.pointerId);
-        startConnection(shape.id, port, position);
+        startConnection(item.id, port, position);
       }}
       onPointerMove={(event) => {
         if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
@@ -53,8 +54,8 @@ export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: Sha
       onPointerUp={(event) => {
         if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
         const target = document.elementFromPoint(event.clientX, event.clientY);
-        const targetId = target?.closest<HTMLElement>("[data-shape-id]")?.dataset.shapeId;
-        const targetShape = useBoardStore.getState().shapes.find(({ id }) => id === targetId);
+        const targetId = target?.closest<HTMLElement>("[data-board-connectable-id]")?.dataset.boardConnectableId;
+        const targetShape = getConnectableItems(useBoardStore.getState()).find(({ id }) => id === targetId);
         const point = getBoardPoint(event);
         if (!targetShape || !point) {
           finishConnection(point, null);

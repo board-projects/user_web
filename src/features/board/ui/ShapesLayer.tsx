@@ -6,12 +6,17 @@ import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 
-import { SHAPE_PORTS } from "../domain/types";
-import { ShapeConnectionHandle } from "./ShapeConnectionHandle";
+import { ConnectionPorts } from "./ConnectionPorts";
 import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
 
+const resizeGrip = (
+  <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-sm border-2 border-blue-600 bg-white shadow-sm" />
+);
+const circleResizeHandles = {
+  topLeft: resizeGrip, topRight: resizeGrip, bottomLeft: resizeGrip, bottomRight: resizeGrip,
+};
+
 export function ShapesLayer() {
-  const connecting = useBoardStore((s) => s.connectionDraft !== null);
   const connections = useBoardStore((s) => s.connections);
   const connectedIds = React.useMemo(
     () => new Set(connections.flatMap(({ sourceId, targetId }) => [sourceId, targetId])),
@@ -51,6 +56,7 @@ export function ShapesLayer() {
             key={shape.id}
             data-interactive="true"
             data-board-selection-key={key}
+            data-board-connectable-id={shape.id}
             scale={zoom}
             size={{ width: shape.width, height: shape.height }}
             position={{ x: shape.x, y: shape.y }}
@@ -60,6 +66,7 @@ export function ShapesLayer() {
             onResizeStop={updateSize}
             cancel="[data-connection-handle]"
             enableResizing
+            resizeHandleComponent={selected && shape.type === "circle" ? circleResizeHandles : undefined}
             lockAspectRatio={shape.type === "circle" || isStar}
             className="pointer-events-auto"
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -68,7 +75,6 @@ export function ShapesLayer() {
             }}
           >
             <div
-              data-shape-id={shape.id}
               style={{
                 width: "100%",
                 height: "100%",
@@ -86,9 +92,7 @@ export function ShapesLayer() {
                   style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
                 />
               )}
-              {(selected || connecting) && SHAPE_PORTS.map((port) => (
-                <ShapeConnectionHandle key={port} shape={shape} port={port} />
-              ))}
+              <ConnectionPorts item={shape} selected={selected} />
             </div>
           </Rnd>
         );

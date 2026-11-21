@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useRef } from "react";
 import { Rnd } from "react-rnd";
+import { codeConnectable } from "../domain/connectableItems";
+import { ConnectionPorts } from "./ConnectionPorts";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { useBoardStore } from "../store/board.store";
@@ -11,6 +13,7 @@ import type { EditorView } from "@codemirror/view";
 
 export function CodeBlocksLayer() {
   const dragItem = useBoardItemDrag();
+  const connections = useBoardStore((s) => s.connections);
   const codeBlocks = useBoardStore((s) => s.codeBlocks);
   const updateCodeBlock = useBoardStore((s) => s.updateCodeBlock);
 
@@ -54,30 +57,29 @@ export function CodeBlocksLayer() {
         const key = selectionKey("codeblock", block.id);
         const inMarquee = marqueeItems?.has(key);
         const isEditing = editingCodeBlockId === block.id;
+        const connected = connections.some(({ sourceId, targetId }) => sourceId === block.id || targetId === block.id);
+        const resize: React.ComponentProps<typeof Rnd>["onResize"] = (_, __, ref, ___, position) =>
+          updateCodeBlock(block.id, { ...position, width: ref.offsetWidth, height: ref.offsetHeight });
 
         return (
           <Rnd
             key={block.id}
             data-interactive="true"
             data-board-selection-key={key}
+            data-board-connectable-id={block.id}
+            cancel="[data-connection-handle]"
             scale={zoom}
             size={{ width: block.width, height: block.height }}
             position={{ x: block.x, y: block.y }}
             minWidth={200}
             minHeight={100}
-            {...dragItem({ type: "codeblock", id: block.id }, block, (position) => updateCodeBlock(block.id, position))}
+            {...dragItem({ type: "codeblock", id: block.id }, block, (position) => updateCodeBlock(block.id, position), connected)}
             onResizeStart={() => {
               stopEditingCodeBlock();
               select({ type: "codeblock", id: block.id });
             }}
-            onResizeStop={(_, __, ref, ___, position) =>
-              updateCodeBlock(block.id, {
-                x: position.x,
-                y: position.y,
-                width: ref.offsetWidth,
-                height: ref.offsetHeight,
-              })
-            }
+            onResize={connected ? resize : undefined}
+            onResizeStop={resize}
             className="pointer-events-auto"
             // ✅ اینجا دیگه stopEditingCodeBlock نزن! فقط select کن
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -157,6 +159,7 @@ export function CodeBlocksLayer() {
                 }}
               />
             </div>
+            <ConnectionPorts item={codeConnectable(block)} selected={selected} />
           </Rnd>
         );
       })}

@@ -15,6 +15,7 @@ export function ItemPropertiesToolbar({ viewport }: {
   const selection = useBoardStore((state) => state.selection);
   const selectedItem = useBoardStore((state) => getSelectedBoardItem(state, state.selection));
   const marquee = useBoardStore((state) => state.marqueeSelection);
+  const isPage = selection?.type === "page";
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const properties = getItemProperties(useBoardStore.getState());
 
@@ -41,7 +42,9 @@ export function ItemPropertiesToolbar({ viewport }: {
         return;
       }
 
-      const { left, top } = getPropertiesToolbarPosition(bounds, item, toolbar.getBoundingClientRect());
+      const { left, top } = getPropertiesToolbarPosition(
+        bounds, item, toolbar.getBoundingClientRect(), isPage ? "right" : "above",
+      );
       toolbar.style.left = `${left}px`;
       toolbar.style.top = `${top}px`;
       toolbar.style.visibility = "visible";
@@ -68,7 +71,7 @@ export function ItemPropertiesToolbar({ viewport }: {
       movement.disconnect();
       unsubscribe();
     };
-  }, [anchorSelector, viewport]);
+  }, [anchorSelector, isPage, viewport]);
 
   if (!properties || !anchorSelector) return null;
 
@@ -79,11 +82,15 @@ export function ItemPropertiesToolbar({ viewport }: {
       role="group"
       aria-label="Selected item properties"
       data-ui="true"
-      className="absolute z-[70] flex items-center gap-2 overflow-x-auto whitespace-nowrap rounded-xl border border-stone-200 bg-white p-1.5 shadow-lg"
-      style={{ maxWidth: "calc(100% - 1rem)", visibility: "hidden" }}
+      className={`absolute z-[70] flex gap-2 rounded-xl border border-stone-200 bg-white p-1.5 shadow-lg ${
+        isPage
+          ? "max-h-[calc(100%-1rem)] w-max flex-col items-stretch overflow-y-auto [overflow-wrap:anywhere] [&>label]:justify-between"
+          : "items-center overflow-x-auto whitespace-nowrap"
+      }`}
+      style={{ maxWidth: isPage ? "min(14rem, calc(100% - 1rem))" : "calc(100% - 1rem)", visibility: "hidden" }}
     >
       {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
-      {selection?.type === "page" && (
+      {isPage && (
         <PageItemActions key={selection.id} itemId={selection.id} />
       )}
       <button

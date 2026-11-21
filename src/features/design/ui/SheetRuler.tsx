@@ -19,14 +19,14 @@ export function SheetRuler({ axis, length, scale, unit }: {
           <g key={index} transform={horizontal ? `translate(${position},0)` : `translate(0,${position})`}>
             <line
               x1={horizontal ? 0 : RULER_SIZE - inset}
-              y1={horizontal ? RULER_SIZE - inset : 0}
+              y1={0}
               x2={horizontal ? 0 : RULER_SIZE}
-              y2={horizontal ? RULER_SIZE : 0}
+              y2={horizontal ? inset : 0}
               stroke="currentColor"
               opacity={label === undefined ? 0.45 : 0.8}
             />
             {label !== undefined && (
-              <text x={horizontal ? 3 : 2} y={11} fontSize={9} fill="currentColor">
+              <text x={horizontal ? 3 : 2} y={horizontal ? RULER_SIZE - 5 : 11} fontSize={9} fill="currentColor">
                 {label}
               </text>
             )}

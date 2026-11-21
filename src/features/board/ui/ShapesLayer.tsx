@@ -3,6 +3,7 @@
 import React from "react";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
+import { selectionKey } from "../store/slices/selection.slice";
 
 import { SHAPE_PORTS } from "../domain/types";
 import { ShapeConnectionHandle } from "./ShapeConnectionHandle";
@@ -23,12 +24,15 @@ export function ShapesLayer() {
   const zoom = useBoardStore((s) => s.zoom);
 
   const selection = useBoardStore((s) => s.selection);
+  const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
   const select = useBoardStore((s) => s.select);
 
   return (
     <div className="absolute inset-0 z-40 pointer-events-none">
       {shapes.map((shape) => {
         const selected = selection?.type === "shape" && selection.id === shape.id;
+        const key = selectionKey("shape", shape.id);
+        const inMarquee = marqueeItems?.has(key);
 
         const isStar = shape.type === "star";
 
@@ -47,6 +51,7 @@ export function ShapesLayer() {
           <Rnd
             key={shape.id}
             data-interactive="true"
+            data-board-selection-key={key}
             scale={zoom}
             size={{ width: shape.width, height: shape.height }}
             position={{ x: shape.x, y: shape.y }}
@@ -72,7 +77,7 @@ export function ShapesLayer() {
                 height: "100%",
                 backgroundColor: isStar ? "transparent" : shape.color,
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
-                outline: selected ? "2px solid rgba(0,0,0,0.6)" : "none",
+                outline: inMarquee ? "2px solid #2563eb" : selected ? "2px solid rgba(0,0,0,0.6)" : "none",
                 outlineOffset: 2,
                 position: "relative",
               }}

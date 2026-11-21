@@ -6,6 +6,7 @@ import { DrawLine } from "@/features/board/domain/types";
 export function useCanvasRedraw(args: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   lines: DrawLine[];
+  selectedLines?: ReadonlySet<DrawLine>;
   zoom: number;
   panX: number;
   panY: number;
@@ -34,7 +35,7 @@ export function useCanvasRedraw(args: {
     );
 
     for (const line of args.lines) {
-      ctx.strokeStyle = line.color;
+      ctx.strokeStyle = args.selectedLines?.has(line) ? "#2563eb" : line.color;
 
       // ✅ ضخامت ثابت روی صفحه (مثل miro)
       ctx.lineWidth = line.size / args.zoom;
@@ -47,5 +48,5 @@ export function useCanvasRedraw(args: {
       ctx.lineTo(line.to.x, line.to.y);
       ctx.stroke();
     }
-  }, [args.canvasRef, args.lines, args.zoom, args.panX, args.panY]);
+  }, [args.canvasRef, args.lines, args.selectedLines, args.zoom, args.panX, args.panY]);
 }

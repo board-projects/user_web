@@ -6,6 +6,8 @@ import { ToastContainer, toast, Bounce } from "react-toastify";
 
 import { useBoardStore } from "@/features/board/store/board.store";
 import { useBoardSocket } from "@/features/board/hooks/useBoardSocket";
+import { useMarqueeSelection } from "@/features/board/hooks/useMarqueeSelection";
+import { MarqueeOverlay } from "@/features/board/ui/MarqueeOverlay";
 import { useCanvasDraw } from "@/features/board/hooks/useCanvasDraw";
 import { useWheelZoom } from "@/features/board/hooks/useWheelZoom";
 import { useCanvasRedraw } from "@/features/board/hooks/useCanvasRedraw";
@@ -42,15 +44,9 @@ export default function BoardPageClient() {
   useWheelZoom(boardAreaRef);
   usePan(boardAreaRef);
 
-  const clearSelection = useBoardStore((s) => s.clearSelection);
+  const marquee = useMarqueeSelection();
 
   useDeleteSelected();
-
-  const isInteractive = (t: EventTarget | null) => {
-    const el = t as HTMLElement | null;
-    if (!el) return false;
-    return !!el.closest('[data-interactive="true"]') || !!el.closest('[data-ui="true"]');
-  };
 
   const penColor = useBoardStore((s) => s.penColor);
   const penSize = useBoardStore((s) => s.penSize);
@@ -64,6 +60,7 @@ export default function BoardPageClient() {
   const panX = useBoardStore((s) => s.panX);
   const panY = useBoardStore((s) => s.panY);
   const lines = useBoardStore((s) => s.lines);
+  const selectedLines = useBoardStore((s) => s.marqueeSelection?.lines);
 
   const { emitDrawLine } = useBoardSocket({
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL!,
@@ -83,7 +80,7 @@ export default function BoardPageClient() {
     },
   });
 
-  useCanvasRedraw({ canvasRef, lines, zoom, panX, panY });
+  useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY });
 
   const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${reference}`;
 
@@ -117,17 +114,29 @@ export default function BoardPageClient() {
         ref={boardAreaRef}
         className="absolute inset-0"
         style={{ touchAction: "none" }}
-        onPointerDownCapture={(e) => {
-          // اگر روی فضای خالی کلیک شد → unselect
-          if (!isInteractive(e.target)) clearSelection();
+        onPointerDown={(event) => {
+          marquee.onPointerDown(event);
+          draw.onPointerDown(event);
         }}
-        onPointerDown={draw.onPointerDown}
-        onPointerMove={draw.onPointerMove}
-        onPointerUp={draw.onPointerUp}
-        onPointerCancel={draw.onPointerUp}
-        onPointerLeave={draw.onPointerUp}
+        onPointerMove={(event) => {
+          marquee.onPointerMove(event);
+          draw.onPointerMove(event);
+        }}
+        onPointerUp={(event) => {
+          marquee.onPointerUp(event);
+          draw.onPointerUp(event);
+        }}
+        onPointerCancel={(event) => {
+          marquee.cancel(event);
+          draw.onPointerUp(event);
+        }}
+        onLostPointerCapture={(event) => {
+          marquee.cancel(event);
+          draw.onPointerUp(event);
+        }}
       >
         <GridCanvas />
+        <MarqueeOverlay box={marquee.box} />
         <CanvasStage canvasRef={canvasRef} />
 
         <BoardViewport>

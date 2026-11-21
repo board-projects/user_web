@@ -3,11 +3,13 @@
 import { useMemo } from "react";
 import { getShapePortPoint } from "../domain/shapeGeometry";
 import { useBoardStore } from "../store/board.store";
+import { selectionKey } from "../store/slices/selection.slice";
 
 export function ConnectionsLayer() {
   const connections = useBoardStore((state) => state.connections);
   const shapes = useBoardStore((state) => state.shapes);
   const selection = useBoardStore((state) => state.selection);
+  const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
   const select = useBoardStore((state) => state.select);
   const draft = useBoardStore((state) => state.connectionDraft);
   const connecting = draft !== null;
@@ -41,7 +43,8 @@ export function ConnectionsLayer() {
         const from = getShapePortPoint(source, connection.sourcePort);
         const to = getShapePortPoint(target, connection.targetPort);
         const points = { x1: from.x, y1: from.y, x2: to.x, y2: to.y };
-        const selected = selection?.type === "connection" && selection.id === connection.id;
+        const selected = (selection?.type === "connection" && selection.id === connection.id)
+          || marqueeItems?.has(selectionKey("connection", connection.id));
         const selectConnection = () => select({ type: "connection", id: connection.id });
 
         return (

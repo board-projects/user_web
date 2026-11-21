@@ -1,8 +1,12 @@
 const clamp = (v: number, min: number, max: number) =>
   Math.max(min, Math.min(max, v));
 
+export type BoardTool = "select" | "pen";
+
 export type ViewportSlice = {
   zoom: number;
+  tool: BoardTool;
+  setTool: (tool: BoardTool) => void;
   panMode: boolean;
   togglePanMode: () => void;
   panX: number;
@@ -14,6 +18,8 @@ export type ViewportSlice = {
 
 export const createViewportSlice = (set: any, get: any): ViewportSlice => ({
   zoom: 1,
+  tool: "select",
+  setTool: (tool) => set({ tool, panMode: false }),
   panMode: false,
   togglePanMode: () => set({ panMode: !get().panMode }),
   panX: 0,

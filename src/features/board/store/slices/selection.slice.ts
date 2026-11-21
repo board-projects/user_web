@@ -1,3 +1,4 @@
+import type { DrawLine } from "../../domain/types";
 import type { StateCreator } from "zustand";
 
 export type Selection =
@@ -7,8 +8,17 @@ export type Selection =
   | { type: "cloze"; id: string }
   | null;
 
+export type MarqueeSelection = {
+  items: ReadonlySet<string>;
+  lines: ReadonlySet<DrawLine>;
+};
+
+export const selectionKey = (type: Exclude<Selection, null>["type"], id: string) => `${type}:${id}`;
+
 export type SelectionSlice = {
   selection: Selection;
+  marqueeSelection: MarqueeSelection | null;
+  selectMarquee: (selection: MarqueeSelection) => void;
   select: (sel: Exclude<Selection, null>) => void;
   clearSelection: () => void;
 
@@ -24,10 +34,19 @@ export type SelectionSlice = {
 export const createSelectionSlice: StateCreator<any, [], [], SelectionSlice> =
   (set) => ({
     selection: null,
+    marqueeSelection: null,
+
+    selectMarquee: (marqueeSelection) => set({
+      selection: null,
+      marqueeSelection,
+      editingCodeBlockId: null,
+      editingClozeTestId: null,
+    }),
 
     select: (sel) =>
       set(() => ({
         selection: sel,
+        marqueeSelection: null,
         editingCodeBlockId: null,
         editingClozeTestId: null,
       })),
@@ -35,6 +54,7 @@ export const createSelectionSlice: StateCreator<any, [], [], SelectionSlice> =
     clearSelection: () =>
       set(() => ({
         selection: null,
+        marqueeSelection: null,
         editingCodeBlockId: null,
         editingClozeTestId: null,
       })),

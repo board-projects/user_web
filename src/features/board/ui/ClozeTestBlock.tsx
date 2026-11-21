@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ClozeTest } from "../domain/types";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
+import { selectionKey } from "../store/slices/selection.slice";
 
 export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
 
@@ -13,6 +14,8 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
     const select = useBoardStore((s) => s.select);
     const updateClozeTest = useBoardStore((s) => s.updateClozeTest);
 
+    const key = selectionKey("cloze", id);
+    const inMarquee = useBoardStore((s) => s.marqueeSelection?.items.has(key) ?? false);
     const isSelected = selection?.type === "cloze" && selection.id === id;
 
     const renderContent = () => {
@@ -37,6 +40,8 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
 
     return (
         <Rnd
+            data-interactive="true"
+            data-board-selection-key={key}
             scale={zoom}
             position={{ x, y }}
             enableResizing={false}
@@ -47,7 +52,7 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
             }}
             disableDragging={isEditing}
             className={`rounded-lg border-2 bg-white p-4 shadow-lg z-[50] ${
-                isSelected ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-200"
+                isSelected || inMarquee ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-200"
             }`}
         >
             <div 

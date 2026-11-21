@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useBoardStore } from "@/features/board/store/board.store";
 
 export function useDeleteSelected() {
+  const marqueeSelection = useBoardStore((s) => s.marqueeSelection);
   const selection = useBoardStore((s) => s.selection);
   const clearSelection = useBoardStore((s) => s.clearSelection);
 
@@ -21,6 +22,7 @@ export function useDeleteSelected() {
       // ✅ ESC => خروج از ادیت مود
       if (e.key === "Escape") {
         cancelConnecting();
+        if (marqueeSelection) clearSelection();
         if (editingCodeBlockId) stopEditingCodeBlock();
         return;
       }
@@ -57,6 +59,7 @@ export function useDeleteSelected() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [
     selection,
+    marqueeSelection,
     editingCodeBlockId,
     stopEditingCodeBlock,
     removeShape,

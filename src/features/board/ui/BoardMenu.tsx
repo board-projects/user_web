@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { TbDashboard, TbDownload, TbLink, TbLogout, TbMenu2, TbUpload } from "react-icons/tb";
 import { useAuthStore } from "@/features/auth/store/auth.store";
+import { useBoardTitle } from "../hooks/useBoardTitle";
+import { BoardTitleEditor } from "./BoardTitleEditor";
 import { applyBoardChanges } from "../domain/boardSync";
 import { downloadBoard, readBoardImport } from "../services/boardFiles";
 import type { BoardSyncStatus } from "../services/boardSocket";
@@ -12,25 +14,13 @@ import { useBoardStore } from "../store/board.store";
 const menuItem = "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-cyan-950 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-cyan-600 disabled:opacity-50";
 
 export function BoardMenu({ reference, status }: { reference: string; status: BoardSyncStatus }) {
-  const [title, setTitle] = useState("Untitled board");
+  const boardTitle = useBoardTitle(reference);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const menu = useRef<HTMLDetailsElement | null>(null);
   const importRequest = useRef<AbortController | null>(null);
   const filePicker = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch(`/api/boards/${encodeURIComponent(reference)}/title`, { signal: controller.signal, cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return;
-        const data = await response.json();
-        if (!controller.signal.aborted && typeof data.title === "string" && data.title.trim()) setTitle(data.title);
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [reference]);
 
   useEffect(() => {
     const closeOutside = (event: PointerEvent) => {
@@ -122,7 +112,7 @@ export function BoardMenu({ reference, status }: { reference: string; status: Bo
             <button type="button" className={menuItem} onClick={() => void invite()}><TbLink aria-hidden="true" />Invite</button>
             <button type="button" className={menuItem} onClick={() => {
               resetMessage();
-              downloadBoard(title, useBoardStore.getState());
+              downloadBoard(boardTitle.title, useBoardStore.getState());
             }}><TbDownload aria-hidden="true" />Export board (JSON)</button>
             <button type="button" className={menuItem} disabled={busy} onClick={() => filePicker.current?.click()}>
               <TbUpload aria-hidden="true" />Import JSON
@@ -134,9 +124,7 @@ export function BoardMenu({ reference, status }: { reference: string; status: Bo
             {error && <p role="alert" className="px-3 py-2 text-xs text-red-700">{error}</p>}
           </div>
         </details>
-        <h1 title={title} className="min-w-0 truncate rounded-lg bg-white/90 px-2 py-1 text-sm font-semibold text-cyan-950 sm:text-base">
-          {title}
-        </h1>
+        <BoardTitleEditor {...boardTitle} />
       </div>
       {status !== "connected" && (
         <p role="status" className="mt-1.5 w-fit rounded-md bg-stone-900 px-3 py-2 text-xs text-white">

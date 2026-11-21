@@ -3,6 +3,7 @@
 import React from "react";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
+import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 
 import { SHAPE_PORTS } from "../domain/types";
@@ -25,6 +26,7 @@ export function ShapesLayer() {
 
   const selection = useBoardStore((s) => s.selection);
   const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
+  const dragItem = useBoardItemDrag();
   const select = useBoardStore((s) => s.select);
 
   return (
@@ -37,8 +39,6 @@ export function ShapesLayer() {
         const isStar = shape.type === "star";
 
         const connected = connectedIds.has(shape.id);
-        const updatePosition: React.ComponentProps<typeof Rnd>["onDrag"] =
-          (_, position) => updateShape(shape.id, { x: position.x, y: position.y });
         const updateSize: React.ComponentProps<typeof Rnd>["onResize"] =
           (_, __, ref, ___, position) => updateShape(shape.id, {
             x: position.x,
@@ -55,10 +55,8 @@ export function ShapesLayer() {
             scale={zoom}
             size={{ width: shape.width, height: shape.height }}
             position={{ x: shape.x, y: shape.y }}
-            onDragStart={() => select({ type: "shape", id: shape.id })}
+            {...dragItem({ type: "shape", id: shape.id }, shape, (position) => updateShape(shape.id, position), connected)}
             onResizeStart={() => select({ type: "shape", id: shape.id })}
-            onDrag={connected ? updatePosition : undefined}
-            onDragStop={updatePosition}
             onResize={connected ? updateSize : undefined}
             onResizeStop={updateSize}
             cancel="[data-connection-handle]"
@@ -67,7 +65,7 @@ export function ShapesLayer() {
             className="pointer-events-auto"
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
-              select({ type: "shape", id: shape.id });
+              selectBoardItem({ type: "shape", id: shape.id });
             }}
           >
             <div

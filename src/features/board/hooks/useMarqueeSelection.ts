@@ -38,7 +38,7 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
   }
 
   const lines = new Set(state.lines.filter((line) => segmentIntersectsBox(line.from, line.to, worldBox)));
-  state.selectMarquee({ items, lines });
+  state.selectMarquee({ items, lines, anchor: { x: worldBox.left, y: worldBox.top } });
 }
 
 export function useMarqueeSelection() {

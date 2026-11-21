@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaCode, FaRegCircle, FaRegStar } from "react-icons/fa";
 import {
   TbRectangle,
+  TbLine,
   TbUsers,
   TbCopy,
   TbLock,
@@ -147,6 +148,11 @@ export function Toolbar(props: ToolbarProps) {
   const penSize = useBoardStore((s) => s.penSize);
   const setPenSize = useBoardStore((s) => (s as any).setPenSize as ((n: number) => void) | undefined);
 
+  const connecting = useBoardStore((s) => s.connecting);
+  const connectionSourceId = useBoardStore((s) => s.connectionSourceId);
+  const startConnecting = useBoardStore((s) => s.startConnecting);
+  const cancelConnecting = useBoardStore((s) => s.cancelConnecting);
+
   const isShapeTool = tool === "rect" || tool === "circle" || tool === "star";
   const [shapesOpen, setShapesOpen] = useState(false);
   const shapesBtnRef = useRef<HTMLDivElement | null>(null);
@@ -170,7 +176,10 @@ export function Toolbar(props: ToolbarProps) {
     }
   };
 
-  const setToolSafe = (t: Tool) => setTool?.(t);
+  const setToolSafe = (t: Tool) => {
+    cancelConnecting();
+    setTool?.(t);
+  };
 
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
@@ -349,6 +358,24 @@ export function Toolbar(props: ToolbarProps) {
                 >
                   <FaRegStar />
                 </IconButton>
+              </div>
+            )}
+          </div>
+
+          <div className="relative" data-ui="true">
+            <IconButton
+              title={connecting ? "Cancel connection" : "Connect shapes"}
+              active={connecting}
+              onClick={connecting ? cancelConnecting : startConnecting}
+            >
+              <TbLine />
+            </IconButton>
+            {connecting && (
+              <div
+                role="status"
+                className="absolute left-12 top-0 w-max rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow"
+              >
+                {connectionSourceId ? "Select the second shape" : "Select the first shape"}
               </div>
             )}
           </div>

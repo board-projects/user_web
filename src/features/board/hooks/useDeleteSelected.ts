@@ -7,6 +7,9 @@ export function useDeleteSelected() {
   const selection = useBoardStore((s) => s.selection);
   const clearSelection = useBoardStore((s) => s.clearSelection);
 
+  const cancelConnecting = useBoardStore((s) => s.cancelConnecting);
+  const removeConnection = useBoardStore((s) => s.removeConnection);
+
   const removeShape = useBoardStore((s) => s.removeShape);
   const removeCodeBlock = useBoardStore((s) => s.removeCodeBlock);
 
@@ -17,6 +20,7 @@ export function useDeleteSelected() {
     const onKeyDown = (e: KeyboardEvent) => {
       // ✅ ESC => خروج از ادیت مود
       if (e.key === "Escape") {
+        cancelConnecting();
         if (editingCodeBlockId) stopEditingCodeBlock();
         return;
       }
@@ -42,6 +46,7 @@ export function useDeleteSelected() {
 
       e.preventDefault();
 
+      if (selection.type === "connection") removeConnection(selection.id);
       if (selection.type === "shape") removeShape(selection.id);
       if (selection.type === "codeblock") removeCodeBlock(selection.id);
 
@@ -55,6 +60,8 @@ export function useDeleteSelected() {
     editingCodeBlockId,
     stopEditingCodeBlock,
     removeShape,
+    removeConnection,
+    cancelConnecting,
     removeCodeBlock,
     clearSelection,
   ]);

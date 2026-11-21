@@ -2,6 +2,7 @@ import type { StateCreator } from "zustand";
 
 export type Selection =
   | { type: "shape"; id: string }
+  | { type: "connection"; id: string }
   | { type: "codeblock"; id: string }
   | { type: "cloze"; id: string }
   | null;

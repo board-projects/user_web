@@ -1,7 +1,7 @@
 import type { BoardState } from "../store/board.store";
 
-const COLLECTIONS = ["shapes", "codeBlocks", "clozeTests", "connections", "lines", "sheets"] as const;
-type Collection = typeof COLLECTIONS[number];
+export const BOARD_COLLECTIONS = ["shapes", "codeBlocks", "clozeTests", "connections", "lines", "sheets"] as const;
+type Collection = typeof BOARD_COLLECTIONS[number];
 
 export type BoardContent = Pick<BoardState, Collection>;
 export type BoardChange = {
@@ -19,7 +19,7 @@ export const changeKey = ({ kind, id }: BoardChange) => `${kind}:${id}`;
 
 export function diffBoardContent(previous: BoardContent, next: BoardContent): BoardChange[] {
   const changes: BoardChange[] = [];
-  for (const kind of COLLECTIONS) {
+  for (const kind of BOARD_COLLECTIONS) {
     if (previous[kind] === next[kind]) continue;
 
     const before = previous[kind];
@@ -51,7 +51,7 @@ export function applyBoardChanges(board: BoardContent, changes: readonly BoardCh
     next[kind] = Array.from(items.values()) as BoardContent[K];
   }
 
-  COLLECTIONS.forEach(applyCollection);
+  BOARD_COLLECTIONS.forEach(applyCollection);
   return next;
 }
 
@@ -64,6 +64,6 @@ export function reconcileBoardContent(current: BoardContent, next: BoardContent)
       patch[kind] = after;
     }
   }
-  COLLECTIONS.forEach(reconcile);
+  BOARD_COLLECTIONS.forEach(reconcile);
   return patch;
 }

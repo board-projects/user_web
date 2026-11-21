@@ -2,7 +2,7 @@
 
 import { useRef, useState, type PointerEvent } from "react";
 import { boxBetween, boxesIntersect, segmentIntersectsBox } from "../domain/marqueeGeometry";
-import { getShapePortPoint } from "../domain/shapeGeometry";
+import { connectorIntersectsBox, getConnectorPoints } from "../domain/connectorGeometry";
 import type { Point } from "../domain/types";
 import { useBoardStore } from "../store/board.store";
 import { selectionKey } from "../store/slices/selection.slice";
@@ -16,7 +16,8 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
   const screenBox = boxBetween(start, end);
   const items = new Set<string>();
 
-  for (const element of area.querySelectorAll<HTMLElement>("[data-board-selection-key]")) {
+  for (const element of area.querySelectorAll("[data-board-selection-key]")) {
+    if (!(element instanceof HTMLElement)) continue;
     const key = element.dataset.boardSelectionKey;
     if (key && boxesIntersect(screenBox, element.getBoundingClientRect())) items.add(key);
   }
@@ -32,9 +33,9 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
     const source = shapes.get(connection.sourceId);
     const target = shapes.get(connection.targetId);
     if (!source || !target) continue;
-    const from = getShapePortPoint(source, connection.sourcePort);
-    const to = getShapePortPoint(target, connection.targetPort);
-    if (segmentIntersectsBox(from, to, worldBox)) items.add(selectionKey("connection", connection.id));
+    if (connectorIntersectsBox(getConnectorPoints(connection, source, target), worldBox)) {
+      items.add(selectionKey("connection", connection.id));
+    }
   }
 
   const lines = new Set(state.lines.filter((line) => segmentIntersectsBox(line.from, line.to, worldBox)));

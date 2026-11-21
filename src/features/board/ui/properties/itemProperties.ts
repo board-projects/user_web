@@ -1,15 +1,16 @@
+import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES } from "../../domain/types";
 import type { BoardState } from "../../store/board.store";
 import type { Selection } from "../../store/slices/selection.slice";
 
 export type ItemProperty =
   | { kind: "number"; label: string; value: number; min: number; max: number; change: (value: number) => void }
   | { kind: "color" | "text"; label: string; value: string; change: (value: string) => void }
+  | { kind: "select"; label: string; value: string; options: readonly string[]; change: (value: string) => void }
   | { kind: "toggle"; label: string; value: boolean; change: (value: boolean) => void }
   | { kind: "action"; label: string; run: () => void };
 
 type ItemProperties = {
   fields: ItemProperty[];
-  remove: () => void;
 };
 
 export function getSelectedBoardItem(state: BoardState, selection: Selection) {
@@ -56,7 +57,6 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
         colorField(drawing.color, (color) => state.styleSelectedLines({ color })),
         thicknessField(drawing.size, 256, (size) => state.styleSelectedLines({ size })),
       ],
-      remove: state.removeSelectedLines,
     };
   }
 
@@ -70,7 +70,6 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
           colorField(item.color, (color) => state.updateShape(id, { color })),
           ...sizeFields(item, (size) => state.updateShape(id, size), 10, 10, item.type !== "rect"),
         ],
-        remove: () => state.removeShape(id),
       };
     }
     case "codeblock": {
@@ -81,7 +80,6 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
           ...sizeFields(item, (size) => state.updateCodeBlock(id, size), 200, 100),
           { kind: "action", label: "Edit code", run: () => state.startEditingCodeBlock(id) },
         ],
-        remove: () => state.removeCodeBlock(id),
       };
     }
     case "cloze": {
@@ -92,7 +90,6 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
           { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
         ],
-        remove: () => state.removeClozeTest(id),
       };
     }
     case "connection": {
@@ -102,9 +99,23 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
         fields: [
           colorField(item.color ?? "#44403c", (color) => state.updateConnection(id, { color })),
           thicknessField(item.size ?? 2, 48, (size) => state.updateConnection(id, { size })),
-          { kind: "toggle", label: "Dashed", value: item.dashed ?? false, change: (dashed) => state.updateConnection(id, { dashed }) },
+          { kind: "text", label: "Label", value: item.label ?? "", change: (label) => state.updateConnection(id, { label }) },
+          {
+            kind: "select", label: "Route", value: item.route ?? "straight", options: CONNECTOR_ROUTES,
+            change: (value) => {
+              const route = CONNECTOR_ROUTES.find((option) => option === value);
+              if (route) state.updateConnection(id, { route });
+            },
+          },
+          {
+            kind: "select", label: "Pattern", value: item.pattern ?? (item.dashed ? "dash" : "solid"), options: CONNECTOR_PATTERNS,
+            change: (value) => {
+              const pattern = CONNECTOR_PATTERNS.find((option) => option === value);
+              if (pattern) state.updateConnection(id, { pattern });
+            },
+          },
+          { kind: "toggle", label: "Arrow", value: item.arrow !== false, change: (arrow) => state.updateConnection(id, { arrow }) },
         ],
-        remove: () => state.removeConnection(id),
       };
     }
   }

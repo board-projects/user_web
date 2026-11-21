@@ -1,15 +1,18 @@
 "use client";
 
+import { ConnectionStroke } from "./ConnectionStroke";
 import { useMemo } from "react";
 import { getShapePortPoint } from "../domain/shapeGeometry";
 import { useBoardStore } from "../store/board.store";
 import { selectionKey } from "../store/slices/selection.slice";
 
 export function ConnectionsLayer() {
+  const zoom = useBoardStore((state) => state.zoom);
   const connections = useBoardStore((state) => state.connections);
   const shapes = useBoardStore((state) => state.shapes);
   const selection = useBoardStore((state) => state.selection);
   const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
+  const updateConnection = useBoardStore((state) => state.updateConnection);
   const select = useBoardStore((state) => state.select);
   const draft = useBoardStore((state) => state.connectionDraft);
   const connecting = draft !== null;
@@ -40,55 +43,21 @@ export function ConnectionsLayer() {
         const target = shapeById.get(connection.targetId);
         if (!source || !target) return null;
 
-        const from = getShapePortPoint(source, connection.sourcePort);
-        const to = getShapePortPoint(target, connection.targetPort);
-        const points = { x1: from.x, y1: from.y, x2: to.x, y2: to.y };
         const selected = (selection?.type === "connection" && selection.id === connection.id)
-          || marqueeItems?.has(selectionKey("connection", connection.id));
-        const width = connection.size ?? 2;
-        const selectConnection = () => select({ type: "connection", id: connection.id });
+          || !!marqueeItems?.has(selectionKey("connection", connection.id));
 
         return (
-          <g
+          <ConnectionStroke
             key={connection.id}
-            data-interactive="true"
-            data-board-selection-key={selectionKey("connection", connection.id)}
-            role="button"
-            aria-label="Select shape connector"
-            aria-pressed={selected}
-            aria-disabled={connecting}
-            tabIndex={connecting ? -1 : 0}
-            onClick={connecting ? undefined : selectConnection}
-            onKeyDown={(event) => {
-              if (!connecting && (event.key === "Enter" || event.key === " ")) {
-                event.preventDefault();
-                selectConnection();
-              }
-            }}
-          >
-            {selected && (
-              <line
-                {...points}
-                stroke="#93c5fd"
-                strokeWidth={width + 4}
-                vectorEffect="non-scaling-stroke"
-              />
-            )}
-            <line
-              {...points}
-              stroke={connection.color ?? "#44403c"}
-              strokeWidth={width}
-              strokeDasharray={connection.dashed ? "6 4" : undefined}
-              vectorEffect="non-scaling-stroke"
-            />
-            <line
-              {...points}
-              stroke="transparent"
-              strokeWidth={Math.max(16, width)}
-              vectorEffect="non-scaling-stroke"
-              style={{ pointerEvents: connecting ? "none" : "stroke", cursor: "pointer" }}
-            />
-          </g>
+            connection={connection}
+            source={source}
+            target={target}
+            selected={selected}
+            interactive={!connecting}
+            zoom={zoom}
+            onSelect={() => select({ type: "connection", id: connection.id })}
+            onLabelChange={(label) => updateConnection(connection.id, { label })}
+          />
         );
       })}
     </svg>

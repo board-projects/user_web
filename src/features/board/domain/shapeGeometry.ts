@@ -46,7 +46,7 @@ function getShapeBoundaryPoint(shape: Shape, toward: Point): Point {
   };
 }
 
-const PORT_DIRECTION: Record<ShapePort, Point> = {
+export const PORT_DIRECTION: Record<ShapePort, Point> = {
   top: { x: 0, y: -1 },
   right: { x: 1, y: 0 },
   bottom: { x: 0, y: 1 },

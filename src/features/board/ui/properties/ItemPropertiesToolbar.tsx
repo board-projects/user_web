@@ -85,10 +85,7 @@ export function ItemPropertiesToolbar({ viewport }: { viewport: RefObject<HTMLEl
         title="Delete selected item"
         aria-label="Delete selected item"
         className={`${propertyButtonClass} text-red-700`}
-        onClick={() => {
-          properties.remove();
-          useBoardStore.getState().clearSelection();
-        }}
+        onClick={() => useBoardStore.getState().deleteSelected()}
       >
         <FaTrash aria-hidden="true" />
       </button>

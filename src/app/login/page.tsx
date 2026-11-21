@@ -54,7 +54,7 @@ export default function LoginPage() {
         }
       }
 
-      window.location.assign("/");
+      window.location.assign("/dashboard");
     } catch (error) {
       console.error("Verification failed:", error);
       setOtp(new Array(6).fill(""));

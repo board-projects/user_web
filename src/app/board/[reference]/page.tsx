@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useLayoutEffect, useRef } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 
@@ -87,14 +88,16 @@ function BoardRoom({ reference }: { reference: string }) {
   return (
     <div className="relative h-dvh w-full overflow-hidden">
       <ToastContainer />
-      {syncStatus !== "connected" && (
-        <div
-          role="status"
-          className="pointer-events-none absolute left-3 top-3 z-50 max-w-[calc(100%-6rem)] rounded-md bg-stone-900 px-3 py-2 text-xs text-white"
-        >
-          {syncStatus === "offline" ? "Board sync offline. Reconnecting…" : "Connecting to board…"}
-        </div>
-      )}
+      <div data-ui="true" className="absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50 flex max-w-[calc(100%-7rem)] flex-col items-start gap-1.5">
+        <Link href="/dashboard" className="inline-flex min-h-10 items-center rounded-lg border border-cyan-200 bg-white px-3 text-sm font-semibold text-cyan-900 shadow-sm hover:bg-cyan-50">
+          Dashboard
+        </Link>
+        {syncStatus !== "connected" && (
+          <div role="status" className="pointer-events-none rounded-md bg-stone-900 px-3 py-2 text-xs text-white">
+            {syncStatus === "offline" ? "Board sync offline. Reconnecting…" : "Connecting to board…"}
+          </div>
+        )}
+      </div>
 
       <Toolbar
         onAddRect={() => addShape(createRect())}

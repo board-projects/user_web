@@ -1,3 +1,4 @@
+import { SHEET_DOT_GRID } from "@/features/design/domain/sheetLayout";
 import { useBoardStore } from "../store/board.store";
 import { BoardViewport } from "./BoardViewport";
 
@@ -18,8 +19,8 @@ export function PageBackgrounds() {
             width: page.width,
             height: page.height,
             backgroundColor: page.backgroundColor ?? "#ffffff",
-            backgroundImage: page.dots ? "radial-gradient(circle, #94a3b8 0.8px, transparent 1px)" : undefined,
-            backgroundSize: "16px 16px",
+            backgroundImage: page.dots ? `radial-gradient(circle, ${SHEET_DOT_GRID.color} ${SHEET_DOT_GRID.radius}px, transparent 1px)` : undefined,
+            backgroundSize: `${SHEET_DOT_GRID.step}px ${SHEET_DOT_GRID.step}px`,
           }}
         />
       ))}

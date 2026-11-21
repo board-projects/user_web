@@ -11,6 +11,7 @@ export const SHEET_PRESETS = [
 ] as const;
 
 export const DEFAULT_SHEET: SheetLayout = { width: 390, height: 844, dots: false };
+export const SHEET_DOT_GRID = { step: 16, radius: 0.8, color: "#94a3b8" } as const;
 export const SHEET_LIMITS = { min: 240, max: 4096 };
 const PX_PER_UNIT: Record<RulerUnit, number> = { px: 1, mm: 96 / 25.4, cm: 96 / 2.54, in: 96 };
 

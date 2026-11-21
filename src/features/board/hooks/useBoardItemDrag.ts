@@ -2,9 +2,10 @@
 
 import { useRef, type ComponentProps } from "react";
 import type { Rnd } from "react-rnd";
+import { pageMovementScope } from "../store/pageMovement";
 import type { Point } from "../domain/types";
 import { useBoardStore } from "../store/board.store";
-import { selectionKey, type Selection } from "../store/slices/selection.slice";
+import { selectionKey, type MoveScope, type Selection } from "../store/slices/selection.slice";
 
 type BoardItem = Exclude<Selection, null>;
 type DragProps = Pick<ComponentProps<typeof Rnd>, "onDragStart" | "onDrag" | "onDragStop">;
@@ -15,7 +16,7 @@ export function selectBoardItem(item: BoardItem) {
 }
 
 export function useBoardItemDrag() {
-  const groupDrag = useRef<{ key: string; position: Point } | null>(null);
+  const groupDrag = useRef<{ key: string; position: Point; scope: MoveScope } | null>(null);
 
   return (item: BoardItem, position: Point, moveItem: (position: Point) => void, live = false): DragProps => {
     const key = selectionKey(item.type, item.id);
@@ -27,7 +28,7 @@ export function useBoardItemDrag() {
       useBoardStore.getState().moveMarquee({
         x: next.x - drag.position.x,
         y: next.y - drag.position.y,
-      });
+      }, drag.scope);
       drag.position = next;
       return true;
     };
@@ -35,8 +36,18 @@ export function useBoardItemDrag() {
     return {
       onDragStart: () => {
         const state = useBoardStore.getState();
-        groupDrag.current = state.marqueeSelection?.items.has(key) ? { key, position } : null;
-        if (!groupDrag.current) state.select(item);
+        const group = state.marqueeSelection?.items.has(key) ? state.marqueeSelection : null;
+        if (!group) state.select(item);
+
+        if (group || item.type === "page") {
+          const scope = pageMovementScope(state, {
+            items: group?.items ?? new Set([key]),
+            lineIds: new Set(Array.from(group?.lines ?? [], (line) => line.id)),
+          });
+          groupDrag.current = { key, position, scope };
+        } else {
+          groupDrag.current = null;
+        }
       },
       onDrag: (_, next) => {
         if (!moveGroup(next) && live) moveItem({ x: next.x, y: next.y });

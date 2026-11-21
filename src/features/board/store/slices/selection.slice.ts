@@ -19,12 +19,14 @@ export type MarqueeSelection = {
 
 export const selectionKey = (type: Exclude<Selection, null>["type"], id: string) => `${type}:${id}`;
 
+export type MoveScope = { items: ReadonlySet<string>; lineIds: ReadonlySet<string> };
+
 export type SelectionSlice = {
   selection: Selection;
   marqueeSelection: MarqueeSelection | null;
   styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size">>) => void;
   deleteSelected: () => boolean;
-  moveMarquee: (delta: Point) => void;
+  moveMarquee: (delta: Point, scope?: MoveScope) => void;
   selectDrawing: (id: string) => void;
   resizeDrawing: (from: DrawingFrame, to: DrawingFrame) => void;
   selectMarquee: (selection: MarqueeSelection) => void;
@@ -122,9 +124,12 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       return deleted;
     },
 
-    moveMarquee: (delta) => set((state) => {
+    moveMarquee: (delta, scope) => set((state) => {
       const selected = state.marqueeSelection;
-      if (!selected || (!delta.x && !delta.y)) return state;
+      if ((!selected && !scope) || (!delta.x && !delta.y)) return state;
+
+      const items = scope?.items ?? selected?.items;
+      const shouldMoveLine = (line: DrawLine) => scope ? scope.lineIds.has(line.id) : selected?.lines.has(line);
 
       const translate = <T extends Point>(point: T): T => ({
         ...point,
@@ -132,16 +137,18 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         y: point.y + delta.y,
       });
       const moveItems = <T extends Point & { id: string }>(
-        items: T[],
+        collection: T[],
         type: "shape" | "codeblock" | "cloze" | "page",
-      ) => items.map((item) => selected.items.has(selectionKey(type, item.id)) ? translate(item) : item);
+      ) => {
+        const next = collection.map((item) => items?.has(selectionKey(type, item.id)) ? translate(item) : item);
+        return next.some((item, index) => item !== collection[index]) ? next : collection;
+      };
 
-      const lines = new Set<DrawLine>();
-      const nextLines = selected.lines.size ? state.lines.map((line) => {
-        if (!selected.lines.has(line)) return line;
-
-        const moved = translateDrawingLine(line, delta);
-        lines.add(moved);
+      const selectedLines = new Set<DrawLine>();
+      const movesLines = scope ? scope.lineIds.size > 0 : !!selected?.lines.size;
+      const nextLines = movesLines ? state.lines.map((line) => {
+        const moved = shouldMoveLine(line) ? translateDrawingLine(line, delta) : line;
+        if (selected?.lines.has(line)) selectedLines.add(moved);
         return moved;
       }) : state.lines;
 
@@ -151,11 +158,11 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         clozeTests: moveItems(state.clozeTests, "cloze"),
         sheets: moveItems(state.sheets, "page"),
         lines: nextLines,
-        marqueeSelection: {
+        marqueeSelection: selected ? {
           ...selected,
           anchor: translate(selected.anchor),
-          lines: selected.lines.size ? lines : selected.lines,
-        },
+          lines: movesLines ? selectedLines : selected.lines,
+        } : null,
       };
     }),
 

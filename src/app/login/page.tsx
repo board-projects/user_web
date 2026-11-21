@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { authApi } from "@/features/auth/services/auth.api";
 
@@ -11,14 +10,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
-  const { setLoggedIn, isLoggedIn } = useAuthStore();
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      router.replace("/");
-    }
-  }, [isLoggedIn, router]);
+  const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,21 +37,24 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const res = await authApi.verifyOtp(email, code);
-
-      const token = res?.access_token || res?.data?.access_token;
-      const user = res?.user || res?.data?.user;
-
-      if (token) {
-        if (window.location.hostname.includes("dequizma.com")) {
-          document.cookie = `access_token=${token}; path=/; domain=.dequizma.com; max-age=86400; SameSite=Lax; Secure`;
-        } else {
-          document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-        }
-
-        setLoggedIn(true, user || { email }); 
-        
-        window.location.href = "/";
+      if (!res) {
+        setOtp(new Array(6).fill(""));
+        return;
       }
+
+      setLoggedIn(true, res.user ?? { email });
+
+      const { origin, search } = window.location;
+      const next = new URLSearchParams(search).get("next");
+      if (next?.startsWith("/board/")) {
+        const destination = new URL(next, origin);
+        if (destination.origin === origin && destination.pathname.startsWith("/board/")) {
+          window.location.assign(destination.href);
+          return;
+        }
+      }
+
+      window.location.assign("/");
     } catch (error) {
       console.error("Verification failed:", error);
       setOtp(new Array(6).fill(""));

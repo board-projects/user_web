@@ -15,13 +15,13 @@ class RequestService {
   private readonly endpoint: string;
   private cookies: Cookies;
 
-  constructor(endpoint: string) {
+  constructor(endpoint: string, private readonly baseUrl = BASE_URL) {
     this.endpoint = endpoint;
     this.cookies = new Cookies(null, { path: "/" });
   }
   async get(params = ""): Promise<any> {
     try {
-      const response = await fetch(BASE_URL + this.endpoint + params, {
+      const response = await fetch(this.baseUrl + this.endpoint + params, {
         method: METHOD_GET,
         headers: this.getHeaders(),
         credentials: "include",
@@ -40,7 +40,7 @@ class RequestService {
 
       const isFormData = payload instanceof FormData;
 
-      const response = await fetch(BASE_URL + this.endpoint, {
+      const response = await fetch(this.baseUrl + this.endpoint, {
         method: METHOD_POST,
         headers: {
           ...this.getHeaders(),

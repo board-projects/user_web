@@ -36,7 +36,7 @@ export const EntryActions = () => {
       </div>
 
       <div className="absolute top-[47%] left-[-5%] w-[50%] h-[50%] z-20 animate-alive [animation-delay:0.4s]">
-        <Link href={`/board/${teacherId}`} className="relative w-full h-full flex items-center justify-center group cursor-pointer">
+        <Link prefetch={false} href={`/board/${teacherId}`} className="relative w-full h-full flex items-center justify-center group cursor-pointer">
           <Image
             src="/03.png"
             alt="blue"
@@ -50,7 +50,7 @@ export const EntryActions = () => {
       </div>
 
       <div className="absolute top-[50.5%] left-[35%] w-[50%] h-[50%] z-10 animate-alive [animation-delay:0.6s]">
-        <Link href={`/board/${studentId}`} className="relative w-full h-full flex items-center justify-center group cursor-pointer">
+        <Link prefetch={false} href={`/board/${studentId}`} className="relative w-full h-full flex items-center justify-center group cursor-pointer">
           <Image
             src="/04.png"
             alt="yellow"

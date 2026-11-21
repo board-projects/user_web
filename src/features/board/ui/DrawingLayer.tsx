@@ -65,9 +65,8 @@ export function DrawingLayer() {
             d={segments.map(({ from, to }) => `M${from.x},${from.y} L${to.x},${to.y}`).join(" ")}
             fill="none"
             stroke="transparent"
-            strokeWidth={segments.reduce((width, { size }) => Math.max(width, size), 16)}
+            strokeWidth={segments.reduce((width, { size }) => Math.max(width, size), 16 / zoom)}
             strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
             style={{ pointerEvents: interactive ? "stroke" : "none", cursor: "move" }}
             onPointerDown={(event) => drawDrag.onPointerDown(id, event)}
             onPointerMove={drawDrag.onPointerMove}

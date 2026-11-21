@@ -2,6 +2,7 @@
 
 import React, { useCallback, useRef, useState } from "react";
 import { DrawLine, Point } from "../domain/types";
+import { paintDrawingSegment } from "../services/paintDrawingSegment";
 import { isBoardInteractiveTarget } from "./boardPointer";
 import { useBoardStore } from "@/features/board/store/board.store";
 
@@ -58,15 +59,7 @@ export function useCanvasDraw(args: {
         panY * dpr,
       );
 
-      ctx.strokeStyle = line.color;
-      ctx.lineWidth = line.size / zoom; // ضخامت ثابت روی صفحه
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-
-      ctx.beginPath();
-      ctx.moveTo(line.from.x, line.from.y);
-      ctx.lineTo(line.to.x, line.to.y);
-      ctx.stroke();
+      paintDrawingSegment(ctx, line);
 
       ctx.restore();
     },

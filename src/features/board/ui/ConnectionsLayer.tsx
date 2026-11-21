@@ -15,15 +15,18 @@ export function ConnectionsLayer() {
 
   const draftSource = draft ? shapeById.get(draft.sourceId) : undefined;
   const previewStart = draft && draftSource ? getShapePortPoint(draftSource, draft.sourcePort) : null;
+  const snapTarget = draft?.snapTarget;
+  const snapShape = snapTarget ? shapeById.get(snapTarget.id) : undefined;
+  const previewEnd = snapTarget && snapShape ? getShapePortPoint(snapShape, snapTarget.port) : draft?.pointer;
 
   return (
     <svg className="pointer-events-none absolute inset-0 z-30 h-full w-full overflow-visible">
-      {draft && previewStart && (
+      {previewStart && previewEnd && (
         <line
           x1={previewStart.x}
           y1={previewStart.y}
-          x2={draft.pointer.x}
-          y2={draft.pointer.y}
+          x2={previewEnd.x}
+          y2={previewEnd.y}
           stroke="#2563eb"
           strokeWidth={2}
           strokeDasharray="5 4"

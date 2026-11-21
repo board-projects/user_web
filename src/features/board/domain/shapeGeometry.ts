@@ -75,3 +75,29 @@ export function getNearestShapePort(shape: Shape, point: Point): ShapePort {
   }
   return nearest;
 }
+
+export type ShapePortTarget = { id: string; port: ShapePort };
+
+export function findNearbyShapePort(
+  shapes: readonly Shape[],
+  sourceId: string,
+  pointer: Point,
+  radius: number,
+): ShapePortTarget | null {
+  let nearest: ShapePortTarget | null = null;
+  let shortest = radius ** 2;
+
+  for (const shape of shapes) {
+    if (shape.id === sourceId) continue;
+
+    const port = getNearestShapePort(shape, pointer);
+    const point = getShapePortPoint(shape, port);
+    const distance = (point.x - pointer.x) ** 2 + (point.y - pointer.y) ** 2;
+    if (distance > shortest || (nearest && distance === shortest)) continue;
+
+    nearest = { id: shape.id, port };
+    shortest = distance;
+  }
+
+  return nearest;
+}

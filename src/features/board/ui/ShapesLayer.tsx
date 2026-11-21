@@ -20,7 +20,6 @@ export function ShapesLayer() {
 
   const shapes = useBoardStore((s) => s.shapes);
   const updateShape = useBoardStore((s) => s.updateShape);
-  const removeShape = useBoardStore((s) => s.removeShape);
 
   const zoom = useBoardStore((s) => s.zoom);
 
@@ -90,32 +89,6 @@ export function ShapesLayer() {
               {(selected || connecting) && SHAPE_PORTS.map((port) => (
                 <ShapeConnectionHandle key={port} shape={shape} port={port} />
               ))}
-              {selected && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeShape(shape.id);
-                    // selection رو هم پاک می‌کنیم
-                    useBoardStore.getState().clearSelection();
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: -30,
-                    right: -30,
-                    width: 22,
-                    height: 22,
-                    borderRadius: 999,
-                    border: "1px solid rgba(0,0,0,0.2)",
-                    background: "white",
-                    cursor: "pointer",
-                    lineHeight: "20px",
-                  }}
-                  title="Delete"
-                >
-                  ×
-                </button>
-              )}
             </div>
           </Rnd>
         );

@@ -19,7 +19,7 @@ export type ConnectionsSlice = {
   moveConnection: (pointer: Point) => void;
   finishConnection: (pointer: Point | null, fallbackTarget: ShapePortTarget | null) => void;
   cancelConnecting: () => void;
-  updateConnection: (id: string, style: Pick<ShapeConnection, "color" | "size" | "dashed">) => void;
+  updateConnection: (id: string, style: Pick<ShapeConnection, "color" | "size" | "pattern" | "route" | "label" | "arrow">) => void;
   removeConnection: (id: string) => void;
 };
 

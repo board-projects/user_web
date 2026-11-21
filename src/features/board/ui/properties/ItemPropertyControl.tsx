@@ -47,6 +47,12 @@ export function ItemPropertyControl({ field }: { field: ItemProperty }) {
             }
           }}
         />
+      ) : field.kind === "select" ? (
+        <select value={field.value} className={fieldClass} onChange={(event) => field.change(event.target.value)}>
+          {field.options.map((option) => (
+            <option key={option} value={option}>{option[0].toUpperCase() + option.slice(1)}</option>
+          ))}
+        </select>
       ) : (
         <input
           type={field.kind}

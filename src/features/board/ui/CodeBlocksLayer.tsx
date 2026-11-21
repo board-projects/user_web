@@ -13,14 +13,12 @@ export function CodeBlocksLayer() {
   const dragItem = useBoardItemDrag();
   const codeBlocks = useBoardStore((s) => s.codeBlocks);
   const updateCodeBlock = useBoardStore((s) => s.updateCodeBlock);
-  const removeCodeBlock = useBoardStore((s) => s.removeCodeBlock);
 
   const zoom = useBoardStore((s) => s.zoom);
 
   const selection = useBoardStore((s) => s.selection);
   const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
   const select = useBoardStore((s) => s.select);
-  const clearSelection = useBoardStore((s) => s.clearSelection);
 
   const editingCodeBlockId = useBoardStore((s) => s.editingCodeBlockId);
   const startEditingCodeBlock = useBoardStore((s) => s.startEditingCodeBlock);
@@ -49,8 +47,6 @@ export function CodeBlocksLayer() {
         if (t?.closest('[data-interactive="true"]')) return;
 
         stopEditingCodeBlock();
-        // اگر خواستی کلیک روی فضای خالی selection رو هم پاک کنه:
-        // clearSelection();
       }}
     >
       {codeBlocks.map((block) => {
@@ -115,32 +111,6 @@ export function CodeBlocksLayer() {
                 startEditingCodeBlock(block.id);
               }}
             >
-              {selected && (
-                <button
-                  type="button"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
-                    removeCodeBlock(block.id);
-                    clearSelection();
-                  }}
-                  style={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    zIndex: 5,
-                    width: 26,
-                    height: 26,
-                    borderRadius: 999,
-                    border: "1px solid rgba(255,255,255,0.25)",
-                    background: "rgba(0,0,0,0.6)",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                  title="Delete"
-                >
-                  ×
-                </button>
-              )}
 
               {/* ✅ وقتی ادیت نیستیم، لایه‌ی شفاف می‌ذاریم تا کلیک/درگ راحت باشه و ادیتور فوکوس نگیره */}
               {!isEditing && (

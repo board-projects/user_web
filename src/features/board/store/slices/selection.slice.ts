@@ -21,7 +21,7 @@ export type SelectionSlice = {
   selection: Selection;
   marqueeSelection: MarqueeSelection | null;
   styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size">>) => void;
-  removeSelectedLines: () => void;
+  deleteSelected: () => boolean;
   moveMarquee: (delta: Point) => void;
   selectMarquee: (selection: MarqueeSelection) => void;
   select: (sel: Exclude<Selection, null>) => void;
@@ -55,14 +55,38 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       return { lines: updated, marqueeSelection: { ...selected, lines } };
     }),
 
-    removeSelectedLines: () => set((state) => {
-      const selected = state.marqueeSelection;
-      if (!selected?.lines.size) return state;
-      return {
-        lines: state.lines.filter((line) => !selected.lines.has(line)),
-        marqueeSelection: null,
-      };
-    }),
+    deleteSelected: () => {
+      let deleted = false;
+      set((state) => {
+        const selected = state.selection;
+        const items = selected
+          ? new Set([selectionKey(selected.type, selected.id)])
+          : state.marqueeSelection?.items;
+        const lines = selected ? undefined : state.marqueeSelection?.lines;
+        if (!items?.size && !lines?.size) return state;
+        deleted = true;
+
+        const has = (type: Exclude<Selection, null>["type"], id: string) =>
+          items?.has(selectionKey(type, id)) ?? false;
+        return {
+          shapes: state.shapes.filter((shape) => !has("shape", shape.id)),
+          codeBlocks: state.codeBlocks.filter((block) => !has("codeblock", block.id)),
+          clozeTests: state.clozeTests.filter((cloze) => !has("cloze", cloze.id)),
+          connections: state.connections.filter((connection) =>
+            !has("connection", connection.id) &&
+            !has("shape", connection.sourceId) &&
+            !has("shape", connection.targetId),
+          ),
+          lines: lines?.size ? state.lines.filter((line) => !lines.has(line)) : state.lines,
+          connectionDraft: null,
+          selection: null,
+          marqueeSelection: null,
+          editingCodeBlockId: null,
+          editingClozeTestId: null,
+        };
+      });
+      return deleted;
+    },
 
     moveMarquee: (delta) => set((state) => {
       const selected = state.marqueeSelection;

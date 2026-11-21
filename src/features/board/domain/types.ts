@@ -25,6 +25,11 @@ export type Shape = {
 export const SHAPE_PORTS = ["top", "right", "bottom", "left"] as const;
 export type ShapePort = (typeof SHAPE_PORTS)[number];
 
+export const CONNECTOR_ROUTES = ["straight", "smooth", "orthogonal", "wave", "zigzag"] as const;
+export const CONNECTOR_PATTERNS = ["solid", "dash", "dot", "dash-dot"] as const;
+export type ConnectorRoute = (typeof CONNECTOR_ROUTES)[number];
+export type ConnectorPattern = (typeof CONNECTOR_PATTERNS)[number];
+
 export type ShapeConnection = {
   id: string;
   sourceId: string;
@@ -34,6 +39,10 @@ export type ShapeConnection = {
   color?: string;
   size?: number;
   dashed?: boolean;
+  route?: ConnectorRoute;
+  pattern?: ConnectorPattern;
+  label?: string;
+  arrow?: boolean;
 };
 
 export type CodeBlock = {

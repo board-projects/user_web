@@ -1,11 +1,10 @@
 import { drawingId } from "../domain/drawings";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { BoardSocket, type BoardSyncStatus } from "../services/boardSocket";
 import { diffBoardContent, reconcileBoardContent } from "../domain/boardSync";
 import { useBoardStore } from "../store/board.store";
 
 export function useBoardSocket(baseUrl: string | undefined, reference: string) {
-  const socket = useRef<BoardSocket | null>(null);
   const [status, setStatus] = useState<BoardSyncStatus>("connecting");
 
   useLayoutEffect(() => {
@@ -34,7 +33,6 @@ export function useBoardSocket(baseUrl: string | undefined, reference: string) {
         applyingRemote = false;
       },
     });
-    socket.current = connection;
     const unsubscribe = useBoardStore.subscribe((next, previous) => {
       if (applyingRemote) return;
       const changes = diffBoardContent(previous, next);
@@ -42,16 +40,10 @@ export function useBoardSocket(baseUrl: string | undefined, reference: string) {
     });
 
     return () => {
-      socket.current = null;
       unsubscribe();
       connection.destroy();
     };
   }, [baseUrl, reference]);
 
-  const waitForSync = useCallback(async () => {
-    if (!socket.current) throw new Error("Board is connecting");
-    await socket.current.waitForSync();
-  }, []);
-
-  return { status, waitForSync };
+  return { status };
 }

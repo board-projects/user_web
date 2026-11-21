@@ -1,4 +1,4 @@
-export type SheetLayout = { width: number; height: number; dots: boolean };
+export type SheetLayout = { width: number; height: number; dots: boolean; backgroundColor?: string };
 export type { PageUnit as RulerUnit } from "@/features/board/domain/types";
 import type { PageUnit as RulerUnit } from "@/features/board/domain/types";
 

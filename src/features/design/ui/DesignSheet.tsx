@@ -24,7 +24,7 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
           <circle cx={1} cy={1} r={0.8} fill="#94a3b8" />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="white" />
+      <rect width="100%" height="100%" fill={layout.backgroundColor ?? "#ffffff"} />
       {layout.dots && <rect width="100%" height="100%" fill={`url(#${gridId})`} />}
       {board.lines.map((line) => (
         <line key={line.id} x1={line.from.x} y1={line.from.y} x2={line.to.x} y2={line.to.y}

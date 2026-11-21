@@ -57,11 +57,7 @@ export function PageItemsLayer() {
             className="pointer-events-none"
             {...dragItem(item, page, (position) => updatePage(page.id, position), connected)}
           >
-            <div className="h-full w-full border border-cyan-300 bg-transparent shadow-sm" style={{
-              ...itemSelectionStyle(selected || !!marquee?.has(key)),
-              backgroundImage: page.dots ? "radial-gradient(circle, #94a3b8 0.8px, transparent 1px)" : undefined,
-              backgroundSize: "16px 16px",
-            }} />
+            <div className="h-full w-full border border-cyan-300 shadow-sm" style={itemSelectionStyle(selected || !!marquee?.has(key))} />
             <button
               type="button"
               className="page-item-drag-handle pointer-events-auto absolute bottom-full left-0 max-w-full cursor-move touch-none overflow-hidden text-ellipsis whitespace-nowrap rounded-t-md border border-cyan-200 bg-cyan-50 px-2 py-1 text-left text-xs font-semibold text-cyan-950"

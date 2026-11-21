@@ -9,7 +9,7 @@ export type DrawLine = {
   size: number;
 };
 
-export type ShapeType = "rect" | "circle";
+export type ShapeType = "rect" | "circle" | "star";
 
 export type Shape = {
   id: string;

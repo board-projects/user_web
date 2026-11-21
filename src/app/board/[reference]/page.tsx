@@ -70,21 +70,14 @@ function BoardRoom({ reference }: { reference: string }) {
   const lines = useBoardStore((s) => s.lines);
   const selectedLines = useBoardStore((s) => s.marqueeSelection?.lines);
 
-  const { emitDrawLine } = useBoardSocket({
-    baseUrl: process.env.NEXT_PUBLIC_BASE_URL!,
-    reference,
-    onDrawLine: addLine,
-  });
+  const syncStatus = useBoardSocket(process.env.NEXT_PUBLIC_BASE_URL, reference);
 
   const draw = useCanvasDraw({
     canvasRef,
     boardAreaRef,
     penColor,
     penSize,
-    onLine: (line) => {
-      emitDrawLine(line);
-      addLine(line);
-    },
+    onLine: addLine,
   });
 
   useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY });
@@ -94,6 +87,14 @@ function BoardRoom({ reference }: { reference: string }) {
   return (
     <div className="relative h-dvh w-full overflow-hidden">
       <ToastContainer />
+      {syncStatus !== "connected" && (
+        <div
+          role="status"
+          className="pointer-events-none absolute left-3 top-3 z-50 max-w-[calc(100%-6rem)] rounded-md bg-stone-900 px-3 py-2 text-xs text-white"
+        >
+          {syncStatus === "offline" ? "Board sync offline. Reconnecting…" : "Connecting to board…"}
+        </div>
+      )}
 
       <Toolbar
         onAddRect={() => addShape(createRect())}

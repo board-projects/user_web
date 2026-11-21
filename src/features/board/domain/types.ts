@@ -3,6 +3,7 @@ export type BoardId = string;
 export type Point = { x: number; y: number };
 
 export type DrawLine = {
+  id: string;
   from: Point;
   to: Point;
   color: string;

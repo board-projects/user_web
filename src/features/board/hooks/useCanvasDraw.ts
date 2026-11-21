@@ -99,6 +99,7 @@ export function useCanvasDraw(args: {
       const newPos = getWorldPos(e);
 
       const line: DrawLine = {
+        id: crypto.randomUUID(),
         from: lastPos.current,
         to: newPos,
         color: args.penColor,

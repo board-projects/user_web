@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBoardStore } from "@/features/board/store/board.store";
+import { openPublishSignInChannel, PUBLISH_RESUME_PARAM } from "@/features/auth/services/publishSignIn";
 import { capturePage } from "../domain/capturePage";
 import { applyBoardChanges, EMPTY_BOARD, type BoardUpdate } from "@/features/board/domain/boardSync";
 import { propertyButtonClass } from "@/features/board/ui/properties/ItemPropertyControl";
@@ -41,31 +42,41 @@ export function PageItemActions({ reference, itemId }: {
   const [print, setPrint] = useState<PrintPage | null>(null);
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
-  const [signInRequired, setSignInRequired] = useState(false);
+  const [resumeId, setResumeId] = useState<string | null>(null);
+  const resumeDraft = useRef<string | null>(null);
+  const running = useRef(false);
   const [copied, setCopied] = useState(false);
   const closePrint = useCallback(() => setPrint(null), []);
 
-  const run = async (action: "preview" | "publish") => {
+  const run = useCallback(async (action: "preview" | "publish", savedDraft?: string) => {
+    if (running.current) return;
+    running.current = true;
     setPending(action);
     setError("");
-    setSignInRequired(false);
+    setResumeId(null);
     setCopied(false);
     try {
-      const board = useBoardStore.getState();
-      const page = board.sheets.find((item) => item.id === itemId);
-      if (!page) throw new Error("Page item not found");
-      const capture = capturePage(board, page);
-      if (action === "preview") {
-        setPrint(capture);
-        return;
+      let payload = savedDraft;
+      if (!payload) {
+        const board = useBoardStore.getState();
+        const page = board.sheets.find((item) => item.id === itemId);
+        if (!page) throw new Error("Page item not found");
+        const capture = capturePage(board, page);
+        if (action === "preview") {
+          setPrint(capture);
+          return;
+        }
+        payload = JSON.stringify({ page: capture.page, changes: capture.snapshot.changes });
       }
       const response = await fetch(`/api/boards/${encodeURIComponent(reference)}/pages/${encodeURIComponent(itemId)}/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ page: capture.page, changes: capture.snapshot.changes }),
+        body: payload,
       });
       if (response.status === 401) {
-        setSignInRequired(true);
+        if (savedDraft) throw new Error("Publish could not verify the renewed session. Try Publish again in this tab.");
+        resumeDraft.current = payload;
+        setResumeId(crypto.randomUUID());
         return;
       }
       const data = await response.json();
@@ -75,9 +86,25 @@ export function PageItemActions({ reference, itemId }: {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Page action failed");
     } finally {
+      running.current = false;
       setPending(null);
     }
-  };
+  }, [reference, itemId]);
+
+  useEffect(() => {
+    if (!resumeId) return;
+    const channel = openPublishSignInChannel(resumeId);
+    if (!channel) return;
+
+    channel.onmessage = (event) => {
+      if (event.data !== "signed-in" || !resumeDraft.current) return;
+      const draft = resumeDraft.current;
+      resumeDraft.current = null;
+      void run("publish", draft);
+    };
+
+    return () => channel.close();
+  }, [resumeId, run]);
 
   return (
     <>
@@ -110,11 +137,11 @@ export function PageItemActions({ reference, itemId }: {
           }}>{copied ? "Copied" : "Copy public link"}</button>
         </>
       )}
-      {signInRequired && (
+      {resumeId && (
         <>
-          <span role="status" className="shrink-0 px-2 text-xs text-stone-700">Sign in again, then retry Publish here.</span>
+          <span role="status" className="shrink-0 px-2 text-xs text-stone-700">Sign in to continue publishing.</span>
           <a className={`${propertyButtonClass} inline-flex items-center`}
-            href={`/login?next=${encodeURIComponent(`/board/${encodeURIComponent(reference)}`)}`}
+            href={`/login?${PUBLISH_RESUME_PARAM}=${encodeURIComponent(resumeId)}`}
             target="_blank" rel="noopener noreferrer">
             Sign in
           </a>

@@ -3,6 +3,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { DrawLine, Point } from "../domain/types";
 import { paintDrawingSegment } from "../services/paintDrawingSegment";
+import { canvasPixelRatio } from "../services/canvasPixelRatio";
 import { isBoardInteractiveTarget } from "./boardPointer";
 import { useBoardStore } from "@/features/board/store/board.store";
 
@@ -47,7 +48,7 @@ export function useCanvasDraw(args: {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = canvasPixelRatio(canvas);
 
       ctx.save();
       ctx.setTransform(

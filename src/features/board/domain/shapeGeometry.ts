@@ -1,7 +1,7 @@
 import { SHAPE_PORTS, type Point, type ShapePort } from "./types";
 import type { ConnectableItem } from "./connectableItems";
 
-const STAR_POINTS = [
+export const STAR_POINTS = [
   [50, 0], [62, 36], [100, 38], [70, 61], [81, 100],
   [50, 76], [19, 100], [30, 61], [0, 38], [38, 36],
 ] as const;

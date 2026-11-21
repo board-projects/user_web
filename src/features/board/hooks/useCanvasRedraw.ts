@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { DrawLine } from "@/features/board/domain/types";
 import { paintDrawingSegment } from "../services/paintDrawingSegment";
+import { canvasPixelRatio } from "../services/canvasPixelRatio";
 
 export function useCanvasRedraw(args: {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -11,6 +12,8 @@ export function useCanvasRedraw(args: {
   zoom: number;
   panX: number;
   panY: number;
+  viewportWidth?: number;
+  viewportHeight?: number;
 }) {
   useEffect(() => {
     const canvas = args.canvasRef.current;
@@ -19,7 +22,7 @@ export function useCanvasRedraw(args: {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = canvasPixelRatio(canvas);
 
     // clear (در مختصات پیکسلی canvas)
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -39,5 +42,5 @@ export function useCanvasRedraw(args: {
       const selectionMargin = args.selectedLines?.has(line) ? 4 / args.zoom : 0;
       paintDrawingSegment(ctx, line, selectionMargin);
     }
-  }, [args.canvasRef, args.lines, args.selectedLines, args.zoom, args.panX, args.panY]);
+  }, [args.canvasRef, args.lines, args.selectedLines, args.zoom, args.panX, args.panY, args.viewportWidth, args.viewportHeight]);
 }

@@ -19,18 +19,24 @@ export function getSessionCredentials(req: NextRequest) {
   };
 }
 
-export function backendPost(path: string, body: object) {
+export function backendRequest(path: string, init: RequestInit = {}) {
   const backend = process.env.API_URL || process.env.NEXT_PUBLIC_BASE_URL;
   const base = backend?.startsWith("https://") || backend?.startsWith("http://")
     ? backend
     : "https://back.dequizma.com";
 
   return fetch(`${base.replace(/\/$/, "")}/${path}`, {
+    ...init,
+    cache: "no-store",
+    signal: AbortSignal.timeout(8000),
+  });
+}
+
+export function backendPost(path: string, body: object) {
+  return backendRequest(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-    cache: "no-store",
-    signal: AbortSignal.timeout(8000),
   });
 }
 

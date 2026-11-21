@@ -13,6 +13,7 @@ export function useCanvasDraw(args: {
   onLine: (line: DrawLine) => void;
 }) {
   const [drawing, setDrawing] = useState(false);
+  const strokeId = useRef<string | null>(null);
   const lastPos = useRef<Point | null>(null);
 
   const connecting = useBoardStore((s) => s.connectionDraft !== null);
@@ -83,6 +84,7 @@ export function useCanvasDraw(args: {
       e.preventDefault();
       e.currentTarget.setPointerCapture(e.pointerId);
 
+      strokeId.current = crypto.randomUUID();
       setDrawing(true);
       lastPos.current = getWorldPos(e);
     },
@@ -91,7 +93,7 @@ export function useCanvasDraw(args: {
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!e.isPrimary || !drawing || !lastPos.current || useBoardStore.getState().tool !== "pen") return;
+      if (!e.isPrimary || !drawing || !strokeId.current || !lastPos.current || useBoardStore.getState().tool !== "pen") return;
       if ((e.buttons & 1) !== 1) return;
 
       e.preventDefault();
@@ -100,6 +102,7 @@ export function useCanvasDraw(args: {
 
       const line: DrawLine = {
         id: crypto.randomUUID(),
+        strokeId: strokeId.current,
         from: lastPos.current,
         to: newPos,
         color: args.penColor,
@@ -120,6 +123,7 @@ export function useCanvasDraw(args: {
 
     setDrawing(false);
     lastPos.current = null;
+    strokeId.current = null;
 
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);

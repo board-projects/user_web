@@ -1,4 +1,5 @@
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES } from "../../domain/types";
+import { clozeConnectable } from "../../domain/connectableItems";
 import type { BoardState } from "../../store/board.store";
 import type { Selection } from "../../store/slices/selection.slice";
 
@@ -88,6 +89,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         fields: [
           { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
+          ...sizeFields(clozeConnectable(item), (size) => state.updateClozeTest(id, size), 140, 100),
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
         ],
       };

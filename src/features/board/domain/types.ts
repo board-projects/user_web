@@ -4,6 +4,7 @@ export type Point = { x: number; y: number };
 
 export type DrawLine = {
   id: string;
+  strokeId?: string;
   from: Point;
   to: Point;
   color: string;
@@ -59,6 +60,8 @@ export type ClozeTest = {
   type: "cloze_test";
   x: number;
   y: number;
+  width?: number;
+  height?: number;
   content: string;
   title: string;
 }

@@ -1,3 +1,4 @@
+import { drawingId } from "../domain/drawings";
 import { useLayoutEffect, useState } from "react";
 import { BoardSocket, type BoardSyncStatus } from "../services/boardSocket";
 import { diffBoardContent, reconcileBoardContent } from "../domain/boardSync";
@@ -16,13 +17,13 @@ export function useBoardSocket(baseUrl: string | undefined, reference: string) {
         if (!Object.keys(patch).length) return;
 
         if (patch.lines && current.marqueeSelection?.lines.size) {
-          const selectedIds = new Set(Array.from(current.marqueeSelection.lines, (line) => line.id));
+          const selectedIds = new Set(Array.from(current.marqueeSelection.lines, drawingId));
           applyingRemote = true;
           useBoardStore.setState({
             ...patch,
             marqueeSelection: {
               ...current.marqueeSelection,
-              lines: new Set(patch.lines.filter((line) => selectedIds.has(line.id))),
+              lines: new Set(patch.lines.filter((line) => selectedIds.has(drawingId(line)))),
             },
           });
         } else {

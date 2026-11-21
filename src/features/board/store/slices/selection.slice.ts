@@ -1,3 +1,4 @@
+import { drawingId, getDrawingFrame, scaleDrawingLine, translateDrawingLine, type DrawingFrame } from "../../domain/drawings";
 import type { DrawLine, Point } from "../../domain/types";
 import type { StateCreator } from "zustand";
 import type { BoardState } from "../board.store";
@@ -23,6 +24,8 @@ export type SelectionSlice = {
   styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size">>) => void;
   deleteSelected: () => boolean;
   moveMarquee: (delta: Point) => void;
+  selectDrawing: (id: string) => void;
+  resizeDrawing: (from: DrawingFrame, to: DrawingFrame) => void;
   selectMarquee: (selection: MarqueeSelection) => void;
   select: (sel: Exclude<Selection, null>) => void;
   clearSelection: () => void;
@@ -40,6 +43,34 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
   (set) => ({
     selection: null,
     marqueeSelection: null,
+
+    selectDrawing: (id) => set((state) => {
+      const lines = state.lines.filter((line) => drawingId(line) === id);
+      const anchor = getDrawingFrame(lines);
+      if (!anchor || lines.every((line) => state.marqueeSelection?.lines.has(line))) return state;
+
+      return {
+        selection: null,
+        marqueeSelection: { items: new Set(), lines: new Set(lines), anchor },
+        editingCodeBlockId: null,
+        editingClozeTestId: null,
+      };
+    }),
+
+    resizeDrawing: (from, to) => set((state) => {
+      const selected = state.marqueeSelection;
+      if (!selected?.lines.size || selected.items.size ||
+          (from.x === to.x && from.y === to.y && from.width === to.width && from.height === to.height)) return state;
+
+      const lines = new Set<DrawLine>();
+      const updated = state.lines.map((line) => {
+        if (!selected.lines.has(line)) return line;
+        const next = scaleDrawingLine(line, from, to);
+        lines.add(next);
+        return next;
+      });
+      return { lines: updated, marqueeSelection: { ...selected, anchor: to, lines } };
+    }),
 
     styleSelectedLines: (style) => set((state) => {
       const selected = state.marqueeSelection;
@@ -107,7 +138,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       const nextLines = selected.lines.size ? state.lines.map((line) => {
         if (!selected.lines.has(line)) return line;
 
-        const moved = { ...line, from: translate(line.from), to: translate(line.to) };
+        const moved = translateDrawingLine(line, delta);
         lines.add(moved);
         return moved;
       }) : state.lines;

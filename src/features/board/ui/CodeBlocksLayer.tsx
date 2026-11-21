@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { codeConnectable } from "../domain/connectableItems";
+import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 import { ConnectionPorts } from "./ConnectionPorts";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -80,6 +81,7 @@ export function CodeBlocksLayer() {
             }}
             onResize={connected ? resize : undefined}
             onResizeStop={resize}
+            resizeHandleComponent={selected ? itemResizeHandles : undefined}
             className="pointer-events-auto"
             // ✅ اینجا دیگه stopEditingCodeBlock نزن! فقط select کن
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -95,8 +97,7 @@ export function CodeBlocksLayer() {
                 width: "100%",
                 height: "100%",
                 position: "relative",
-                outline: inMarquee ? "2px solid #2563eb" : selected ? "2px solid rgba(0,0,0,0.6)" : "none",
-                outlineOffset: 2,
+                ...itemSelectionStyle(selected || !!inMarquee),
                 borderRadius: 8,
                 overflow: "hidden",
               }}

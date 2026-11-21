@@ -6,15 +6,9 @@ import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 
+import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 import { ConnectionPorts } from "./ConnectionPorts";
 import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
-
-const resizeGrip = (
-  <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-sm border-2 border-blue-600 bg-white shadow-sm" />
-);
-const circleResizeHandles = {
-  topLeft: resizeGrip, topRight: resizeGrip, bottomLeft: resizeGrip, bottomRight: resizeGrip,
-};
 
 export function ShapesLayer() {
   const connections = useBoardStore((s) => s.connections);
@@ -66,7 +60,7 @@ export function ShapesLayer() {
             onResizeStop={updateSize}
             cancel="[data-connection-handle]"
             enableResizing
-            resizeHandleComponent={selected && shape.type === "circle" ? circleResizeHandles : undefined}
+            resizeHandleComponent={selected ? itemResizeHandles : undefined}
             lockAspectRatio={shape.type === "circle" || isStar}
             className="pointer-events-auto"
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -80,8 +74,7 @@ export function ShapesLayer() {
                 height: "100%",
                 backgroundColor: isStar ? "transparent" : shape.color,
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
-                outline: inMarquee ? "2px solid #2563eb" : selected ? "2px solid rgba(0,0,0,0.6)" : "none",
-                outlineOffset: 2,
+                ...itemSelectionStyle(selected || !!inMarquee),
                 position: "relative",
               }}
             >

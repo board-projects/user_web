@@ -3,6 +3,7 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { boxBetween, boxesIntersect, segmentIntersectsBox } from "../domain/marqueeGeometry";
 import { connectorIntersectsBox, getConnectorPoints } from "../domain/connectorGeometry";
+import { drawingId } from "../domain/drawings";
 import { getConnectableItems } from "../domain/connectableItems";
 import type { Point } from "../domain/types";
 import { useBoardStore } from "../store/board.store";
@@ -39,7 +40,10 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
     }
   }
 
-  const lines = new Set(state.lines.filter((line) => segmentIntersectsBox(line.from, line.to, worldBox)));
+  const drawings = new Set(state.lines
+    .filter((line) => segmentIntersectsBox(line.from, line.to, worldBox))
+    .map(drawingId));
+  const lines = new Set(state.lines.filter((line) => drawings.has(drawingId(line))));
   state.selectMarquee({ items, lines, anchor: { x: worldBox.left, y: worldBox.top } });
 }
 

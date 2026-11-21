@@ -8,7 +8,7 @@ import { ToastContainer, toast, Bounce } from "react-toastify";
 import { useBoardStore } from "@/features/board/store/board.store";
 import { useBoardSocket } from "@/features/board/hooks/useBoardSocket";
 import { useMarqueeSelection } from "@/features/board/hooks/useMarqueeSelection";
-import { MarqueeMoveHandle } from "@/features/board/ui/MarqueeMoveHandle";
+import { DrawingLayer } from "@/features/board/ui/DrawingLayer";
 import { MarqueeOverlay } from "@/features/board/ui/MarqueeOverlay";
 import { useCanvasDraw } from "@/features/board/hooks/useCanvasDraw";
 import { useWheelZoom } from "@/features/board/hooks/useWheelZoom";
@@ -156,7 +156,7 @@ function BoardRoom({ reference }: { reference: string }) {
           <ShapesLayer />
           <CodeBlocksLayer />
           <ClozeTestLayer />
-          <MarqueeMoveHandle />
+          <DrawingLayer />
         </BoardViewport>
       </div>
     </div>

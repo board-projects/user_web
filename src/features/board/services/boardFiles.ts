@@ -4,7 +4,10 @@ import { prepareBoardImport, serializeBoardArchive } from "../domain/boardArchiv
 export function downloadBoard(title: string, board: BoardContent) {
   const blob = new Blob([serializeBoardArchive(title, board)], { type: "application/json" });
   const href = URL.createObjectURL(blob);
-  const filename = title.trim().replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-").replace(/[. ]+$/g, "") || "board";
+  const safeTitle = Array.from(title.trim(), (character) =>
+    character.charCodeAt(0) < 32 || '<>:"/\\|?*'.includes(character) ? "-" : character,
+  ).join("");
+  const filename = safeTitle.replace(/-+/g, "-").replace(/[. -]+$/g, "") || "board";
   const link = document.createElement("a");
   link.href = href;
   link.download = `${filename}.json`;

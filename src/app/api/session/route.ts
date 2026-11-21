@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   ACCESS_COOKIE,
   REFRESH_COOKIE,
+  LEGACY_ACCESS_COOKIE,
+  getSessionCredentials,
   accessCookieOptions,
   authRequest,
 } from "@/features/auth/services/session.server";
 
-export async function POST(req: NextRequest) {
+function isSameOrigin(req: NextRequest) {
   const origin = req.headers.get("origin");
-  if (origin && origin !== req.nextUrl.origin && new URL(origin).host !== req.headers.get("host")) {
+  const host = req.headers.get("host");
+  return !origin || origin === req.nextUrl.origin || origin === `https://${host}` || origin === `http://${host}`;
+}
+
+export async function POST(req: NextRequest) {
+  if (!isSameOrigin(req)) {
     return NextResponse.json({ message: "Invalid origin" }, { status: 403 });
   }
 
@@ -38,5 +45,30 @@ export async function POST(req: NextRequest) {
     return response;
   } catch {
     return NextResponse.json({ message: "Unable to start session" }, { status: 502 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  if (!isSameOrigin(req)) {
+    return NextResponse.json({ message: "Invalid origin" }, { status: 403 });
+  }
+
+  try {
+    const { refresh_token } = getSessionCredentials(req);
+    if (refresh_token) {
+      const upstream = await authRequest("logout", { refresh_token });
+      if (!upstream.ok) throw new Error("Session revocation failed");
+    }
+
+    const response = new NextResponse(null, { status: 204 });
+    response.cookies.delete(ACCESS_COOKIE);
+    response.cookies.delete(REFRESH_COOKIE);
+    response.cookies.delete(LEGACY_ACCESS_COOKIE);
+    if (req.nextUrl.hostname === "dequizma.com" || req.nextUrl.hostname.endsWith(".dequizma.com")) {
+      response.headers.append("Set-Cookie", `${LEGACY_ACCESS_COOKIE}=; Domain=dequizma.com; Path=/; Max-Age=0; Secure; SameSite=Lax`);
+    }
+    return response;
+  } catch {
+    return NextResponse.json({ message: "Unable to sign out. Please retry." }, { status: 502 });
   }
 }

@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useLayoutEffect, useRef } from "react";
-import Link from "next/link";
 import { DEFAULT_SHEET } from "@/features/design/domain/sheetLayout";
 import { PageBackgrounds } from "./PageBackgrounds";
 import { PageItemsLayer } from "./PageItemsLayer";
-import { ToastContainer, toast, Bounce } from "react-toastify";
 
 import { useBoardStore } from "@/features/board/store/board.store";
 import { useBoardSocket } from "@/features/board/hooks/useBoardSocket";
@@ -20,7 +18,7 @@ import { usePan } from "@/features/board/hooks/usePan";
 import { BoardNavigation } from "@/features/board/ui/BoardNavigation";
 import { ItemPropertiesToolbar } from "@/features/board/ui/properties/ItemPropertiesToolbar";
 import { Toolbar } from "@/features/board/ui/Toolbar";
-import { InviteButton } from "@/features/board/ui/InviteButton";
+import { BoardMenu } from "./BoardMenu";
 import { CanvasStage } from "@/features/board/ui/CanvasStage";
 import { ConnectionsLayer } from "@/features/board/ui/ConnectionsLayer";
 import { ShapesLayer } from "@/features/board/ui/ShapesLayer";
@@ -82,21 +80,9 @@ export function BoardEditor({ reference }: { reference: string }) {
 
   useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY });
 
-  const inviteUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/board/${encodeURIComponent(reference)}`;
-
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-white">
-      <ToastContainer />
-      <div data-ui="true" className="absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50 flex max-w-[calc(100%-7rem)] flex-col items-start gap-1.5">
-        <Link href="/dashboard" className="inline-flex min-h-10 items-center rounded-lg border border-cyan-200 bg-white px-3 text-sm font-semibold text-cyan-900 shadow-sm hover:bg-cyan-50">
-          Dashboard
-        </Link>
-        {syncStatus !== "connected" && (
-          <div role="status" className="pointer-events-none rounded-md bg-stone-900 px-3 py-2 text-xs text-white">
-            {syncStatus === "offline" ? "Board sync offline. Reconnecting…" : "Connecting to board…"}
-          </div>
-        )}
-      </div>
+      <BoardMenu reference={reference} status={syncStatus} />
 
       <Toolbar
         onAddRect={() => addShape(createRect())}
@@ -116,18 +102,6 @@ export function BoardEditor({ reference }: { reference: string }) {
 
       <BoardNavigation viewport={boardAreaRef} />
       <ItemPropertiesToolbar viewport={boardAreaRef} />
-
-      <InviteButton
-        url={inviteUrl}
-        onCopied={() =>
-          toast.info("The link copied to clipboard", {
-            position: "bottom-center",
-            autoClose: 4000,
-            theme: "colored",
-            transition: Bounce,
-          })
-        }
-      />
 
       <div
         ref={boardAreaRef}

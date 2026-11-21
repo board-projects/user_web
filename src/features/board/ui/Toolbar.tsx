@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { FaCode, FaRegCircle, FaRegStar } from "react-icons/fa";
+import { FaCode, FaMousePointer, FaRegCircle, FaRegStar } from "react-icons/fa";
 import {
   TbRectangle,
   TbUsers,
@@ -21,7 +21,6 @@ type PresenceUser = {
   avatarUrl?: string;
 };
 
-type Tool = "pen" | "rect" | "circle" | "star" | "code" | "cloze_test";
 
 type ToolbarProps = {
   onAddCode?: () => void;
@@ -79,6 +78,7 @@ function IconButton(props: {
     <button
       type="button"
       title={props.title}
+      aria-pressed={props.active}
       disabled={props.disabled}
       onClick={props.onClick}
       data-ui="true"
@@ -138,8 +138,9 @@ function PresenceMini({ users = [], viewerCount }: { users?: PresenceUser[]; vie
 }
 
 export function Toolbar(props: ToolbarProps) {
-  const tool = useBoardStore((s) => (s as any).tool as Tool | undefined) ?? "pen";
-  const setTool = useBoardStore((s) => (s as any).setTool as ((t: Tool) => void) | undefined);
+  const tool = useBoardStore((s) => s.tool);
+  const setTool = useBoardStore((s) => s.setTool);
+  const panMode = useBoardStore((s) => s.panMode);
 
   const penColor = useBoardStore((s) => s.penColor);
   const setPenColor = useBoardStore((s) => (s as any).setPenColor as ((c: string) => void) | undefined);
@@ -147,7 +148,6 @@ export function Toolbar(props: ToolbarProps) {
   const penSize = useBoardStore((s) => s.penSize);
   const setPenSize = useBoardStore((s) => (s as any).setPenSize as ((n: number) => void) | undefined);
 
-  const isShapeTool = tool === "rect" || tool === "circle" || tool === "star";
   const [shapesOpen, setShapesOpen] = useState(false);
   const shapesBtnRef = useRef<HTMLDivElement | null>(null);
   const shapesPanelRef = useRef<HTMLDivElement | null>(null);
@@ -170,7 +170,6 @@ export function Toolbar(props: ToolbarProps) {
     }
   };
 
-  const setToolSafe = (t: Tool) => setTool?.(t);
 
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
@@ -183,11 +182,28 @@ export function Toolbar(props: ToolbarProps) {
         )}
       >
         <div className="flex items-center gap-2 p-2 lg:flex-col">
+          <IconButton
+            title="Select"
+            active={tool === "select" && !panMode}
+            onClick={() => {
+              setTool("select");
+              setPenOpen(false);
+              setShapesOpen(false);
+            }}
+          >
+            <FaMousePointer />
+          </IconButton>
+
           {/* ✅ Pen group (toggle + panel) */}
           <div ref={penBtnRef} className="relative" data-ui="true">
             <IconButton
-              title="Pen settings"
-              onClick={() => setPenOpen((v) => !v)}
+              title="Pen"
+              active={tool === "pen" && !panMode}
+              onClick={() => {
+                setTool("pen");
+                setShapesOpen(false);
+                setPenOpen((v) => !v);
+              }}
             >
               <TbPencil />
             </IconButton>
@@ -254,7 +270,7 @@ export function Toolbar(props: ToolbarProps) {
                   type="button"
                   className="w-full h-9 rounded-xl border border-stone-200/80 bg-white/70 text-xs font-semibold text-stone-700 hover:bg-white"
                   onClick={() => {
-                    setToolSafe("pen");
+                    setTool("pen");
                     setPenOpen(false);
                   }}
                 >
@@ -267,9 +283,8 @@ export function Toolbar(props: ToolbarProps) {
           {/* Code */}
           <IconButton
             title="Add code"
-            active={tool === "code"}
+
             onClick={() => {
-              setToolSafe("code");
               props.onAddCode?.();
             }}
           >
@@ -279,9 +294,8 @@ export function Toolbar(props: ToolbarProps) {
           { /* Cloze test */}
           <IconButton
             title="Add cloze test"
-            active={tool === "cloze_test"}
+
             onClick={() => {
-              setToolSafe("cloze_test");
               props.onAddClozeTest?.();
             }}
           >
@@ -292,15 +306,11 @@ export function Toolbar(props: ToolbarProps) {
           <div ref={shapesBtnRef} className="relative" data-ui="true">
             <IconButton
               title="Shapes"
-              active={isShapeTool}
+              active={shapesOpen}
               onClick={() => setShapesOpen((v) => !v)}
             >
               <TbShape />
             </IconButton>
-
-            {isShapeTool && (
-              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-stone-900 ring-2 ring-stone-100" />
-            )}
 
             {shapesOpen && (
               <div
@@ -316,9 +326,8 @@ export function Toolbar(props: ToolbarProps) {
               >
                 <IconButton
                   title="Rectangle"
-                  active={tool === "rect"}
+
                   onClick={() => {
-                    setToolSafe("rect");
                     props.onAddRect?.();
                     setShapesOpen(false);
                   }}
@@ -328,9 +337,8 @@ export function Toolbar(props: ToolbarProps) {
 
                 <IconButton
                   title="Circle"
-                  active={tool === "circle"}
+
                   onClick={() => {
-                    setToolSafe("circle");
                     props.onAddCircle?.();
                     setShapesOpen(false);
                   }}
@@ -340,9 +348,8 @@ export function Toolbar(props: ToolbarProps) {
 
                 <IconButton
                   title="Star"
-                  active={tool === "star"}
+
                   onClick={() => {
-                    setToolSafe("star");
                     props.onAddStar?.();
                     setShapesOpen(false);
                   }}

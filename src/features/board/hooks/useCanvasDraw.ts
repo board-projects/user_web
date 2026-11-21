@@ -2,6 +2,7 @@
 
 import React, { useCallback, useRef, useState } from "react";
 import { DrawLine, Point } from "../domain/types";
+import { isBoardInteractiveTarget } from "./boardPointer";
 import { useBoardStore } from "@/features/board/store/board.store";
 
 export function useCanvasDraw(args: {
@@ -18,16 +19,6 @@ export function useCanvasDraw(args: {
   const zoom = useBoardStore((s) => s.zoom);
   const panX = useBoardStore((s) => s.panX);
   const panY = useBoardStore((s) => s.panY);
-
-  const isInteractiveTarget = (target: EventTarget | null) => {
-    const el = target as HTMLElement | null;
-    if (!el) return false;
-
-    // هر چیزی که draggable/resizable هست
-    if (el.closest('[data-interactive="true"]')) return true;
-
-    return !!el.closest('[data-ui="true"]');
-  };
 
   const getWorldPos = useCallback(
     (e: React.PointerEvent): Point => {
@@ -84,10 +75,10 @@ export function useCanvasDraw(args: {
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       // فقط دکمه چپ
-      if (e.defaultPrevented || useBoardStore.getState().panMode || (e.buttons & 1) !== 1) return;
+      if (!e.isPrimary || e.defaultPrevented || useBoardStore.getState().panMode || useBoardStore.getState().tool !== "pen" || (e.buttons & 1) !== 1) return;
 
       // ✅ اگر روی shape/codeblock/ui کلیک شد، draw نکن (بذار Rnd کارشو بکنه)
-      if (connecting || isInteractiveTarget(e.target)) return;
+      if (connecting || isBoardInteractiveTarget(e.target)) return;
 
       e.preventDefault();
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -100,7 +91,7 @@ export function useCanvasDraw(args: {
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!drawing || !lastPos.current) return;
+      if (!e.isPrimary || !drawing || !lastPos.current || useBoardStore.getState().tool !== "pen") return;
       if ((e.buttons & 1) !== 1) return;
 
       e.preventDefault();
@@ -123,7 +114,7 @@ export function useCanvasDraw(args: {
   );
 
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!drawing) return;
+    if (!e.isPrimary || !drawing) return;
     e.preventDefault();
 
     setDrawing(false);

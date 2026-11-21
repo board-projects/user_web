@@ -5,6 +5,7 @@ import { Rnd } from "react-rnd";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { useBoardStore } from "../store/board.store";
+import { selectionKey } from "../store/slices/selection.slice";
 import type { EditorView } from "@codemirror/view";
 
 export function CodeBlocksLayer() {
@@ -15,6 +16,7 @@ export function CodeBlocksLayer() {
   const zoom = useBoardStore((s) => s.zoom);
 
   const selection = useBoardStore((s) => s.selection);
+  const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
   const select = useBoardStore((s) => s.select);
   const clearSelection = useBoardStore((s) => s.clearSelection);
 
@@ -47,12 +49,15 @@ export function CodeBlocksLayer() {
     >
       {codeBlocks.map((block) => {
         const selected = selection?.type === "codeblock" && selection.id === block.id;
+        const key = selectionKey("codeblock", block.id);
+        const inMarquee = marqueeItems?.has(key);
         const isEditing = editingCodeBlockId === block.id;
 
         return (
           <Rnd
             key={block.id}
             data-interactive="true"
+            data-board-selection-key={key}
             scale={zoom}
             size={{ width: block.width, height: block.height }}
             position={{ x: block.x, y: block.y }}
@@ -88,7 +93,7 @@ export function CodeBlocksLayer() {
                 width: "100%",
                 height: "100%",
                 position: "relative",
-                outline: selected ? "2px solid rgba(0,0,0,0.6)" : "none",
+                outline: inMarquee ? "2px solid #2563eb" : selected ? "2px solid rgba(0,0,0,0.6)" : "none",
                 outlineOffset: 2,
                 borderRadius: 8,
                 overflow: "hidden",

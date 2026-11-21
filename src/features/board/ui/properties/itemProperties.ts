@@ -1,3 +1,4 @@
+import { TABLE_LIMITS } from "../../domain/tables";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
 import { clozeConnectable } from "../../domain/connectableItems";
 import { SHEET_LIMITS, SHEET_PRESETS } from "@/features/design/domain/sheetLayout";
@@ -19,6 +20,7 @@ export function getSelectedBoardItem(state: BoardState, selection: Selection) {
   switch (selection?.type) {
     case "shape": return state.shapes.find((item) => item.id === selection.id);
     case "codeblock": return state.codeBlocks.find((item) => item.id === selection.id);
+    case "table": return state.tables.find((item) => item.id === selection.id);
     case "page": return state.sheets.find((item) => item.id === selection.id);
     case "cloze": return state.clozeTests.find((item) => item.id === selection.id);
     case "connection": return state.connections.find((item) => item.id === selection.id);
@@ -94,6 +96,18 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
           { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
           ...sizeFields(clozeConnectable(item), (size) => state.updateClozeTest(id, size), 140, 100),
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
+        ],
+      };
+    }
+    case "table": {
+      const table = state.tables.find((item) => item.id === id);
+      if (!table) return null;
+      return {
+        fields: [
+          ...sizeFields(table, (size) => state.resizeTable(id, size),
+            table.columns.length * TABLE_LIMITS.minTrack, table.rows.length * TABLE_LIMITS.minTrack, false, TABLE_LIMITS.maxSize),
+          ...(table.rows.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add row", run: () => state.addTableTrack(id, "rows") }] : []),
+          ...(table.columns.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add column", run: () => state.addTableTrack(id, "columns") }] : []),
         ],
       };
     }

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaCode, FaMousePointer, FaRegCircle, FaRegStar } from "react-icons/fa";
 import {
   TbRectangle,
+  TbTable,
   TbUsers,
   TbCopy,
   TbLock,
@@ -14,6 +15,8 @@ import {
   TbSquareRoundedLetterT,
 } from "react-icons/tb";
 import { useBoardStore } from "@/features/board/store/board.store";
+
+import { TableCreatePanel } from "./TableCreatePanel";
 
 type PresenceUser = {
   id: string;
@@ -30,6 +33,7 @@ type ToolbarProps = {
   onAddStar?: () => void;
   onAddClozeTest?: () => void;
   onAddPage?: () => void;
+  onAddTable?: (rows: number, columns: number) => void;
 
   shareUrl?: string;
   onCopyLink?: () => void;
@@ -85,7 +89,7 @@ function IconButton(props: {
       onClick={props.onClick}
       data-ui="true"
       className={cn(
-        "grid place-items-center h-10 w-10 rounded-xl",
+        "grid place-items-center h-10 w-9 rounded-xl sm:w-10",
         "border backdrop-blur",
         "shadow-[0_1px_0_rgba(0,0,0,0.04)]",
         "transition active:scale-[0.98]",
@@ -153,6 +157,10 @@ export function Toolbar(props: ToolbarProps) {
   const penSize = useBoardStore((s) => s.penSize);
   const setPenSize = useBoardStore((s) => (s as any).setPenSize as ((n: number) => void) | undefined);
 
+  const tableRef = useRef<HTMLDivElement | null>(null);
+  const [tableOpen, setTableOpen] = useState(false);
+  useOnClickOutside([tableRef], () => setTableOpen(false), tableOpen);
+
   const [shapesOpen, setShapesOpen] = useState(false);
   const shapesBtnRef = useRef<HTMLDivElement | null>(null);
   const shapesPanelRef = useRef<HTMLDivElement | null>(null);
@@ -186,7 +194,7 @@ export function Toolbar(props: ToolbarProps) {
           "shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
         )}
       >
-        <div className="flex items-center gap-2 p-2 lg:flex-col">
+        <div className="flex max-w-[calc(100vw-1rem)] items-center gap-1 p-1 sm:gap-2 sm:p-2 lg:flex-col">
           <IconButton
             title="Select"
             active={tool === "select" && !panMode}
@@ -310,6 +318,22 @@ export function Toolbar(props: ToolbarProps) {
           <IconButton title="Add page item" onClick={props.onAddPage}>
             <TbFileDescription />
           </IconButton>
+
+          {props.onAddTable && <div ref={tableRef} className="relative" data-ui="true" onKeyDown={(event) => {
+            if (event.key === "Escape") setTableOpen(false);
+          }}>
+            <IconButton title="Add table" active={tableOpen} onClick={() => setTableOpen((open) => !open)}>
+              <TbTable />
+            </IconButton>
+            {tableOpen && (
+              <div className="absolute bottom-12 right-0 max-h-[calc(100dvh-5rem)] w-44 overflow-y-auto rounded-2xl border border-stone-200 bg-white shadow-lg lg:bottom-auto lg:left-12 lg:right-auto lg:top-0">
+                <TableCreatePanel onCreate={(rows, columns) => {
+                  props.onAddTable?.(rows, columns);
+                  setTableOpen(false);
+                }} />
+              </div>
+            )}
+          </div>}
 
           {/* Shapes group */}
           <div ref={shapesBtnRef} className="relative" data-ui="true">

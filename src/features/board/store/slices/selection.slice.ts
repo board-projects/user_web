@@ -9,6 +9,7 @@ export type Selection =
   | { type: "codeblock"; id: string }
   | { type: "cloze"; id: string }
   | { type: "page"; id: string }
+  | { type: "table"; id: string }
   | null;
 
 export type MarqueeSelection = {
@@ -102,11 +103,12 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
 
         const has = (type: Exclude<Selection, null>["type"], id: string) =>
           items?.has(selectionKey(type, id)) ?? false;
-        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id) || has("page", id);
+        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id) || has("page", id) || has("table", id);
         return {
           shapes: state.shapes.filter((shape) => !has("shape", shape.id)),
           codeBlocks: state.codeBlocks.filter((block) => !has("codeblock", block.id)),
           clozeTests: state.clozeTests.filter((cloze) => !has("cloze", cloze.id)),
+          tables: state.tables.filter((table) => !has("table", table.id)),
           sheets: state.sheets.filter((page) => !has("page", page.id)),
           connections: state.connections.filter((connection) =>
             !has("connection", connection.id) &&
@@ -138,7 +140,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       });
       const moveItems = <T extends Point & { id: string }>(
         collection: T[],
-        type: "shape" | "codeblock" | "cloze" | "page",
+        type: "shape" | "codeblock" | "cloze" | "page" | "table",
       ) => {
         const next = collection.map((item) => items?.has(selectionKey(type, item.id)) ? translate(item) : item);
         return next.some((item, index) => item !== collection[index]) ? next : collection;
@@ -156,6 +158,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         shapes: moveItems(state.shapes, "shape"),
         codeBlocks: moveItems(state.codeBlocks, "codeblock"),
         clozeTests: moveItems(state.clozeTests, "cloze"),
+        tables: moveItems(state.tables, "table"),
         sheets: moveItems(state.sheets, "page"),
         lines: nextLines,
         marqueeSelection: selected ? {

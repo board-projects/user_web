@@ -89,15 +89,25 @@ export function PageItemActions({ reference, itemId }: {
       </button>
       {link && (
         <>
-          <a className={`${propertyButtonClass} inline-flex items-center`} href={link} target="_blank" rel="noreferrer">Open test</a>
+          <label className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-stone-700">
+            Public link
+            <input
+              type="url"
+              value={link}
+              readOnly
+              onFocus={(event) => event.currentTarget.select()}
+              className="h-9 w-48 rounded-md border border-stone-300 bg-white px-2 text-sm text-stone-900 sm:w-64"
+            />
+          </label>
+          <a className={`${propertyButtonClass} inline-flex items-center`} href={link} target="_blank" rel="noreferrer">Open public page</a>
           <button type="button" className={propertyButtonClass} onClick={async () => {
             try {
               await navigator.clipboard.writeText(link);
               setCopied(true);
             } catch {
-              setError("Open the test page to copy its address.");
+              setError("Select the public link to copy it manually.");
             }
-          }}>{copied ? "Copied" : "Copy link"}</button>
+          }}>{copied ? "Copied" : "Copy public link"}</button>
         </>
       )}
       {signInRequired && (

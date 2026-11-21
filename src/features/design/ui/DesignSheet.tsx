@@ -3,7 +3,7 @@ import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
 import { connectorArrow, connectorDashArray, connectorMidpoint, connectorPath, getConnectorPoints } from "@/features/board/domain/connectorGeometry";
 import { STAR_POINTS } from "@/features/board/domain/shapeGeometry";
-import type { SheetLayout } from "../domain/sheetLayout";
+import { SHEET_DOT_GRID, type SheetLayout } from "../domain/sheetLayout";
 
 export function DesignSheet({ layout, board, title }: { layout: SheetLayout; board: BoardContent; title: string }) {
   const gridId = useId();
@@ -20,8 +20,8 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
       aria-label={title}
     >
       <defs>
-        <pattern id={gridId} width={16} height={16} patternUnits="userSpaceOnUse">
-          <circle cx={1} cy={1} r={0.8} fill="#94a3b8" />
+        <pattern id={gridId} width={SHEET_DOT_GRID.step} height={SHEET_DOT_GRID.step} patternUnits="userSpaceOnUse">
+          <circle cx={SHEET_DOT_GRID.step / 2} cy={SHEET_DOT_GRID.step / 2} r={SHEET_DOT_GRID.radius} fill={SHEET_DOT_GRID.color} />
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill={layout.backgroundColor ?? "#ffffff"} />

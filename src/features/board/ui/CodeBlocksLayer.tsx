@@ -5,10 +5,12 @@ import { Rnd } from "react-rnd";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { useBoardStore } from "../store/board.store";
+import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 import type { EditorView } from "@codemirror/view";
 
 export function CodeBlocksLayer() {
+  const dragItem = useBoardItemDrag();
   const codeBlocks = useBoardStore((s) => s.codeBlocks);
   const updateCodeBlock = useBoardStore((s) => s.updateCodeBlock);
   const removeCodeBlock = useBoardStore((s) => s.removeCodeBlock);
@@ -63,15 +65,11 @@ export function CodeBlocksLayer() {
             position={{ x: block.x, y: block.y }}
             minWidth={200}
             minHeight={100}
-            onDragStart={() => {
-              stopEditingCodeBlock();
-              select({ type: "codeblock", id: block.id });
-            }}
+            {...dragItem({ type: "codeblock", id: block.id }, block, (position) => updateCodeBlock(block.id, position))}
             onResizeStart={() => {
               stopEditingCodeBlock();
               select({ type: "codeblock", id: block.id });
             }}
-            onDragStop={(_, d) => updateCodeBlock(block.id, { x: d.x, y: d.y })}
             onResizeStop={(_, __, ref, ___, position) =>
               updateCodeBlock(block.id, {
                 x: position.x,
@@ -84,7 +82,7 @@ export function CodeBlocksLayer() {
             // ✅ اینجا دیگه stopEditingCodeBlock نزن! فقط select کن
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
-              select({ type: "codeblock", id: block.id });
+              selectBoardItem({ type: "codeblock", id: block.id });
               if (!isEditing) blurActiveElement(); // وقتی ادیت نیستیم، فوکوس رو بگیر تا Delete کار کنه
             }}
           >
@@ -100,7 +98,7 @@ export function CodeBlocksLayer() {
               }}
               onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
                 e.stopPropagation();
-                select({ type: "codeblock", id: block.id });
+                selectBoardItem({ type: "codeblock", id: block.id });
                 if (!isEditing) blurActiveElement();
               }}
               onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -152,7 +150,7 @@ export function CodeBlocksLayer() {
                   }}
                   onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
                     e.stopPropagation();
-                    select({ type: "codeblock", id: block.id });
+                    selectBoardItem({ type: "codeblock", id: block.id });
                     blurActiveElement();
                   }}
                   onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) => {

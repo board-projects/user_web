@@ -84,12 +84,14 @@ function IconButton(props: {
       data-ui="true"
       className={cn(
         "grid place-items-center h-10 w-10 rounded-xl",
-        "border border-stone-200/80 bg-white/70 backdrop-blur",
+        "border backdrop-blur",
         "shadow-[0_1px_0_rgba(0,0,0,0.04)]",
         "transition active:scale-[0.98]",
-        "hover:bg-white hover:border-stone-300",
+        
         "focus:outline-none focus:ring-2 focus:ring-stone-300 focus:ring-offset-2 focus:ring-offset-stone-100",
-        props.active && "bg-stone-900 text-white border-stone-900 hover:bg-stone-900",
+        props.active
+          ? "border-stone-900 bg-stone-900 text-white hover:bg-stone-800"
+          : "border-stone-200/80 bg-white/70 text-stone-900 hover:border-stone-300 hover:bg-white",
         props.disabled && "opacity-40 cursor-not-allowed"
       )}
     >

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ClozeTest } from "../domain/types";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
+import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 
 export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
@@ -11,7 +12,7 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
     const [isEditing, setIsEditing] = useState(false);
     const zoom = useBoardStore((s) => s.zoom);
     const selection = useBoardStore((s) => s.selection);
-    const select = useBoardStore((s) => s.select);
+    const dragItem = useBoardItemDrag();
     const updateClozeTest = useBoardStore((s) => s.updateClozeTest);
 
     const key = selectionKey("cloze", id);
@@ -45,10 +46,10 @@ export const ClozeTestBlock = ({ id, content, x, y }: ClozeTest) => {
             scale={zoom}
             position={{ x, y }}
             enableResizing={false}
-            onDragStop={(e, d) => updateClozeTest(id, { x: d.x, y: d.y })}
+            {...dragItem({ type: "cloze", id }, { x, y }, (position) => updateClozeTest(id, position))}
             onPointerDown={(e: { stopPropagation: () => void; }) => {
                 e.stopPropagation();
-                select({ type: "cloze", id });
+                selectBoardItem({ type: "cloze", id });
             }}
             disableDragging={isEditing}
             className={`rounded-lg border-2 bg-white p-4 shadow-lg z-[50] ${

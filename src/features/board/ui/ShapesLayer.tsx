@@ -4,12 +4,10 @@ import React from "react";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 
+import { ShapeConnectionHandle } from "./ShapeConnectionHandle";
 import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
 
 export function ShapesLayer() {
-  const connecting = useBoardStore((s) => s.connecting);
-  const connectionSourceId = useBoardStore((s) => s.connectionSourceId);
-  const pickConnectionShape = useBoardStore((s) => s.pickConnectionShape);
   const connections = useBoardStore((s) => s.connections);
   const connectedIds = React.useMemo(
     () => new Set(connections.flatMap(({ sourceId, targetId }) => [sourceId, targetId])),
@@ -56,25 +54,23 @@ export function ShapesLayer() {
             onDragStop={updatePosition}
             onResize={connected ? updateSize : undefined}
             onResizeStop={updateSize}
-            disableDragging={connecting}
-            enableResizing={!connecting}
+            cancel="[data-connection-handle]"
+            enableResizing
             lockAspectRatio={shape.type === "circle" || isStar}
             className="pointer-events-auto"
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
-              if (connecting) pickConnectionShape(shape.id);
-              else select({ type: "shape", id: shape.id });
+              select({ type: "shape", id: shape.id });
             }}
           >
             <div
+              data-shape-id={shape.id}
               style={{
                 width: "100%",
                 height: "100%",
                 backgroundColor: isStar ? "transparent" : shape.color,
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
-                outline: connectionSourceId === shape.id
-                  ? "2px solid #2563eb"
-                  : selected ? "2px solid rgba(0,0,0,0.6)" : "none",
+                outline: selected ? "2px solid rgba(0,0,0,0.6)" : "none",
                 outlineOffset: 2,
                 position: "relative",
               }}
@@ -86,6 +82,7 @@ export function ShapesLayer() {
                   style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
                 />
               )}
+              {selected && <ShapeConnectionHandle shapeId={shape.id} />}
               {selected && (
                 <button
                   type="button"

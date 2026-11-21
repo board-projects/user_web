@@ -22,7 +22,7 @@ export type BoardState = PenSlice &
 export const useBoardStore = create<BoardState>((set, get, store) => ({
   ...createPenSlice(set),
   ...createViewportSlice(set, get),
-  ...createShapesSlice(set),
+  ...createShapesSlice(set, get, store),
   ...createBlocksSlice(set),
   ...createLinesSlice(set),
   ...createSelectionSlice(set, get, store),

@@ -15,6 +15,10 @@ function getBoardPoint(event: PointerEvent<HTMLButtonElement>) {
 }
 
 export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: ShapePort }) {
+  const snapped = useBoardStore((state) => {
+    const target = state.connectionDraft?.snapTarget;
+    return target?.id === shape.id && target.port === port;
+  });
   const position = getShapePortPoint(shape, port);
   const { startConnection, moveConnection, finishConnection, cancelConnecting } =
     useBoardStore.getState();
@@ -25,7 +29,7 @@ export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: Sha
       data-connection-handle={port}
       aria-label={`Drag to connect from the ${port} side`}
       title={`Connect from ${port}`}
-      className="absolute z-30 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-blue-600 bg-white shadow cursor-crosshair"
+      className={`absolute z-30 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-blue-600 shadow cursor-crosshair ${snapped ? "bg-blue-600 ring-4 ring-blue-200" : "bg-white"}`}
       style={{ left: position.x - shape.x, top: position.y - shape.y }}
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => {
@@ -50,14 +54,14 @@ export function ShapeConnectionHandle({ shape, port }: { shape: Shape; port: Sha
         const targetShape = useBoardStore.getState().shapes.find(({ id }) => id === targetId);
         const point = getBoardPoint(event);
         if (!targetShape || !point) {
-          finishConnection(null);
+          finishConnection(point, null);
           return;
         }
 
         const handle = target?.closest<HTMLElement>("[data-connection-handle]");
         const targetPort = SHAPE_PORTS.find((side) => handle?.dataset.connectionHandle === side)
           ?? getNearestShapePort(targetShape, point);
-        finishConnection({ id: targetShape.id, port: targetPort });
+        finishConnection(point, { id: targetShape.id, port: targetPort });
       }}
       onLostPointerCapture={cancelConnecting}
     />

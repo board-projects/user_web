@@ -1,11 +1,15 @@
 import type { StateCreator } from "zustand";
 import type { Point, ShapeConnection, ShapePort } from "../../domain/types";
+import { findNearbyShapePort, type ShapePortTarget } from "../../domain/shapeGeometry";
 import type { BoardState } from "../board.store";
+
+const SNAP_RADIUS_PX = 24;
 
 type ConnectionDraft = {
   sourceId: string;
   sourcePort: ShapePort;
   pointer: Point;
+  snapTarget: ShapePortTarget | null;
 };
 
 export type ConnectionsSlice = {
@@ -13,10 +17,14 @@ export type ConnectionsSlice = {
   connectionDraft: ConnectionDraft | null;
   startConnection: (sourceId: string, sourcePort: ShapePort, pointer: Point) => void;
   moveConnection: (pointer: Point) => void;
-  finishConnection: (target: { id: string; port: ShapePort } | null) => void;
+  finishConnection: (pointer: Point | null, fallbackTarget: ShapePortTarget | null) => void;
   cancelConnecting: () => void;
   removeConnection: (id: string) => void;
 };
+
+function getSnapTarget(state: BoardState, sourceId: string, pointer: Point) {
+  return findNearbyShapePort(state.shapes, sourceId, pointer, SNAP_RADIUS_PX / state.zoom);
+}
 
 export const createConnectionsSlice: StateCreator<BoardState, [], [], ConnectionsSlice> = (set) => ({
   connections: [],
@@ -24,21 +32,28 @@ export const createConnectionsSlice: StateCreator<BoardState, [], [], Connection
 
   startConnection: (sourceId, sourcePort, pointer) => set((state) =>
     state.shapes.some((shape) => shape.id === sourceId)
-      ? { connectionDraft: { sourceId, sourcePort, pointer } }
+      ? { connectionDraft: { sourceId, sourcePort, pointer, snapTarget: null } }
       : state,
   ),
 
   moveConnection: (pointer) => set((state) =>
     state.connectionDraft
-      ? { connectionDraft: { ...state.connectionDraft, pointer } }
+      ? {
+          connectionDraft: {
+            ...state.connectionDraft,
+            pointer,
+            snapTarget: getSnapTarget(state, state.connectionDraft.sourceId, pointer),
+          },
+        }
       : state,
   ),
 
-  finishConnection: (target) => set((state) => {
+  finishConnection: (pointer, fallbackTarget) => set((state) => {
     const draft = state.connectionDraft;
     if (!draft) return state;
 
     const { sourceId, sourcePort } = draft;
+    const target = pointer ? getSnapTarget(state, sourceId, pointer) ?? fallbackTarget : null;
     if (!target || sourceId === target.id || !state.shapes.some((shape) => shape.id === target.id)) {
       return { connectionDraft: null };
     }

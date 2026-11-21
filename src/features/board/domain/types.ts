@@ -30,6 +30,9 @@ export type ShapeConnection = {
   sourcePort: ShapePort;
   targetId: string;
   targetPort: ShapePort;
+  color?: string;
+  size?: number;
+  dashed?: boolean;
 };
 
 export type CodeBlock = {

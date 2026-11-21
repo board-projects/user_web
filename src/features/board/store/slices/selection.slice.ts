@@ -20,6 +20,8 @@ export const selectionKey = (type: Exclude<Selection, null>["type"], id: string)
 export type SelectionSlice = {
   selection: Selection;
   marqueeSelection: MarqueeSelection | null;
+  styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size">>) => void;
+  removeSelectedLines: () => void;
   moveMarquee: (delta: Point) => void;
   selectMarquee: (selection: MarqueeSelection) => void;
   select: (sel: Exclude<Selection, null>) => void;
@@ -38,6 +40,29 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
   (set) => ({
     selection: null,
     marqueeSelection: null,
+
+    styleSelectedLines: (style) => set((state) => {
+      const selected = state.marqueeSelection;
+      if (!selected?.lines.size) return state;
+
+      const lines = new Set<DrawLine>();
+      const updated = state.lines.map((line) => {
+        if (!selected.lines.has(line)) return line;
+        const next = { ...line, ...style };
+        lines.add(next);
+        return next;
+      });
+      return { lines: updated, marqueeSelection: { ...selected, lines } };
+    }),
+
+    removeSelectedLines: () => set((state) => {
+      const selected = state.marqueeSelection;
+      if (!selected?.lines.size) return state;
+      return {
+        lines: state.lines.filter((line) => !selected.lines.has(line)),
+        marqueeSelection: null,
+      };
+    }),
 
     moveMarquee: (delta) => set((state) => {
       const selected = state.marqueeSelection;

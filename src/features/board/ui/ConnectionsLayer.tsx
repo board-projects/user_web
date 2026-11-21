@@ -45,12 +45,14 @@ export function ConnectionsLayer() {
         const points = { x1: from.x, y1: from.y, x2: to.x, y2: to.y };
         const selected = (selection?.type === "connection" && selection.id === connection.id)
           || marqueeItems?.has(selectionKey("connection", connection.id));
+        const width = connection.size ?? 2;
         const selectConnection = () => select({ type: "connection", id: connection.id });
 
         return (
           <g
             key={connection.id}
             data-interactive="true"
+            data-board-selection-key={selectionKey("connection", connection.id)}
             role="button"
             aria-label="Select shape connector"
             aria-pressed={selected}
@@ -64,16 +66,25 @@ export function ConnectionsLayer() {
               }
             }}
           >
+            {selected && (
+              <line
+                {...points}
+                stroke="#93c5fd"
+                strokeWidth={width + 4}
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
             <line
               {...points}
-              stroke={selected ? "#2563eb" : "#44403c"}
-              strokeWidth={selected ? 3 : 2}
+              stroke={connection.color ?? "#44403c"}
+              strokeWidth={width}
+              strokeDasharray={connection.dashed ? "6 4" : undefined}
               vectorEffect="non-scaling-stroke"
             />
             <line
               {...points}
               stroke="transparent"
-              strokeWidth={16}
+              strokeWidth={Math.max(16, width)}
               vectorEffect="non-scaling-stroke"
               style={{ pointerEvents: connecting ? "none" : "stroke", cursor: "pointer" }}
             />

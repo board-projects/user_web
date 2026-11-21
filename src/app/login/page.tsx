@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useAuthStore } from "@/features/auth/store/auth.store";
-import { isPublishResumeId, openPublishSignInChannel, PUBLISH_RESUME_PARAM } from "@/features/auth/services/publishSignIn";
 import { authApi } from "@/features/auth/services/auth.api";
 
 export default function LoginPage() {
@@ -10,7 +9,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
-  const [publishSignInComplete, setPublishSignInComplete] = useState(false);
 
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
 
@@ -47,17 +45,7 @@ export default function LoginPage() {
       setLoggedIn(true, res.user ?? { email });
 
       const { origin, search } = window.location;
-      const params = new URLSearchParams(search);
-      const resumeId = params.get(PUBLISH_RESUME_PARAM);
-      if (isPublishResumeId(resumeId)) {
-        const channel = openPublishSignInChannel(resumeId);
-        channel?.postMessage("signed-in");
-        channel?.close();
-        setPublishSignInComplete(true);
-        return;
-      }
-
-      const next = params.get("next");
+      const next = new URLSearchParams(search).get("next");
       if (next?.startsWith("/board/")) {
         const destination = new URL(next, origin);
         if (destination.origin === origin && destination.pathname.startsWith("/board/")) {
@@ -94,16 +82,6 @@ export default function LoginPage() {
     }
   };
 
-  if (publishSignInComplete) {
-    return (
-      <main className="flex min-h-dvh items-center justify-center bg-gray-50 px-4">
-        <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-xl">
-          <h1 className="text-2xl font-bold text-gray-900">Signed in</h1>
-          <p className="mt-3 text-gray-700">Return to the original board tab to see the public link. If Publish did not resume, press Publish there again.</p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-gray-50 px-4 py-6">

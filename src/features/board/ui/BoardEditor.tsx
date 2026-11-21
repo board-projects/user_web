@@ -115,7 +115,7 @@ export function BoardEditor({ reference }: { reference: string }) {
       />
 
       <BoardNavigation viewport={boardAreaRef} />
-      <ItemPropertiesToolbar viewport={boardAreaRef} reference={reference} />
+      <ItemPropertiesToolbar viewport={boardAreaRef} />
 
       <InviteButton
         url={inviteUrl}

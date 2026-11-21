@@ -103,6 +103,6 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
     stopEditingCodeBlock: () => set(() => ({ editingCodeBlockId: null })),
 
     editingClozeTestId: null,
-    startEditingClozeTest: (id) => set(() => ({ editingClozeId: id })),
-    stopEditingClozeTest: () => set(() => ({ editingClozeId: null })),
+    startEditingClozeTest: (id) => set(() => ({ editingClozeTestId: id })),
+    stopEditingClozeTest: () => set(() => ({ editingClozeTestId: null })),
   });

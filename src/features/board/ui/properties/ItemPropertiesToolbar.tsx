@@ -9,9 +9,8 @@ import { getItemProperties, getSelectedBoardItem } from "./itemProperties";
 import { ItemPropertyControl, propertyButtonClass } from "./ItemPropertyControl";
 import { getPropertiesToolbarPosition } from "./toolbarPosition";
 
-export function ItemPropertiesToolbar({ viewport, reference }: {
+export function ItemPropertiesToolbar({ viewport }: {
   viewport: RefObject<HTMLElement | null>;
-  reference: string;
 }) {
   const selection = useBoardStore((state) => state.selection);
   const selectedItem = useBoardStore((state) => getSelectedBoardItem(state, state.selection));
@@ -85,7 +84,7 @@ export function ItemPropertiesToolbar({ viewport, reference }: {
     >
       {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
       {selection?.type === "page" && (
-        <PageItemActions key={selection.id} reference={reference} itemId={selection.id} />
+        <PageItemActions key={selection.id} itemId={selection.id} />
       )}
       <button
         type="button"

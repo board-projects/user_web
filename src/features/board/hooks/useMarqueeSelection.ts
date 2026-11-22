@@ -81,10 +81,13 @@ export function useMarqueeSelection() {
     ));
   };
 
-  const cancel = (event: BoardPointerEvent) => {
-    if (gesture.current?.id !== event.pointerId) return;
+  const cancelGesture = () => {
     gesture.current = null;
     setBox(null);
+  };
+
+  const cancel = (event: BoardPointerEvent) => {
+    if (gesture.current?.id === event.pointerId) cancelGesture();
   };
 
   const onPointerUp = (event: BoardPointerEvent) => {
@@ -100,5 +103,5 @@ export function useMarqueeSelection() {
     }
   };
 
-  return { box, onPointerDown, onPointerMove, onPointerUp, cancel };
+  return { box, onPointerDown, onPointerMove, onPointerUp, cancel, cancelGesture };
 }

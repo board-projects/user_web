@@ -111,20 +111,24 @@ export function useCanvasDraw(args: {
     [drawing, getWorldPos, drawLine, args],
   );
 
+  const cancelDrawing = useCallback(() => {
+    setDrawing(false);
+    lastPos.current = null;
+    strokeId.current = null;
+  }, []);
+
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!e.isPrimary || !drawing) return;
     e.preventDefault();
 
-    setDrawing(false);
-    lastPos.current = null;
-    strokeId.current = null;
+    cancelDrawing();
 
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
       // intentionally empty: releasePointerCapture may throw if not captured
     }
-  }, [drawing]);
+  }, [drawing, cancelDrawing]);
 
-  return { drawLine, onPointerDown, onPointerMove, onPointerUp };
+  return { drawLine, onPointerDown, onPointerMove, onPointerUp, cancelDrawing };
 }

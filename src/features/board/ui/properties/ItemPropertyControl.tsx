@@ -16,6 +16,18 @@ export function ItemPropertyControl({ field, compact = false }: { field: ItemPro
     return <button type="button" className={propertyButtonClass} onClick={field.run}>{field.label}</button>;
   }
 
+  if (field.kind === "range") {
+    return (
+      <label className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-stone-700">
+        {field.label}
+        <input type="range" aria-label={field.label} min={0} max={field.max} value={field.value}
+          className="w-20 accent-blue-600 sm:w-24"
+          onChange={(event) => field.change(event.currentTarget.valueAsNumber)} />
+        <span aria-hidden="true" className="w-8 text-right tabular-nums">{field.value}%</span>
+      </label>
+    );
+  }
+
   if (field.kind === "toggle") {
     return (
       <button type="button"

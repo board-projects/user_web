@@ -4,6 +4,7 @@ import React from "react";
 import { useTextEditingStore } from "../store/textEditing.store";
 import { InlineItemTextEditor } from "./InlineItemTextEditor";
 import { ShapeRotationHandle } from "./ShapeRotationHandle";
+import { roundedShapePath } from "../domain/shapeCorners";
 import { normalizeRotation } from "../domain/shapeRotation";
 import { ShapeText } from "./ItemText";
 import { Rnd } from "react-rnd";
@@ -42,7 +43,8 @@ export function ShapesLayer() {
         const key = selectionKey("shape", shape.id);
         const inMarquee = marqueeItems?.has(key);
 
-        const clipPath = polygonClip(shape.type);
+        const roundedPath = roundedShapePath(shape.type, shape.cornerRounding);
+        const clipPath = roundedPath ? undefined : polygonClip(shape.type);
         const area = shapeTextArea(shape.type);
         const rotation = normalizeRotation(shape.rotation);
 
@@ -85,13 +87,19 @@ export function ShapesLayer() {
               style={{
                 width: "100%",
                 height: "100%",
-                backgroundColor: clipPath ? "transparent" : shape.color,
+                backgroundColor: clipPath || roundedPath ? "transparent" : shape.color,
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
                 ...itemSelectionStyle(selected || !!inMarquee),
                 position: "relative",
                 transform: rotation ? `rotate(${rotation}deg)` : undefined,
               }}
             >
+              {roundedPath && (
+                <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full"
+                  viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <path d={roundedPath} fill={shape.color} />
+                </svg>
+              )}
               {clipPath && (
                 <div
                   aria-hidden="true"

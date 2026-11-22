@@ -1,7 +1,7 @@
 import { SHAPE_PORTS, type Point, type ShapePort } from "./types";
 import type { ConnectableItem } from "./connectableItems";
 import { rotateVector } from "./shapeRotation";
-import { shapeDefinitions } from "./shapeDefinitions";
+import { shapeBoundaryVertices } from "./shapeCorners";
 
 const center = (shape: ConnectableItem): Point => ({
   x: shape.x + shape.width / 2,
@@ -14,7 +14,7 @@ function getShapeBoundaryPoint(shape: ConnectableItem, toward: Point): Point {
   const dy = (toward.y - midpoint.y) / (shape.height / 2);
   if ((!dx && !dy) || !Number.isFinite(dx) || !Number.isFinite(dy)) return midpoint;
 
-  const points = shapeDefinitions[shape.type].points;
+  const points = shapeBoundaryVertices(shape.type, shape.cornerRounding);
   let distance = 1 / Math.max(Math.abs(dx), Math.abs(dy));
   if (shape.type === "circle") {
     distance = 1 / Math.hypot(dx, dy);

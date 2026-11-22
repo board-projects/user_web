@@ -36,6 +36,7 @@ export type Shape = {
   id: string;
   type: ShapeType;
   rotation?: number;
+  cornerRounding?: number;
   itemLabel?: string;
   textRuns?: TextRun[];
   label?: string;

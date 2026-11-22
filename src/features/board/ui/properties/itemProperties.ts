@@ -1,4 +1,5 @@
 import { TABLE_LIMITS } from "../../domain/tables";
+import { MAX_CORNER_ROUNDING, normalizeCornerRounding } from "../../domain/shapeCorners";
 import { normalizeRotation } from "../../domain/shapeRotation";
 import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, validTextColor, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
@@ -9,6 +10,7 @@ import type { BoardState } from "../../store/board.store";
 import type { Selection } from "../../store/slices/selection.slice";
 
 export type ItemProperty =
+  | { kind: "range"; label: string; value: number; max: number; change: (value: number) => void }
   | { kind: "number"; label: string; value: number; min: number; max: number; step?: number; change: (value: number) => void }
   | { kind: "color" | "text"; label: string; value: string; maxLength?: number; change: (value: string) => void }
   | { kind: "select"; label: string; value: string; options: readonly string[]; change: (value: string) => void }
@@ -119,6 +121,10 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
         fields: [
           labelField(item.itemLabel, (itemLabel) => state.updateShape(id, { itemLabel })),
           colorField(item.color, (color) => state.updateShape(id, { color })),
+          ...(item.type === "circle" ? [] : [{
+            kind: "range" as const, label: "Corner rounding", value: normalizeCornerRounding(item.cornerRounding),
+            max: MAX_CORNER_ROUNDING, change: (cornerRounding: number) => state.updateShape(id, { cornerRounding }),
+          }]),
           { kind: "number", label: "Rotation", value: normalizeRotation(item.rotation), min: 0, max: 360,
             change: (rotation) => state.updateShape(id, { rotation: normalizeRotation(rotation) }) },
           ...(item.type === "circle" ? [{

@@ -8,7 +8,7 @@ import { useId } from "react";
 import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
 import { connectorArrow, connectorDashArray, connectorMidpoint, connectorPath, getConnectorPoints } from "@/features/board/domain/connectorGeometry";
-import { STAR_POINTS } from "@/features/board/domain/shapeGeometry";
+import { shapeDefinitions } from "@/features/board/domain/shapeDefinitions";
 import { SHEET_DOT_GRID, type SheetLayout } from "../domain/sheetLayout";
 
 export function DesignSheet({ layout, board, title }: { layout: SheetLayout; board: BoardContent; title: string }) {
@@ -64,8 +64,9 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
       {board.shapes.map((shape) => {
         const { x, y, width, height, color } = shape;
         if (shape.type === "circle") return <ellipse key={shape.id} cx={x + width / 2} cy={y + height / 2} rx={width / 2} ry={height / 2} fill={color} />;
-        if (shape.type === "star") {
-          const points = STAR_POINTS.map(([px, py]) => `${x + width * px / 100},${y + height * py / 100}`).join(" ");
+        const vertices = shapeDefinitions[shape.type].points;
+        if (vertices) {
+          const points = vertices.map(([px, py]) => `${x + width * px / 100},${y + height * py / 100}`).join(" ");
           return <polygon key={shape.id} points={points} fill={color} />;
         }
         return <rect key={shape.id} x={x} y={y} width={width} height={height} fill={color} />;

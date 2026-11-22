@@ -1,23 +1,16 @@
-import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
+import { polygonClip } from "../domain/shapeDefinitions";
 import type { ShapeType } from "../domain/types";
 
-type BoundaryPoint = readonly [number, number];
+const fullArea = { x: 0, y: 0, width: 1, height: 1 };
 
-const circleEdge: BoundaryPoint[] = Array.from({ length: 21 }, (_, index) => {
-  const y = index * 5;
-  return [100 - Math.sqrt(10000 - (y * 2 - 100) ** 2), y];
-});
-
-const circleFloat = (right: boolean) => {
-  const edge = circleEdge.map(([x, y]) => `${right ? 100 - x : x}% ${y}%`);
-  const outer = right ? "100%" : "0%";
-  return `polygon(${outer} 0%, ${edge.join(", ")}, ${outer} 100%)`;
+export const shapeTextArea = (shape?: ShapeType) => {
+  switch (shape) {
+    case "circle": return { x: 0.15, y: 0.25, width: 0.7, height: 0.5 };
+    case "triangle": return { x: 0.26, y: 0.52, width: 0.48, height: 0.44 };
+    case "trapezoid": return { x: 0.2, y: 0.12, width: 0.6, height: 0.8 };
+    case "diamond": return { x: 0.26, y: 0.26, width: 0.48, height: 0.48 };
+    default: return fullArea;
+  }
 };
 
-export const circleTextFloats = [
-  { float: "left", width: "50%", height: "100%", shapeOutside: circleFloat(false) },
-  { float: "right", width: "50%", height: "100%", shapeOutside: circleFloat(true) },
-] as const;
-
-export const shapeTextClip = (shape?: ShapeType) =>
-  shape === "circle" ? "ellipse(50% 50%)" : shape === "star" ? STAR_CLIP_PATH : undefined;
+export const shapeTextClip = (shape?: ShapeType) => shape === "star" ? polygonClip(shape) : undefined;

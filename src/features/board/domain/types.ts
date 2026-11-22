@@ -28,7 +28,8 @@ export type DrawLine = {
   size: number;
 };
 
-export type ShapeType = "rect" | "circle" | "star";
+export const SHAPE_TYPES = ["rect", "circle", "star", "trapezoid", "triangle", "diamond"] as const;
+export type ShapeType = (typeof SHAPE_TYPES)[number];
 
 export type Shape = {
   textFormat?: TextFormat;

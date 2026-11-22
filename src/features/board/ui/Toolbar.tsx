@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { FaCode, FaMousePointer, FaRegCircle, FaRegStar } from "react-icons/fa";
+import { FaCode, FaMousePointer } from "react-icons/fa";
 import {
-  TbRectangle,
   TbTable,
   TbUsers,
   TbCopy,
@@ -16,6 +15,9 @@ import {
 } from "react-icons/tb";
 import { useBoardStore } from "@/features/board/store/board.store";
 
+import { SHAPE_TYPES, type ShapeType } from "../domain/types";
+import { shapeDefinitions } from "../domain/shapeDefinitions";
+import { ShapeIcon } from "./ShapeIcon";
 import { TableCreatePanel } from "./TableCreatePanel";
 
 type PresenceUser = {
@@ -28,9 +30,7 @@ type PresenceUser = {
 
 type ToolbarProps = {
   onAddCode?: () => void;
-  onAddRect?: () => void;
-  onAddCircle?: () => void;
-  onAddStar?: () => void;
+  onAddShape?: (type: ShapeType) => void;
   onAddClozeTest?: () => void;
   onAddPage?: () => void;
   onAddTable?: (rows: number, columns: number) => void;
@@ -349,46 +349,16 @@ export function Toolbar(props: ToolbarProps) {
               <div
                 ref={shapesPanelRef}
                 data-ui="true"
-                className={cn(
-                  panelPlacement,
-                  "w-max p-2 rounded-2xl lg:w-auto",
-                  "border border-stone-200/80 bg-stone-100/70 backdrop-blur",
-                  "shadow-[0_10px_30px_rgba(0,0,0,0.10)]",
-                  "flex items-center gap-2 lg:flex-col"
-                )}
+                className="absolute bottom-12 right-0 grid w-max grid-cols-3 gap-2 rounded-2xl border border-stone-200/80 bg-stone-100/90 p-2 shadow-lg backdrop-blur lg:bottom-auto lg:left-12 lg:right-auto lg:top-0 lg:grid-cols-2"
               >
-                <IconButton
-                  title="Rectangle"
-
-                  onClick={() => {
-                    props.onAddRect?.();
+                {SHAPE_TYPES.map((type) => (
+                  <IconButton key={type} title={shapeDefinitions[type].label} onClick={() => {
+                    props.onAddShape?.(type);
                     setShapesOpen(false);
-                  }}
-                >
-                  <TbRectangle />
-                </IconButton>
-
-                <IconButton
-                  title="Circle"
-
-                  onClick={() => {
-                    props.onAddCircle?.();
-                    setShapesOpen(false);
-                  }}
-                >
-                  <FaRegCircle />
-                </IconButton>
-
-                <IconButton
-                  title="Star"
-
-                  onClick={() => {
-                    props.onAddStar?.();
-                    setShapesOpen(false);
-                  }}
-                >
-                  <FaRegStar />
-                </IconButton>
+                  }}>
+                    <ShapeIcon type={type} />
+                  </IconButton>
+                ))}
               </div>
             )}
           </div>

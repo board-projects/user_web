@@ -1,6 +1,6 @@
 import { contrastingTextColor, getTextStyles, type TextFormat } from "../domain/textFormat";
 import { textParagraphs, type TextRun } from "../domain/richText";
-import { circleTextFloats, shapeTextClip } from "./shapeTextLayout";
+import { shapeTextArea, shapeTextClip } from "./shapeTextLayout";
 import type { Point, ShapeType } from "../domain/types";
 import { TextLink } from "./TextLink";
 
@@ -22,7 +22,6 @@ export function ItemText({ x, y, width, height, text, runs, format, background, 
     <foreignObject x={x} y={y} width={width} height={height} pointerEvents="none">
       <div className={shape ? "h-full overflow-hidden" : "flex h-full items-center overflow-hidden"} style={{ color: contrastingTextColor(background), clipPath: shapeTextClip(shape) }}>
         <div className={`max-h-full w-full overflow-hidden break-words px-1 text-xs leading-tight ${shape ? "h-full py-1" : "whitespace-pre-wrap"}`}>
-          {shape === "circle" && circleTextFloats.map((style) => <span key={style.float} aria-hidden="true" style={style} />)}
           {textParagraphs(text, runs ?? [], format).map(({ start, align, segments }) => (
             <div key={start} dir="auto" style={{ textAlign: align, whiteSpace: "pre-wrap" }}>
               {segments.length ? segments.map((segment) => (
@@ -38,6 +37,8 @@ export function ItemText({ x, y, width, height, text, runs, format, background, 
   );
 }
 
-export function ShapeText({ width, height, ...props }: TextProps) {
-  return <ItemText x={0} y={0} width={width} height={height} {...props} />;
+export function ShapeText({ width, height, shape, ...props }: TextProps) {
+  const area = shapeTextArea(shape);
+  return <ItemText x={width * area.x} y={height * area.y}
+    width={width * area.width} height={height * area.height} shape={shape} {...props} />;
 }

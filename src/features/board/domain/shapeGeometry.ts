@@ -1,13 +1,6 @@
 import { SHAPE_PORTS, type Point, type ShapePort } from "./types";
 import type { ConnectableItem } from "./connectableItems";
-
-export const STAR_POINTS = [
-  [50, 0], [62, 36], [100, 38], [70, 61], [81, 100],
-  [50, 76], [19, 100], [30, 61], [0, 38], [38, 36],
-] as const;
-
-export const STAR_CLIP_PATH =
-  `polygon(${STAR_POINTS.map(([x, y]) => `${x}% ${y}%`).join(", ")})`;
+import { shapeDefinitions } from "./shapeDefinitions";
 
 const center = (shape: ConnectableItem): Point => ({
   x: shape.x + shape.width / 2,
@@ -20,14 +13,14 @@ function getShapeBoundaryPoint(shape: ConnectableItem, toward: Point): Point {
   const dy = (toward.y - midpoint.y) / (shape.height / 2);
   if ((!dx && !dy) || !Number.isFinite(dx) || !Number.isFinite(dy)) return midpoint;
 
+  const points = shapeDefinitions[shape.type].points;
   let distance = 1 / Math.max(Math.abs(dx), Math.abs(dy));
   if (shape.type === "circle") {
     distance = 1 / Math.hypot(dx, dy);
-  } else if (shape.type === "star") {
-    // Intersect the center ray with each edge of the same polygon used for rendering.
-    for (let i = 0; i < STAR_POINTS.length; i++) {
-      const [x, y] = STAR_POINTS[i];
-      const [nextX, nextY] = STAR_POINTS[(i + 1) % STAR_POINTS.length];
+  } else if (points) {
+    for (let i = 0; i < points.length; i++) {
+      const [x, y] = points[i];
+      const [nextX, nextY] = points[(i + 1) % points.length];
       const ax = x / 50 - 1;
       const ay = y / 50 - 1;
       const edgeX = (nextX - x) / 50;

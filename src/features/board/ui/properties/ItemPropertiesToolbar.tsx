@@ -10,6 +10,8 @@ import { formatFields, getItemProperties, getSelectedBoardItem } from "./itemPro
 import { ItemPropertyControl, propertyButtonClass } from "./ItemPropertyControl";
 import { getPropertiesToolbarPosition } from "./toolbarPosition";
 
+const PHONE_VIEWPORT = "(max-width: 639px)";
+
 export function ItemPropertiesToolbar({ viewport }: {
   viewport: RefObject<HTMLElement | null>;
 }) {
@@ -33,9 +35,17 @@ export function ItemPropertiesToolbar({ viewport }: {
     const anchor = board.querySelector(anchorSelector);
     if (!anchor) return;
 
+    const phone = window.matchMedia(PHONE_VIEWPORT);
     let frame = 0;
     const position = () => {
       frame = 0;
+      if (phone.matches) {
+        toolbar.style.removeProperty("left");
+        toolbar.style.removeProperty("top");
+        toolbar.style.visibility = "visible";
+        return;
+      }
+
       const bounds = board.getBoundingClientRect();
       const item = (anchor.querySelector("[data-board-rotated-frame]") ?? anchor).getBoundingClientRect();
       const handle = anchor.querySelector("[data-rotation-handle]")?.getBoundingClientRect();
@@ -67,11 +77,13 @@ export function ItemPropertiesToolbar({ viewport }: {
     const movement = new MutationObserver(schedule);
     movement.observe(anchor, { attributes: true, attributeFilter: ["style"] });
 
+    phone.addEventListener("change", schedule);
     const unsubscribe = useBoardStore.subscribe(schedule);
     position();
 
     return () => {
       cancelAnimationFrame(frame);
+      phone.removeEventListener("change", schedule);
       resize.disconnect();
       movement.disconnect();
       unsubscribe();
@@ -105,12 +117,12 @@ export function ItemPropertiesToolbar({ viewport }: {
       role="group"
       aria-label="Selected item properties"
       data-ui="true"
-      className={`absolute z-[70] flex flex-col rounded-xl border border-stone-200 bg-white shadow-lg ${
+      className={`absolute inset-x-2 bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+3.5rem)] z-[70] flex flex-col rounded-xl border border-stone-200 bg-white shadow-lg sm:inset-x-auto sm:bottom-auto ${
         isPage
-          ? "max-h-[calc(100%-1rem)] w-max gap-2 overflow-y-auto p-1.5 [overflow-wrap:anywhere] [&>label]:justify-between"
-          : "w-max overflow-hidden whitespace-nowrap"
+          ? "max-h-[min(45dvh,21rem)] gap-2 overflow-y-auto p-1.5 [overflow-wrap:anywhere] [&>label]:justify-between sm:max-h-[calc(100%-1rem)] sm:w-max sm:max-w-[min(14rem,calc(100%-1rem))]"
+          : "overflow-hidden whitespace-nowrap sm:w-max sm:max-w-[calc(100%-1rem)]"
       }`}
-      style={{ maxWidth: isPage ? "min(14rem, calc(100% - 1rem))" : "calc(100% - 1rem)", visibility: "hidden" }}
+      style={{ visibility: "hidden" }}
     >
       {isPage ? (
         <>

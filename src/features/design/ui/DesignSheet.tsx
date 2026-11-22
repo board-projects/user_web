@@ -4,6 +4,7 @@ import { TextLink } from "@/features/board/ui/TextLink";
 import { DrawingText } from "@/features/board/ui/DrawingText";
 import { ShapeText } from "@/features/board/ui/ItemText";
 import { groupDrawingLines } from "@/features/board/domain/drawings";
+import { MultipleChoiceView } from "@/features/board/ui/MultipleChoiceView";
 import { useId } from "react";
 import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
@@ -101,6 +102,11 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
         <g key={table.id} transform={`translate(${table.x} ${table.y})`}>
           <TableGrid {...table} linksEnabled />
         </g>
+      ))}
+      {board.questions.map((question) => (
+        <foreignObject key={question.id} x={question.x} y={question.y} width={question.width} height={question.height}>
+          <MultipleChoiceView item={question} answering />
+        </foreignObject>
       ))}
     </svg>
   );

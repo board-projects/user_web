@@ -14,6 +14,7 @@ export function ConnectionsLayer() {
   const codeBlocks = useBoardStore((state) => state.codeBlocks);
   const clozeTests = useBoardStore((state) => state.clozeTests);
   const tables = useBoardStore((state) => state.tables);
+  const questions = useBoardStore((state) => state.questions);
   const sheets = useBoardStore((state) => state.sheets);
   const selection = useBoardStore((state) => state.selection);
   const marqueeItems = useBoardStore((s) => s.marqueeSelection?.items);
@@ -22,8 +23,8 @@ export function ConnectionsLayer() {
   const draft = useBoardStore((state) => state.connectionDraft);
   const connecting = draft !== null;
   const itemById = useMemo(() =>
-    new Map(getConnectableItems({ shapes, codeBlocks, clozeTests, sheets, tables }).map((item) => [item.id, item])),
-    [shapes, codeBlocks, clozeTests, sheets, tables],
+    new Map(getConnectableItems({ shapes, codeBlocks, clozeTests, sheets, tables, questions }).map((item) => [item.id, item])),
+    [shapes, codeBlocks, clozeTests, sheets, tables, questions],
   );
 
   const draftSource = draft ? itemById.get(draft.sourceId) : undefined;

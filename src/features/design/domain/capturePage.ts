@@ -9,7 +9,7 @@ export function capturePage(board: BoardContent, page: PageItem) {
   const changes: BoardChange[] = [];
   const included = new Set<string>();
 
-  const add = (kind: "shapes" | "codeBlocks" | "clozeTests" | "tables", item: BoardContent[typeof kind][number], size: { width: number; height: number }) => {
+  const add = (kind: "shapes" | "codeBlocks" | "clozeTests" | "tables" | "questions", item: BoardContent[typeof kind][number], size: { width: number; height: number }) => {
     if (!pageContainsItem(page, { ...item, ...size })) return;
     changes.push({ kind, id: item.id, item: { ...item, ...local(item) } });
     included.add(item.id);
@@ -18,6 +18,7 @@ export function capturePage(board: BoardContent, page: PageItem) {
   for (const item of board.codeBlocks) add("codeBlocks", item, item);
   for (const item of board.clozeTests) add("clozeTests", item, clozeConnectable(item));
   for (const item of board.tables) add("tables", item, item);
+  for (const item of board.questions) add("questions", item, item);
   for (const line of board.lines) {
     if (pageContainsPoint(page, line.from) && pageContainsPoint(page, line.to)) {
       changes.push({ kind: "lines", id: line.id, item: { ...line, from: local(line.from), to: local(line.to) } });

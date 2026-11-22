@@ -1,5 +1,6 @@
 import { TABLE_LIMITS } from "../../domain/tables";
 import { MAX_CORNER_ROUNDING, normalizeCornerRounding } from "../../domain/shapeCorners";
+import { QUESTION_MIN_SIZE } from "../../domain/multipleChoice";
 import { normalizeRotation } from "../../domain/shapeRotation";
 import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, validTextColor, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
@@ -27,6 +28,7 @@ export function getSelectedBoardItem(state: BoardState, selection: Selection) {
     case "shape": return state.shapes.find((item) => item.id === selection.id);
     case "codeblock": return state.codeBlocks.find((item) => item.id === selection.id);
     case "table": return state.tables.find((item) => item.id === selection.id);
+    case "question": return state.questions.find((item) => item.id === selection.id);
     case "page": return state.sheets.find((item) => item.id === selection.id);
     case "cloze": return state.clozeTests.find((item) => item.id === selection.id);
     case "connection": return state.connections.find((item) => item.id === selection.id);
@@ -168,6 +170,18 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
             table.columns.length * TABLE_LIMITS.minTrack, table.rows.length * TABLE_LIMITS.minTrack, false, TABLE_LIMITS.maxSize),
           ...(table.rows.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add row", run: () => state.addTableTrack(id, "rows") }] : []),
           ...(table.columns.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add column", run: () => state.addTableTrack(id, "columns") }] : []),
+        ],
+      };
+    }
+    case "question": {
+      const item = state.questions.find((question) => question.id === id);
+      if (!item) return null;
+      return {
+        textFields: formatFields(item.textFormat, (textFormat) => state.updateQuestion(id, { textFormat }), "left"),
+        fields: [
+          labelField(item.label, (label) => state.updateQuestion(id, { label })),
+          ...sizeFields(item, (size) => state.updateQuestion(id, size), QUESTION_MIN_SIZE.width, QUESTION_MIN_SIZE.height),
+          { kind: "action", label: "Edit question", run: () => state.startEditingQuestion(id) },
         ],
       };
     }

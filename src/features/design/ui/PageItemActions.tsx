@@ -88,7 +88,7 @@ export function PageItemActions({ itemId, deleteButton }: { itemId: string; dele
 
   return (
     <>
-      <div className="flex shrink-0 items-center gap-1 overflow-x-auto">
+      <div className="flex shrink-0 flex-wrap items-center gap-1 sm:flex-nowrap sm:overflow-x-auto">
         <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("preview")}>
           Export PDF
         </button>

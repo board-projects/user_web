@@ -7,6 +7,7 @@ import type { BoardState } from "../board.store";
 
 export type TablesSlice = {
   tables: TableItem[];
+  renameTable: (id: string, itemLabel: string) => void;
   setTableCell: (id: string, row: number, column: number, text: string, runs?: TextRun[]) => void;
   addTable: (table: TableItem) => void;
   moveTable: (id: string, position: Point) => void;
@@ -26,6 +27,7 @@ export const createTablesSlice: StateCreator<BoardState, [], [], TablesSlice> = 
 
   return {
     tables: [],
+    renameTable: (id, itemLabel) => update(id, (table) => ({ ...table, itemLabel })),
     setTableCell: (id, row, column, text, runs) => update(id, (table) => withTableCell(table, row, column, text, runs)),
     addTable: (table) => set((state) => ({ tables: [...state.tables, table] })),
     moveTable: (id, position) => update(id, (table) => ({ ...table, ...position })),

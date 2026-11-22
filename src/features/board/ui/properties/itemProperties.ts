@@ -1,5 +1,4 @@
 import { TABLE_LIMITS } from "../../domain/tables";
-import { useTextEditingStore } from "../../store/textEditing.store";
 import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, validTextColor, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
@@ -9,7 +8,7 @@ import type { BoardState } from "../../store/board.store";
 import type { Selection } from "../../store/slices/selection.slice";
 
 export type ItemProperty =
-  | { kind: "number"; label: string; value: number; min: number; max: number; change: (value: number) => void }
+  | { kind: "number"; label: string; value: number; min: number; max: number; step?: number; change: (value: number) => void }
   | { kind: "color" | "text"; label: string; value: string; maxLength?: number; change: (value: string) => void }
   | { kind: "select"; label: string; value: string; options: readonly string[]; change: (value: string) => void }
   | { kind: "toggle"; label: string; value: boolean; change: (value: boolean) => void }
@@ -54,6 +53,9 @@ function sizeFields(
 const colorField = (value: string, change: (value: string) => void): ItemProperty =>
   ({ kind: "color", label: "Color", value, change });
 
+const labelField = (value: string | undefined, change: (value: string) => void): ItemProperty =>
+  ({ kind: "text", label: "Label", value: value ?? "", change });
+
 const thicknessField = (value: number, max: number, change: (value: number) => void): ItemProperty =>
   ({ kind: "number", label: "Line width", value, min: 1, max, change });
 
@@ -95,7 +97,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
     if (!drawing || state.marqueeSelection?.items.size) return null;
     const groups = groupDrawingLines(state.marqueeSelection?.lines ?? []);
     const label = groups.size === 1
-      ? [{ kind: "text" as const, label: "Text", value: Array.from(state.marqueeSelection?.lines ?? []).find((line) => line.label)?.label ?? "", change: (value: string) => state.labelSelectedDrawing(value) }]
+      ? [{ kind: "text" as const, label: "Label", value: Array.from(state.marqueeSelection?.lines ?? []).find((line) => line.label)?.label ?? "", change: (value: string) => state.labelSelectedDrawing(value) }]
       : [];
     return {
       textFields: groups.size === 1 ? formatFields(drawing.textFormat, (textFormat) => state.styleSelectedLines({ textFormat })) : undefined,
@@ -114,9 +116,12 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       if (!item) return null;
       return {
         fields: [
-          { kind: "action", label: "Edit text", run: () => useTextEditingStore.setState({ shapeId: id }) },
+          labelField(item.itemLabel, (itemLabel) => state.updateShape(id, { itemLabel })),
           colorField(item.color, (color) => state.updateShape(id, { color })),
-          ...sizeFields(item, (size) => state.updateShape(id, size), 10, 10, item.type !== "rect"),
+          ...(item.type === "circle" ? [{
+            kind: "number" as const, label: "Radius", value: item.width / 2, min: 5, max: 2000, step: 0.5,
+            change: (radius: number) => state.updateShape(id, { width: radius * 2, height: radius * 2 }),
+          }] : sizeFields(item, (size) => state.updateShape(id, size), 10, 10, item.type === "star")),
         ],
       };
     }
@@ -126,6 +131,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         textFields: formatFields(item.textFormat, (textFormat) => state.updateCodeBlock(id, { textFormat }), "left"),
         fields: [
+          labelField(item.itemLabel, (itemLabel) => state.updateCodeBlock(id, { itemLabel })),
           ...sizeFields(item, (size) => state.updateCodeBlock(id, size), 200, 100),
           { kind: "action", label: "Edit code", run: () => state.startEditingCodeBlock(id) },
         ],
@@ -137,7 +143,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         textFields: formatFields(item.textFormat, (textFormat) => state.updateClozeTest(id, { textFormat }), "left"),
         fields: [
-          { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
+          labelField(item.title, (title) => state.updateClozeTest(id, { title })),
           ...sizeFields(clozeConnectable(item), (size) => state.updateClozeTest(id, size), 140, 100),
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
         ],
@@ -148,6 +154,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       if (!table) return null;
       return {
         fields: [
+          labelField(table.itemLabel, (itemLabel) => state.renameTable(id, itemLabel)),
           ...sizeFields(table, (size) => state.resizeTable(id, size),
             table.columns.length * TABLE_LIMITS.minTrack, table.rows.length * TABLE_LIMITS.minTrack, false, TABLE_LIMITS.maxSize),
           ...(table.rows.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add row", run: () => state.addTableTrack(id, "rows") }] : []),
@@ -163,7 +170,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
 
       return {
         fields: [
-          { kind: "text", label: "Name", value: page.title, change: (title) => state.updatePage(id, { title }) },
+          labelField(page.title, (title) => state.updatePage(id, { title })),
           { kind: "color", label: "Background", value: page.backgroundColor ?? "#ffffff", change: (backgroundColor) => state.updatePage(id, { backgroundColor }) },
           {
             kind: "select", label: "Resolution", value: presets.includes(resolution) ? resolution : "Custom",
@@ -193,7 +200,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
         fields: [
           colorField(item.color ?? "#44403c", (color) => state.updateConnection(id, { color })),
           thicknessField(item.size ?? 2, 48, (size) => state.updateConnection(id, { size })),
-          { kind: "text", label: "Label", value: item.label ?? "", change: (label) => state.updateConnection(id, { label }) },
+          labelField(item.label, (label) => state.updateConnection(id, { label })),
           {
             kind: "select", label: "Route", value: item.route ?? "straight", options: CONNECTOR_ROUTES,
             change: (value) => {

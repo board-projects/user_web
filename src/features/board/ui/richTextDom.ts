@@ -1,5 +1,7 @@
 import { textParagraphs, type TextRange, type TextRun } from "../domain/richText";
-import { getTextStyles, type TextFormat } from "../domain/textFormat";
+import { circleTextFloats } from "./shapeTextLayout";
+import type { ShapeType } from "../domain/types";
+import { safeTextLink, getTextStyles, type TextFormat } from "../domain/textFormat";
 
 export function readTextSelection(root: HTMLElement): TextRange | null {
   const selection = window.getSelection();
@@ -36,9 +38,18 @@ export function restoreTextSelection(root: HTMLElement, { start, end }: TextRang
   selection?.addRange(range);
 }
 
-export function renderEditableText(root: HTMLElement, text: string, runs: readonly TextRun[], base?: TextFormat) {
+export function renderEditableText(root: HTMLElement, text: string, runs: readonly TextRun[], base?: TextFormat, shape?: ShapeType) {
   const paragraphs = textParagraphs(text, runs, base);
-  root.replaceChildren(...paragraphs.flatMap(({ align, segments }, index) => {
+  const boundaries = shape === "circle" ? circleTextFloats.map((style) => {
+    const boundary = document.createElement("span");
+    boundary.contentEditable = "false";
+    boundary.setAttribute("aria-hidden", "true");
+    boundary.setAttribute("data-text-boundary", "");
+    Object.assign(boundary.style, style);
+    return boundary;
+  }) : [];
+
+  root.replaceChildren(...boundaries, ...paragraphs.flatMap(({ align, segments }, index) => {
     const line = document.createElement("div");
     line.dir = "auto";
     line.style.textAlign = align;
@@ -47,6 +58,7 @@ export function renderEditableText(root: HTMLElement, text: string, runs: readon
       const span = document.createElement("span");
       const { fontSize, ...style } = getTextStyles(segment.format);
       Object.assign(span.style, style);
+      if (safeTextLink(segment.format.link)) span.style.textDecoration = "underline dotted";
       if (fontSize) span.style.fontSize = `${fontSize}px`;
       span.textContent = segment.text;
       line.append(span);

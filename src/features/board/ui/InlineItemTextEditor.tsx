@@ -1,11 +1,14 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { applyTextFormat, paragraphRange, updateTextRuns, type TextRange, type TextRun } from "../domain/richText";
 import { contrastingTextColor, type TextFormat } from "../domain/textFormat";
+import type { ShapeType } from "../domain/types";
+import { shapeTextClip } from "./shapeTextLayout";
 import { useTextEditingStore } from "../store/textEditing.store";
 import { readTextSelection, renderEditableText, restoreTextSelection } from "./richTextDom";
 
 type Props = {
   itemId: string;
+  shape?: ShapeType;
   label: string;
   value: string;
   runs?: TextRun[];
@@ -17,7 +20,7 @@ type Props = {
   close: () => void;
 };
 
-export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, formatWholeText = false, format, background, commit, close }: Props) {
+export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLength, formatWholeText = false, format, background, commit, close }: Props) {
   const input = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ commit, close });
   const draft = useRef({ text: value, runs: runs ?? [] });
@@ -34,9 +37,9 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
     const root = input.current;
     if (!root) return;
     editing.current = true;
-    renderEditableText(root, draft.current.text, draft.current.runs, format);
+    renderEditableText(root, draft.current.text, draft.current.runs, format, shape);
     restoreTextSelection(root, range.current);
-  }, [itemId, format]);
+  }, [itemId, format, shape]);
 
   useEffect(() => {
     const root = input.current;
@@ -63,13 +66,13 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
       const colorPickerFocused = "color" in patch &&
         document.activeElement?.matches('[data-inline-text-tools] input[type="color"]');
       if ("link" in patch || colorPickerFocused) {
-        if (colorPickerFocused && root) renderEditableText(root, text, draft.current.runs, format);
+        if (colorPickerFocused && root) renderEditableText(root, text, draft.current.runs, format, shape);
         const editor = useTextEditingStore.getState().editor;
         if (editor?.itemId === itemId) useTextEditingStore.setState({ editor: { ...editor, format: { ...editor.format, ...patch } } });
         return;
       }
       if (!root) return;
-      renderEditableText(root, text, draft.current.runs, format);
+      renderEditableText(root, text, draft.current.runs, format, shape);
       restoreTextSelection(root, selection);
       publishSelection();
     }
@@ -89,7 +92,7 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
       document.removeEventListener("focusin", finishOutside);
       if (useTextEditingStore.getState().editor?.itemId === itemId) useTextEditingStore.setState({ editor: null });
     };
-  }, [itemId, format, formatWholeText]);
+  }, [itemId, format, formatWholeText, shape]);
 
   function finish(cancel = false) {
     if (!editing.current) return;
@@ -110,7 +113,7 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
     if (text !== old) dirty.current = true;
     draft.current = { text, runs: updateTextRuns(old, text, draft.current.runs) };
     const caret = selection.start + allowed.length;
-    renderEditableText(root, text, draft.current.runs, format);
+    renderEditableText(root, text, draft.current.runs, format, shape);
     restoreTextSelection(root, { start: caret, end: caret });
   };
 
@@ -134,8 +137,9 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
         const applyPending = typed > 0 && caret !== undefined && Object.keys(pending.current).length > 0;
         if (applyPending) runs = applyTextFormat(text, runs, { start: caret - typed, end: caret }, pending.current);
         draft.current = { text, runs };
-        if (applyPending || next !== text) {
-          renderEditableText(event.currentTarget, text, draft.current.runs, format);
+        const lostBoundary = shape === "circle" && !event.currentTarget.firstElementChild?.hasAttribute("data-text-boundary");
+        if (!(event.nativeEvent instanceof InputEvent && event.nativeEvent.isComposing) && (applyPending || next !== text || lostBoundary)) {
+          renderEditableText(event.currentTarget, text, draft.current.runs, format, shape);
           const offset = Math.min(caret ?? text.length, text.length);
           restoreTextSelection(event.currentTarget, { start: offset, end: offset });
         }
@@ -154,8 +158,8 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
         else finish(event.key === "Escape");
       }}
       onClick={(event) => event.stopPropagation()}
-      style={{ color: contrastingTextColor(background) }}
-      className="h-full w-full overflow-auto break-words rounded-sm border border-blue-600 bg-transparent p-0.5 text-xs leading-tight outline-none"
+      style={{ color: contrastingTextColor(background), clipPath: shapeTextClip(shape) }}
+      className="relative z-10 h-full w-full overflow-auto break-words bg-transparent p-1 text-xs leading-tight outline-none ring-1 ring-inset ring-blue-600"
     />
   );
 }

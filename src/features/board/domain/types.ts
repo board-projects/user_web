@@ -8,6 +8,7 @@ export type TableItem = Point & {
   id: string;
   rows: number[];
   columns: number[];
+  itemLabel?: string;
   cells?: Record<string, string>;
   cellRuns?: Record<string, TextRun[]>;
   width: number;
@@ -33,6 +34,7 @@ export type Shape = {
   textFormat?: TextFormat;
   id: string;
   type: ShapeType;
+  itemLabel?: string;
   textRuns?: TextRun[];
   label?: string;
   x: number;
@@ -67,6 +69,7 @@ export type ShapeConnection = {
 };
 
 export type CodeBlock = {
+  itemLabel?: string;
   textFormat?: TextFormat;
   id: string;
   code: string;

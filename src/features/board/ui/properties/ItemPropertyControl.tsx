@@ -36,23 +36,25 @@ export function ItemPropertyControl({ field, compact = false }: { field: ItemPro
           inputMode="numeric"
           min={field.min}
           max={field.max}
-          defaultValue={Math.round(field.value)}
+          step={field.step ?? 1}
+          defaultValue={field.value}
           className={`${fieldClass} w-16 sm:w-20`}
           onBlur={(event) => {
             const input = event.currentTarget;
             const value = input.valueAsNumber;
             if (!Number.isFinite(value)) {
-              input.value = String(Math.round(field.value));
+              input.value = String(field.value);
               return;
             }
-            const next = Math.min(field.max, Math.max(field.min, Math.round(value)));
-            if (next !== Math.round(field.value)) field.change(next);
+            const step = field.step ?? 1;
+            const next = Math.min(field.max, Math.max(field.min, Math.round(value / step) * step));
+            if (next !== field.value) field.change(next);
             input.value = String(next);
           }}
           onKeyDown={(event) => {
             if (event.key === "Enter") event.currentTarget.blur();
             if (event.key === "Escape") {
-              event.currentTarget.value = String(Math.round(field.value));
+              event.currentTarget.value = String(field.value);
               event.currentTarget.blur();
             }
           }}

@@ -35,6 +35,7 @@ export type Shape = {
   textFormat?: TextFormat;
   id: string;
   type: ShapeType;
+  rotation?: number;
   itemLabel?: string;
   textRuns?: TextRun[];
   label?: string;

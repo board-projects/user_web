@@ -37,7 +37,8 @@ export function ItemPropertiesToolbar({ viewport }: {
     const position = () => {
       frame = 0;
       const bounds = board.getBoundingClientRect();
-      const item = anchor.getBoundingClientRect();
+      const item = (anchor.querySelector("[data-board-rotated-frame]") ?? anchor).getBoundingClientRect();
+      const handle = anchor.querySelector("[data-rotation-handle]")?.getBoundingClientRect();
       if (item.right < bounds.left || item.left > bounds.right ||
           item.bottom < bounds.top || item.top > bounds.bottom) {
         toolbar.style.visibility = "hidden";
@@ -45,7 +46,9 @@ export function ItemPropertiesToolbar({ viewport }: {
       }
 
       const { left, top } = getPropertiesToolbarPosition(
-        bounds, item, toolbar.getBoundingClientRect(), isPage ? "right" : "above",
+        bounds,
+        handle ? { left: item.left, right: item.right, top: Math.min(item.top, handle.top), bottom: Math.max(item.bottom, handle.bottom) } : item,
+        toolbar.getBoundingClientRect(), isPage ? "right" : "above",
       );
       toolbar.style.left = `${left}px`;
       toolbar.style.top = `${top}px`;

@@ -1,4 +1,5 @@
 import { TABLE_LIMITS } from "../../domain/tables";
+import { normalizeRotation } from "../../domain/shapeRotation";
 import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, validTextColor, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
@@ -118,6 +119,8 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
         fields: [
           labelField(item.itemLabel, (itemLabel) => state.updateShape(id, { itemLabel })),
           colorField(item.color, (color) => state.updateShape(id, { color })),
+          { kind: "number", label: "Rotation", value: normalizeRotation(item.rotation), min: 0, max: 360,
+            change: (rotation) => state.updateShape(id, { rotation: normalizeRotation(rotation) }) },
           ...(item.type === "circle" ? [{
             kind: "number" as const, label: "Radius", value: item.width / 2, min: 5, max: 2000, step: 0.5,
             change: (radius: number) => state.updateShape(id, { width: radius * 2, height: radius * 2 }),

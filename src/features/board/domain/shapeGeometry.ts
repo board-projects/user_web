@@ -1,5 +1,6 @@
 import { SHAPE_PORTS, type Point, type ShapePort } from "./types";
 import type { ConnectableItem } from "./connectableItems";
+import { rotateVector } from "./shapeRotation";
 import { shapeDefinitions } from "./shapeDefinitions";
 
 const center = (shape: ConnectableItem): Point => ({
@@ -40,20 +41,26 @@ function getShapeBoundaryPoint(shape: ConnectableItem, toward: Point): Point {
   };
 }
 
-export const PORT_DIRECTION: Record<ShapePort, Point> = {
+const PORT_DIRECTION: Record<ShapePort, Point> = {
   top: { x: 0, y: -1 },
   right: { x: 1, y: 0 },
   bottom: { x: 0, y: 1 },
   left: { x: -1, y: 0 },
 };
 
+export function getPortDirection(shape: ConnectableItem, port: ShapePort) {
+  return rotateVector(PORT_DIRECTION[port], shape.rotation);
+}
+
 export function getShapePortPoint(shape: ConnectableItem, port: ShapePort): Point {
   const midpoint = center(shape);
   const direction = PORT_DIRECTION[port];
-  return getShapeBoundaryPoint(shape, {
+  const point = getShapeBoundaryPoint(shape, {
     x: midpoint.x + direction.x * shape.width,
     y: midpoint.y + direction.y * shape.height,
   });
+  const rotated = rotateVector({ x: point.x - midpoint.x, y: point.y - midpoint.y }, shape.rotation);
+  return { x: midpoint.x + rotated.x, y: midpoint.y + rotated.y };
 }
 
 export function getNearestShapePort(shape: ConnectableItem, point: Point): ShapePort {

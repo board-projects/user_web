@@ -21,7 +21,7 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
   for (const element of area.querySelectorAll("[data-board-selection-key]")) {
     if (!(element instanceof HTMLElement)) continue;
     const key = element.dataset.boardSelectionKey;
-    const bounds = element.getBoundingClientRect();
+    const bounds = (element.querySelector("[data-board-rotated-frame]") ?? element).getBoundingClientRect();
     // Selecting content inside a page does not pull the containing page into the selection.
     const hits = element.hasAttribute("data-board-page-frame")
       ? screenBox.left <= bounds.left && screenBox.top <= bounds.top &&

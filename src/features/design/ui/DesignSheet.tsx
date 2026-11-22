@@ -1,4 +1,7 @@
 import { TableGrid } from "@/features/board/ui/TableGrid";
+import { DrawingText } from "@/features/board/ui/DrawingText";
+import { ShapeText } from "@/features/board/ui/ItemText";
+import { groupDrawingLines } from "@/features/board/domain/drawings";
 import { useId } from "react";
 import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
@@ -31,6 +34,7 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
         <line key={line.id} x1={line.from.x} y1={line.from.y} x2={line.to.x} y2={line.to.y}
           stroke={line.color} strokeWidth={line.size} strokeLinecap="round" />
       ))}
+      {Array.from(groupDrawingLines(board.lines), ([id, lines]) => <DrawingText key={id} lines={lines} />)}
       {board.connections.map((connection) => {
         const source = items.get(connection.sourceId);
         const target = items.get(connection.targetId);
@@ -59,6 +63,11 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
         }
         return <rect key={shape.id} x={x} y={y} width={width} height={height} fill={color} />;
       })}
+      {board.shapes.map((shape) => shape.label && (
+        <g key={shape.id} transform={`translate(${shape.x} ${shape.y})`}>
+          <ShapeText width={shape.width} height={shape.height} text={shape.label} />
+        </g>
+      ))}
       {board.codeBlocks.map((block) => (
         <foreignObject key={block.id} x={block.x} y={block.y} width={block.width} height={block.height}>
           <pre className="m-0 h-full overflow-hidden whitespace-pre-wrap break-words rounded-lg bg-stone-900 p-3 font-mono text-sm text-white">{block.code}</pre>

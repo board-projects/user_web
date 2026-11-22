@@ -28,11 +28,9 @@ import { CodeBlocksLayer } from "@/features/board/ui/CodeBlocksLayer";
 import { BoardViewport } from "@/features/board/ui/BoardViewport";
 
 import {
-  createCircle,
   createClozeTest,
   createCodeBlock,
-  createRect,
-  createStar,
+  createShape,
 } from "@/features/board/domain/factories";
 import { GridCanvas } from '@/features/board/ui/GridCanvas';
 import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
@@ -89,9 +87,7 @@ export function BoardEditor({ reference }: { reference: string }) {
       <BoardMenu reference={reference} status={syncStatus} />
 
       <Toolbar
-        onAddRect={() => addShape(createRect())}
-        onAddCircle={() => addShape(createCircle())}
-        onAddStar={() => addShape(createStar())}
+        onAddShape={(type) => addShape(createShape(type))}
         onAddCode={() => addCodeBlock(createCodeBlock())}
         onAddClozeTest={() => addClozeTest(createClozeTest())}
         onAddTable={(rows, columns) => {

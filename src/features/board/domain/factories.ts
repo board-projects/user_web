@@ -1,42 +1,16 @@
-import { CodeBlock, Shape } from "@/features/board/domain/types";
+import { shapeDefinitions } from "./shapeDefinitions";
+import type { CodeBlock, Shape, ShapeType } from "@/features/board/domain/types";
 
 export const randomColor = () =>
   `#${Math.floor(Math.random() * 16777215)
     .toString(16)
     .padStart(6, "0")}`;
 
-export const createRect = () =>
-  ({
-    id: crypto.randomUUID(),
-    type: "rect",
-    x: 150,
-    y: 150,
-    width: 200,
-    height: 120,
-    color: randomColor(),
-  }) satisfies Shape;
-
-export const createCircle = () =>
-  ({
-    id: crypto.randomUUID(),
-    type: "circle",
-    x: 100,
-    y: 100,
-    width: 120,
-    height: 120,
-    color: randomColor(),
-  }) satisfies Shape;
-
-export const createStar = () =>
-  ({
-    id: crypto.randomUUID(),
-    type: "star",
-    x: 100,
-    y: 100,
-    width: 120,
-    height: 120,
-    color: randomColor(),
-  }) satisfies Shape;
+export function createShape(type: ShapeType): Shape {
+  const { width, height } = shapeDefinitions[type];
+  const offset = type === "rect" ? 150 : 100;
+  return { id: crypto.randomUUID(), type, x: offset, y: offset, width, height, color: randomColor() };
+}
 
 export const createCodeBlock = (): CodeBlock => ({
   id: crypto.randomUUID(),

@@ -11,7 +11,8 @@ import { selectionKey } from "../store/slices/selection.slice";
 
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 import { ConnectionPorts } from "./ConnectionPorts";
-import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
+import { polygonClip, shapeDefinitions } from "../domain/shapeDefinitions";
+import { shapeTextArea } from "./shapeTextLayout";
 
 export function ShapesLayer() {
   const editingId = useTextEditingStore((state) => state.shapeId);
@@ -39,7 +40,8 @@ export function ShapesLayer() {
         const key = selectionKey("shape", shape.id);
         const inMarquee = marqueeItems?.has(key);
 
-        const isStar = shape.type === "star";
+        const clipPath = polygonClip(shape.type);
+        const area = shapeTextArea(shape.type);
 
         const connected = connectedIds.has(shape.id);
         const updateSize: React.ComponentProps<typeof Rnd>["onResize"] =
@@ -67,7 +69,7 @@ export function ShapesLayer() {
             cancel="[data-connection-handle], [contenteditable], a"
             enableResizing
             resizeHandleComponent={selected ? itemResizeHandles : undefined}
-            lockAspectRatio={shape.type === "circle" || isStar}
+            lockAspectRatio={shapeDefinitions[shape.type].lockedAspect}
             className="pointer-events-auto"
             onDoubleClick={() => { if (canEdit) useTextEditingStore.setState({ shapeId: shape.id }); }}
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -79,24 +81,27 @@ export function ShapesLayer() {
               style={{
                 width: "100%",
                 height: "100%",
-                backgroundColor: isStar ? "transparent" : shape.color,
+                backgroundColor: clipPath ? "transparent" : shape.color,
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
                 ...itemSelectionStyle(selected || !!inMarquee),
                 position: "relative",
               }}
             >
-              {isStar && (
+              {clipPath && (
                 <div
                   aria-hidden="true"
                   className="absolute inset-0"
-                  style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
+                  style={{ backgroundColor: shape.color, clipPath }}
                 />
               )}
               <svg className="pointer-events-none absolute inset-0 h-full w-full">
                 <ShapeText shape={shape.type} linksEnabled width={shape.width} height={shape.height} text={editingId === shape.id ? undefined : shape.label} format={shape.textFormat} background={shape.color} runs={shape.textRuns} />
               </svg>
               {editingId === shape.id && (
-                <div className="absolute inset-0 z-10">
+                <div className="absolute z-10" style={{
+                  left: `${area.x * 100}%`, top: `${area.y * 100}%`,
+                  width: `${area.width * 100}%`, height: `${area.height * 100}%`,
+                }}>
                   <InlineItemTextEditor itemId={shape.id} shape={shape.type} label="Shape text" value={shape.label ?? ""} runs={shape.textRuns} format={shape.textFormat} background={shape.color}
                     commit={(label, textRuns) => updateShape(shape.id, { label, textRuns })} close={() => useTextEditingStore.setState({ shapeId: null })} />
                 </div>

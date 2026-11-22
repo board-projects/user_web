@@ -37,9 +37,9 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
     const root = input.current;
     if (!root) return;
     editing.current = true;
-    renderEditableText(root, draft.current.text, draft.current.runs, format, shape);
+    renderEditableText(root, draft.current.text, draft.current.runs, format);
     restoreTextSelection(root, range.current);
-  }, [itemId, format, shape]);
+  }, [itemId, format]);
 
   useEffect(() => {
     const root = input.current;
@@ -66,13 +66,13 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
       const colorPickerFocused = "color" in patch &&
         document.activeElement?.matches('[data-inline-text-tools] input[type="color"]');
       if ("link" in patch || colorPickerFocused) {
-        if (colorPickerFocused && root) renderEditableText(root, text, draft.current.runs, format, shape);
+        if (colorPickerFocused && root) renderEditableText(root, text, draft.current.runs, format);
         const editor = useTextEditingStore.getState().editor;
         if (editor?.itemId === itemId) useTextEditingStore.setState({ editor: { ...editor, format: { ...editor.format, ...patch } } });
         return;
       }
       if (!root) return;
-      renderEditableText(root, text, draft.current.runs, format, shape);
+      renderEditableText(root, text, draft.current.runs, format);
       restoreTextSelection(root, selection);
       publishSelection();
     }
@@ -92,7 +92,7 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
       document.removeEventListener("focusin", finishOutside);
       if (useTextEditingStore.getState().editor?.itemId === itemId) useTextEditingStore.setState({ editor: null });
     };
-  }, [itemId, format, formatWholeText, shape]);
+  }, [itemId, format, formatWholeText]);
 
   function finish(cancel = false) {
     if (!editing.current) return;
@@ -113,7 +113,7 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
     if (text !== old) dirty.current = true;
     draft.current = { text, runs: updateTextRuns(old, text, draft.current.runs) };
     const caret = selection.start + allowed.length;
-    renderEditableText(root, text, draft.current.runs, format, shape);
+    renderEditableText(root, text, draft.current.runs, format);
     restoreTextSelection(root, { start: caret, end: caret });
   };
 
@@ -137,9 +137,8 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
         const applyPending = typed > 0 && caret !== undefined && Object.keys(pending.current).length > 0;
         if (applyPending) runs = applyTextFormat(text, runs, { start: caret - typed, end: caret }, pending.current);
         draft.current = { text, runs };
-        const lostBoundary = shape === "circle" && !event.currentTarget.firstElementChild?.hasAttribute("data-text-boundary");
-        if (!(event.nativeEvent instanceof InputEvent && event.nativeEvent.isComposing) && (applyPending || next !== text || lostBoundary)) {
-          renderEditableText(event.currentTarget, text, draft.current.runs, format, shape);
+        if (!(event.nativeEvent instanceof InputEvent && event.nativeEvent.isComposing) && (applyPending || next !== text)) {
+          renderEditableText(event.currentTarget, text, draft.current.runs, format);
           const offset = Math.min(caret ?? text.length, text.length);
           restoreTextSelection(event.currentTarget, { start: offset, end: offset });
         }
@@ -159,7 +158,7 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
       }}
       onClick={(event) => event.stopPropagation()}
       style={{ color: contrastingTextColor(background), clipPath: shapeTextClip(shape) }}
-      className="relative z-10 h-full w-full overflow-auto break-words bg-transparent p-1 text-xs leading-tight outline-none ring-1 ring-inset ring-blue-600"
+      className={`relative z-10 h-full w-full overflow-auto break-words bg-transparent p-1 text-xs leading-tight outline-none ${shape === "circle" ? "" : "ring-1 ring-inset ring-blue-600"}`}
     />
   );
 }

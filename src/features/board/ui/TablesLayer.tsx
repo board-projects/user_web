@@ -49,7 +49,7 @@ function TableFrame({ table }: { table: TableItem }) {
         resize(...args);
         initialSize.current = null;
       }}
-      cancel="[data-connection-handle], [data-table-divider], textarea"
+      cancel="[data-connection-handle], [data-table-divider], [contenteditable]"
       data-board-selection-key={key}
       data-board-connectable-id={table.id}
       data-interactive="true"
@@ -66,7 +66,7 @@ function TableFrame({ table }: { table: TableItem }) {
           <TableGrid {...table} hiddenCell={canEdit ? activeCell ?? undefined : undefined} />
         </svg>
         {canEdit && <TableCellEditors table={table} keyboardEnabled={selected} active={activeCell} setActive={setActiveCell}
-          save={(row, column, text) => setCell(table.id, row, column, text)} />}
+          save={(row, column, text, runs) => setCell(table.id, row, column, text, runs)} />}
       </div>
       {selected && canEdit && (
         <>

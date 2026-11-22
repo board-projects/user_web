@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ITEM_LABEL_LIMIT } from "../domain/itemText";
+import { useTextEditingStore } from "../store/textEditing.store";
 import { InlineItemTextEditor } from "./InlineItemTextEditor";
 import { ShapeText } from "./ItemText";
 import { Rnd } from "react-rnd";
@@ -14,7 +14,7 @@ import { ConnectionPorts } from "./ConnectionPorts";
 import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
 
 export function ShapesLayer() {
-  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const editingId = useTextEditingStore((state) => state.shapeId);
   const canEdit = useBoardStore((state) => state.tool === "select" && !state.panMode);
   const connections = useBoardStore((s) => s.connections);
   const connectedIds = React.useMemo(
@@ -63,12 +63,12 @@ export function ShapesLayer() {
             onResizeStart={() => select({ type: "shape", id: shape.id })}
             onResize={connected ? updateSize : undefined}
             onResizeStop={updateSize}
-            cancel="[data-connection-handle], textarea"
+            cancel="[data-connection-handle], [contenteditable]"
             enableResizing
             resizeHandleComponent={selected ? itemResizeHandles : undefined}
             lockAspectRatio={shape.type === "circle" || isStar}
             className="pointer-events-auto"
-            onDoubleClick={() => { if (canEdit) setEditingId(shape.id); }}
+            onDoubleClick={() => { if (canEdit) useTextEditingStore.setState({ shapeId: shape.id }); }}
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
               selectBoardItem({ type: "shape", id: shape.id });
@@ -92,12 +92,12 @@ export function ShapesLayer() {
                 />
               )}
               <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
-                <ShapeText width={shape.width} height={shape.height} text={editingId === shape.id ? undefined : shape.label} format={shape.textFormat} background={shape.color} />
+                <ShapeText width={shape.width} height={shape.height} text={editingId === shape.id ? undefined : shape.label} format={shape.textFormat} background={shape.color} runs={shape.textRuns} />
               </svg>
               {editingId === shape.id && (
                 <div className="absolute inset-x-[15%] inset-y-[25%] z-10">
-                  <InlineItemTextEditor label="Shape text" value={shape.label ?? ""} maxLength={ITEM_LABEL_LIMIT} format={shape.textFormat} background={shape.color}
-                    commit={(label) => updateShape(shape.id, { label })} close={() => setEditingId(null)} />
+                  <InlineItemTextEditor itemId={shape.id} label="Shape text" value={shape.label ?? ""} runs={shape.textRuns} format={shape.textFormat} background={shape.color}
+                    commit={(label, textRuns) => updateShape(shape.id, { label, textRuns })} close={() => useTextEditingStore.setState({ shapeId: null })} />
                 </div>
               )}
               <ConnectionPorts item={shape} selected={selected} />

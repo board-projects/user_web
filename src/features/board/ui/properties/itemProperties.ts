@@ -1,5 +1,6 @@
 import { TABLE_LIMITS } from "../../domain/tables";
-import { safeTextLink, TEXT_ALIGNMENTS, type TextFormat } from "../../domain/textFormat";
+import { useTextEditingStore } from "../../store/textEditing.store";
+import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
 import { clozeConnectable } from "../../domain/connectableItems";
@@ -55,7 +56,8 @@ const colorField = (value: string, change: (value: string) => void): ItemPropert
 const thicknessField = (value: number, max: number, change: (value: number) => void): ItemProperty =>
   ({ kind: "number", label: "Line width", value, min: 1, max, change });
 
-function formatFields(format: TextFormat = {}, save: (format: TextFormat) => void, align: TextFormat["align"] = "center"): ItemProperty[] {
+export function formatFields(format: TextFormat = {}, save: (format: TextFormat) => void, align: TextFormat["align"] = "center", patchOnly = false): ItemProperty[] {
+  const update = (patch: TextFormat) => save(patchOnly ? patch : { ...format, ...patch });
   const toggles = [
     { key: "bold", label: "Bold" },
     { key: "italic", label: "Italic" },
@@ -64,16 +66,22 @@ function formatFields(format: TextFormat = {}, save: (format: TextFormat) => voi
   const link = safeTextLink(format.link);
   return [
     ...toggles.map(({ key, label }): ItemProperty => ({
-      kind: "toggle", label, value: format[key] ?? false, change: (value) => save({ ...format, [key]: value }),
+      kind: "toggle", label, value: format[key] ?? false, change: (value) => update({ [key]: value }),
     })),
     {
       kind: "select", label: "Align", options: TEXT_ALIGNMENTS, value: format.align ?? align,
       change: (value) => {
         const alignment = TEXT_ALIGNMENTS.find((option) => option === value);
-        if (alignment) save({ ...format, align: alignment });
+        if (alignment) update({ align: alignment });
       },
     },
-    { kind: "text", label: "Link URL", value: format.link ?? "", maxLength: 2048, change: (url) => save({ ...format, link: url }) },
+    { kind: "select", label: "Font", options: ["Default", ...TEXT_FONTS], value: format.font ?? "Default",
+      change: (value) => update({ font: TEXT_FONTS.find((font) => font === value) }),
+    },
+    { kind: "select", label: "Font size", options: TEXT_SIZES.map(String), value: String(format.size ?? 12),
+      change: (value) => update({ size: Number(value) }),
+    },
+    { kind: "text", label: "Link URL", value: format.link ?? "", maxLength: 2048, change: (url) => update({ link: url }) },
     ...(link ? [{ kind: "action" as const, label: "Open link", run: () => window.open(link, "_blank", "noopener,noreferrer") }] : []),
   ];
 }
@@ -104,8 +112,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       if (!item) return null;
       return {
         fields: [
-          { kind: "text", label: "Text", value: item.label ?? "", change: (label) => state.updateShape(id, { label }) },
-          ...formatFields(item.textFormat, (textFormat) => state.updateShape(id, { textFormat })),
+          { kind: "action", label: "Edit text", run: () => useTextEditingStore.setState({ shapeId: id }) },
           colorField(item.color, (color) => state.updateShape(id, { color })),
           ...sizeFields(item, (size) => state.updateShape(id, size), 10, 10, item.type !== "rect"),
         ],
@@ -139,7 +146,6 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       if (!table) return null;
       return {
         fields: [
-          ...formatFields(table.textFormat, (textFormat) => state.formatTableText(id, textFormat)),
           ...sizeFields(table, (size) => state.resizeTable(id, size),
             table.columns.length * TABLE_LIMITS.minTrack, table.rows.length * TABLE_LIMITS.minTrack, false, TABLE_LIMITS.maxSize),
           ...(table.rows.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add row", run: () => state.addTableTrack(id, "rows") }] : []),

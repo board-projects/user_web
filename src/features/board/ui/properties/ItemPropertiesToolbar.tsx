@@ -5,7 +5,8 @@ import { PageItemActions } from "@/features/design/ui/PageItemActions";
 import { FaTrash } from "react-icons/fa";
 import { useBoardStore } from "../../store/board.store";
 import { selectionKey } from "../../store/slices/selection.slice";
-import { getItemProperties, getSelectedBoardItem } from "./itemProperties";
+import { useTextEditingStore } from "../../store/textEditing.store";
+import { formatFields, getItemProperties, getSelectedBoardItem } from "./itemProperties";
 import { ItemPropertyControl, propertyButtonClass } from "./ItemPropertyControl";
 import { getPropertiesToolbarPosition } from "./toolbarPosition";
 
@@ -15,6 +16,7 @@ export function ItemPropertiesToolbar({ viewport }: {
   const selection = useBoardStore((state) => state.selection);
   const selectedItem = useBoardStore((state) => getSelectedBoardItem(state, state.selection));
   const marquee = useBoardStore((state) => state.marqueeSelection);
+  const editor = useTextEditingStore((state) => state.editor);
   const isPage = selection?.type === "page";
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const properties = getItemProperties(useBoardStore.getState());
@@ -101,6 +103,14 @@ export function ItemPropertiesToolbar({ viewport }: {
       }`}
       style={{ maxWidth: isPage ? "min(14rem, calc(100% - 1rem))" : "calc(100% - 1rem)", visibility: "hidden" }}
     >
+      {editor && editor.itemId === selection?.id && (
+        <div data-inline-text-tools className="flex shrink-0 items-center gap-2"
+          onMouseDown={(event) => {
+            if (event.target instanceof Element && event.target.closest("button")) event.preventDefault();
+          }}>
+          {formatFields(editor.format, editor.apply, "center", true).map((field) => <ItemPropertyControl key={field.label} field={field} />)}
+        </div>
+      )}
       {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
       {isPage
         ? <PageItemActions key={selection.id} itemId={selection.id} deleteButton={deleteButton} />

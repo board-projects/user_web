@@ -72,7 +72,7 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
       })}
       {board.shapes.map((shape) => shape.label && (
         <g key={shape.id} transform={`translate(${shape.x} ${shape.y})`}>
-          <ShapeText width={shape.width} height={shape.height} text={shape.label} format={shape.textFormat} background={shape.color} linksEnabled />
+          <ShapeText width={shape.width} height={shape.height} text={shape.label} runs={shape.textRuns} format={shape.textFormat} background={shape.color} linksEnabled />
         </g>
       ))}
       {board.codeBlocks.map((block) => (

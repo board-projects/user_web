@@ -1,6 +1,11 @@
 export const TEXT_ALIGNMENTS = ["left", "center", "right"] as const;
 
+export const TEXT_FONTS = ["Arial", "Georgia", "Verdana", "Courier New"] as const;
+export const TEXT_SIZES = [10, 12, 14, 16, 18, 20, 24, 28, 32, 40, 48, 64] as const;
+
 export type TextFormat = {
+  font?: (typeof TEXT_FONTS)[number];
+  size?: number;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -9,6 +14,8 @@ export type TextFormat = {
 };
 
 export const getTextStyles = (format?: TextFormat, defaultAlign: TextFormat["align"] = "center") => ({
+  fontFamily: TEXT_FONTS.find((font) => font === format?.font),
+  fontSize: TEXT_SIZES.find((size) => size === format?.size),
   fontWeight: format?.bold ? 700 : "normal",
   fontStyle: format?.italic ? "italic" : "normal",
   textDecoration: format?.underline ? "underline" : "none",

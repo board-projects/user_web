@@ -3,6 +3,8 @@
 import React from "react";
 import { useTextEditingStore } from "../store/textEditing.store";
 import { InlineItemTextEditor } from "./InlineItemTextEditor";
+import { ShapeRotationHandle } from "./ShapeRotationHandle";
+import { normalizeRotation } from "../domain/shapeRotation";
 import { ShapeText } from "./ItemText";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
@@ -42,6 +44,7 @@ export function ShapesLayer() {
 
         const clipPath = polygonClip(shape.type);
         const area = shapeTextArea(shape.type);
+        const rotation = normalizeRotation(shape.rotation);
 
         const connected = connectedIds.has(shape.id);
         const updateSize: React.ComponentProps<typeof Rnd>["onResize"] =
@@ -66,7 +69,7 @@ export function ShapesLayer() {
             onResizeStart={() => select({ type: "shape", id: shape.id })}
             onResize={connected ? updateSize : undefined}
             onResizeStop={updateSize}
-            cancel="[data-connection-handle], [contenteditable], a"
+            cancel="[data-connection-handle], [data-rotation-handle], [contenteditable], a"
             enableResizing
             resizeHandleComponent={selected ? itemResizeHandles : undefined}
             lockAspectRatio={shapeDefinitions[shape.type].lockedAspect}
@@ -78,6 +81,7 @@ export function ShapesLayer() {
             }}
           >
             <div
+              data-board-rotated-frame
               style={{
                 width: "100%",
                 height: "100%",
@@ -85,6 +89,7 @@ export function ShapesLayer() {
                 borderRadius: shape.type === "circle" ? "50%" : "0%",
                 ...itemSelectionStyle(selected || !!inMarquee),
                 position: "relative",
+                transform: rotation ? `rotate(${rotation}deg)` : undefined,
               }}
             >
               {clipPath && (
@@ -106,8 +111,11 @@ export function ShapesLayer() {
                     commit={(label, textRuns) => updateShape(shape.id, { label, textRuns })} close={() => useTextEditingStore.setState({ shapeId: null })} />
                 </div>
               )}
-              <ConnectionPorts item={shape} selected={selected} />
             </div>
+            <ConnectionPorts item={shape} selected={selected} />
+            {selected && canEdit && editingId !== shape.id && (
+              <ShapeRotationHandle shape={shape} zoom={zoom} rotate={(rotation) => updateShape(shape.id, { rotation })} />
+            )}
           </Rnd>
         );
       })}

@@ -8,6 +8,7 @@ import { useId } from "react";
 import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
 import { connectorArrow, connectorDashArray, connectorMidpoint, connectorPath, getConnectorPoints } from "@/features/board/domain/connectorGeometry";
+import { normalizeRotation } from "@/features/board/domain/shapeRotation";
 import { shapeDefinitions } from "@/features/board/domain/shapeDefinitions";
 import { SHEET_DOT_GRID, type SheetLayout } from "../domain/sheetLayout";
 
@@ -63,19 +64,20 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
       })}
       {board.shapes.map((shape) => {
         const { x, y, width, height, color } = shape;
-        if (shape.type === "circle") return <ellipse key={shape.id} cx={x + width / 2} cy={y + height / 2} rx={width / 2} ry={height / 2} fill={color} />;
+        const rotation = normalizeRotation(shape.rotation);
         const vertices = shapeDefinitions[shape.type].points;
-        if (vertices) {
-          const points = vertices.map(([px, py]) => `${x + width * px / 100},${y + height * py / 100}`).join(" ");
-          return <polygon key={shape.id} points={points} fill={color} />;
-        }
-        return <rect key={shape.id} x={x} y={y} width={width} height={height} fill={color} />;
+        return (
+          <g key={shape.id} transform={`translate(${x} ${y}) rotate(${rotation} ${width / 2} ${height / 2})`}>
+            {shape.type === "circle"
+              ? <ellipse cx={width / 2} cy={height / 2} rx={width / 2} ry={height / 2} fill={color} />
+              : vertices
+                ? <polygon fill={color} points={vertices.map(([px, py]) => `${width * px / 100},${height * py / 100}`).join(" ")} />
+                : <rect width={width} height={height} fill={color} />}
+            <ShapeText shape={shape.type} width={width} height={height} text={shape.label} runs={shape.textRuns}
+              format={shape.textFormat} background={color} linksEnabled />
+          </g>
+        );
       })}
-      {board.shapes.map((shape) => shape.label && (
-        <g key={shape.id} transform={`translate(${shape.x} ${shape.y})`}>
-          <ShapeText shape={shape.type} width={shape.width} height={shape.height} text={shape.label} runs={shape.textRuns} format={shape.textFormat} background={shape.color} linksEnabled />
-        </g>
-      ))}
       {board.codeBlocks.map((block) => (
         <foreignObject key={block.id} x={block.x} y={block.y} width={block.width} height={block.height}>
           <pre className="m-0 h-full overflow-hidden whitespace-pre-wrap break-words rounded-lg bg-stone-900 p-3 font-mono text-sm text-white" style={getTextStyles(block.textFormat, "left")}><TextLink link={block.textFormat?.link}>{block.code}</TextLink></pre>

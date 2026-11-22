@@ -1,6 +1,6 @@
 import { segmentIntersectsBox, type SelectionBox } from "./marqueeGeometry";
 import type { ConnectableItem } from "./connectableItems";
-import { getShapePortPoint, PORT_DIRECTION } from "./shapeGeometry";
+import { getShapePortPoint, getPortDirection } from "./shapeGeometry";
 import type { Point, ShapeConnection } from "./types";
 
 const distance = (a: Point, b: Point) => Math.hypot(b.x - a.x, b.y - a.y);
@@ -15,8 +15,8 @@ export function getConnectorPoints(connection: ShapeConnection, source: Connecta
   const length = distance(from, to);
   if (!length) return [from, to];
 
-  const start = PORT_DIRECTION[connection.sourcePort];
-  const end = PORT_DIRECTION[connection.targetPort];
+  const start = getPortDirection(source, connection.sourcePort);
+  const end = getPortDirection(target, connection.targetPort);
 
   switch (connection.route) {
     case "smooth": {
@@ -31,13 +31,17 @@ export function getConnectorPoints(connection: ShapeConnection, source: Connecta
       });
     }
     case "orthogonal": {
+      const cardinal = ({ x, y }: Point) => Math.abs(x) >= Math.abs(y)
+        ? { x: Math.sign(x), y: 0 } : { x: 0, y: Math.sign(y) };
+      const startAxis = cardinal(start);
+      const endAxis = cardinal(end);
       const reach = Math.min(28, length / 4);
-      const a = extend(from, start, reach);
-      const b = extend(to, end, reach);
+      const a = extend(from, startAxis, reach);
+      const b = extend(to, endAxis, reach);
       const middle = interpolate(a, b, 0.5);
-      if (start.x && end.x) return [from, a, { x: middle.x, y: a.y }, { x: middle.x, y: b.y }, b, to];
-      if (!start.x && !end.x) return [from, a, { x: a.x, y: middle.y }, { x: b.x, y: middle.y }, b, to];
-      return [from, a, start.x ? { x: b.x, y: a.y } : { x: a.x, y: b.y }, b, to];
+      if (startAxis.x && endAxis.x) return [from, a, { x: middle.x, y: a.y }, { x: middle.x, y: b.y }, b, to];
+      if (!startAxis.x && !endAxis.x) return [from, a, { x: a.x, y: middle.y }, { x: b.x, y: middle.y }, b, to];
+      return [from, a, startAxis.x ? { x: b.x, y: a.y } : { x: a.x, y: b.y }, b, to];
     }
     case "wave":
     case "zigzag": {

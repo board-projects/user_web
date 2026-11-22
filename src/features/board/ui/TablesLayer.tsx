@@ -49,9 +49,10 @@ function TableFrame({ table }: { table: TableItem }) {
         resize(...args);
         initialSize.current = null;
       }}
-      cancel="[data-connection-handle], [data-table-divider], [contenteditable]"
+      cancel="[data-connection-handle], [data-table-divider], [contenteditable], a"
       data-board-selection-key={key}
       data-board-connectable-id={table.id}
+      title={table.itemLabel || undefined}
       data-interactive="true"
       className="pointer-events-auto touch-none"
       {...dragItem(item, table, (position) => moveTable(table.id, position), true)}
@@ -61,9 +62,9 @@ function TableFrame({ table }: { table: TableItem }) {
         style={itemSelectionStyle(selected || !!inGroup)}
         onClick={() => { if (canEdit) selectBoardItem(item); }}
       >
-        <svg className="pointer-events-none block h-full w-full" viewBox={`0 0 ${table.width} ${table.height}`} role="img"
-          aria-label={`Table with ${table.rows.length} rows and ${table.columns.length} columns`}>
-          <TableGrid {...table} hiddenCell={canEdit ? activeCell ?? undefined : undefined} />
+        <svg className="pointer-events-none absolute inset-0 z-[1] block h-full w-full" viewBox={`0 0 ${table.width} ${table.height}`} role="group"
+          aria-label={table.itemLabel || `Table with ${table.rows.length} rows and ${table.columns.length} columns`}>
+          <TableGrid {...table} linksEnabled hiddenCell={canEdit ? activeCell ?? undefined : undefined} />
         </svg>
         {canEdit && <TableCellEditors table={table} keyboardEnabled={selected} active={activeCell} setActive={setActiveCell}
           save={(row, column, text, runs) => setCell(table.id, row, column, text, runs)} />}

@@ -30,7 +30,9 @@ export const getTextStyles = (format?: TextFormat, defaultAlign: TextFormat["ali
 export function safeTextLink(value?: string) {
   if (!value) return undefined;
   try {
-    const url = new URL(value.trim());
+    const input = value.trim();
+    const bareDomain = /^[\w-]+(?:\.[\w-]+)+(?:[/:?#]|$)/i.test(input);
+    const url = new URL(bareDomain ? `https://${input}` : input);
     return url.protocol === "https:" || url.protocol === "http:" ? url.href : undefined;
   } catch {
     return undefined;

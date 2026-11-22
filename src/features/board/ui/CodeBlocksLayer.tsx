@@ -91,6 +91,7 @@ export function CodeBlocksLayer() {
             data-interactive="true"
             data-board-selection-key={key}
             data-board-connectable-id={block.id}
+            title={block.itemLabel || undefined}
             cancel="[data-connection-handle]"
             scale={zoom}
             size={{ width: block.width, height: block.height }}

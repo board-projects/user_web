@@ -56,6 +56,7 @@ export function ShapesLayer() {
             data-interactive="true"
             data-board-selection-key={key}
             data-board-connectable-id={shape.id}
+            title={shape.itemLabel || undefined}
             scale={zoom}
             size={{ width: shape.width, height: shape.height }}
             position={{ x: shape.x, y: shape.y }}
@@ -63,7 +64,7 @@ export function ShapesLayer() {
             onResizeStart={() => select({ type: "shape", id: shape.id })}
             onResize={connected ? updateSize : undefined}
             onResizeStop={updateSize}
-            cancel="[data-connection-handle], [contenteditable]"
+            cancel="[data-connection-handle], [contenteditable], a"
             enableResizing
             resizeHandleComponent={selected ? itemResizeHandles : undefined}
             lockAspectRatio={shape.type === "circle" || isStar}
@@ -91,12 +92,12 @@ export function ShapesLayer() {
                   style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
                 />
               )}
-              <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
-                <ShapeText width={shape.width} height={shape.height} text={editingId === shape.id ? undefined : shape.label} format={shape.textFormat} background={shape.color} runs={shape.textRuns} />
+              <svg className="pointer-events-none absolute inset-0 h-full w-full">
+                <ShapeText shape={shape.type} linksEnabled width={shape.width} height={shape.height} text={editingId === shape.id ? undefined : shape.label} format={shape.textFormat} background={shape.color} runs={shape.textRuns} />
               </svg>
               {editingId === shape.id && (
-                <div className="absolute inset-x-[15%] inset-y-[25%] z-10">
-                  <InlineItemTextEditor itemId={shape.id} label="Shape text" value={shape.label ?? ""} runs={shape.textRuns} format={shape.textFormat} background={shape.color}
+                <div className="absolute inset-0 z-10">
+                  <InlineItemTextEditor itemId={shape.id} shape={shape.type} label="Shape text" value={shape.label ?? ""} runs={shape.textRuns} format={shape.textFormat} background={shape.color}
                     commit={(label, textRuns) => updateShape(shape.id, { label, textRuns })} close={() => useTextEditingStore.setState({ shapeId: null })} />
                 </div>
               )}

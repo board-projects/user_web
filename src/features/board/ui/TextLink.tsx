@@ -6,7 +6,7 @@ export function TextLink({ link, children }: { link?: string; children: ReactNod
   if (!href) return children;
 
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-dotted">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="pointer-events-auto underline decoration-dotted">
       {children}
     </a>
   );

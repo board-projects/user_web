@@ -15,6 +15,7 @@ import { MarqueeOverlay } from "@/features/board/ui/MarqueeOverlay";
 import { useCanvasDraw } from "@/features/board/hooks/useCanvasDraw";
 import { useWheelZoom } from "@/features/board/hooks/useWheelZoom";
 import { useCanvasRedraw } from "@/features/board/hooks/useCanvasRedraw";
+import { useBoardTouch } from "../hooks/useBoardTouch";
 import { usePan } from "@/features/board/hooks/usePan";
 
 import { BoardNavigation } from "@/features/board/ui/BoardNavigation";
@@ -46,7 +47,6 @@ export function BoardEditor({ reference }: { reference: string }) {
   const boardAreaRef = useRef<HTMLDivElement | null>(null);
 
   useWheelZoom(boardAreaRef);
-  usePan(boardAreaRef);
 
   const marquee = useMarqueeSelection();
 
@@ -79,6 +79,13 @@ export function BoardEditor({ reference }: { reference: string }) {
     penSize,
     onLine: addLine,
   });
+
+  useBoardTouch(boardAreaRef, () => {
+    marquee.cancelGesture();
+    draw.cancelDrawing();
+    useBoardStore.getState().cancelConnecting();
+  });
+  usePan(boardAreaRef);
 
   useCanvasRedraw({ canvasRef, lines, selectedLines, zoom, panX, panY });
 

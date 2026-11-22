@@ -1,7 +1,6 @@
 import { INITIAL_VIEWPORT } from "../../domain/boardFit";
 
-const clamp = (v: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, v));
+import { transformViewport } from "../../domain/viewportTransform";
 
 export type BoardTool = "select" | "pen";
 
@@ -27,20 +26,5 @@ export const createViewportSlice = (set: any, get: any): ViewportSlice => ({
 
   setPan: (x, y) => set({ panX: x, panY: y }),
 
-  zoomAt: (nextZoomRaw, screenX, screenY) => {
-    const { zoom, panX, panY } = get();
-    const nextZoom = clamp(nextZoomRaw, Math.min(zoom, 0.2), 4);
-
-    const worldX = (screenX - panX) / zoom;
-    const worldY = (screenY - panY) / zoom;
-
-    const nextPanX = screenX - worldX * nextZoom;
-    const nextPanY = screenY - worldY * nextZoom;
-
-    set({
-      zoom: nextZoom,
-      panX: nextPanX,
-      panY: nextPanY,
-    });
-  },
+  zoomAt: (nextZoom, x, y) => set(transformViewport(get(), nextZoom, { x, y })),
 });

@@ -29,7 +29,7 @@ export function BoardNavigation({ viewport }: { viewport: RefObject<HTMLElement 
       role="group"
       aria-label="Board navigation"
       data-ui="true"
-      className="absolute bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+3.5rem)] left-[max(0.75rem,env(safe-area-inset-left))] z-40 flex items-center rounded-xl border border-stone-200 bg-white p-0.5 shadow lg:bottom-[max(0.75rem,env(safe-area-inset-bottom))]"
+      className="absolute right-[max(0.75rem,env(safe-area-inset-right))] top-[max(0.75rem,env(safe-area-inset-top))] z-50 flex flex-col items-center rounded-xl border border-stone-200 bg-white p-0.5 shadow"
     >
       <button type="button" aria-label="Pan board" aria-pressed={panMode} className={`${buttonClass} lg:hidden aria-pressed:bg-blue-100 aria-pressed:text-blue-700`} onClick={togglePanMode}>
         <FaHandPaper aria-hidden="true" />

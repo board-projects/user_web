@@ -8,6 +8,7 @@ import { useId } from "react";
 import type { BoardContent } from "@/features/board/domain/boardSync";
 import { getConnectableItems, clozeConnectable } from "@/features/board/domain/connectableItems";
 import { connectorArrow, connectorDashArray, connectorMidpoint, connectorPath, getConnectorPoints } from "@/features/board/domain/connectorGeometry";
+import { roundedShapePath } from "@/features/board/domain/shapeCorners";
 import { normalizeRotation } from "@/features/board/domain/shapeRotation";
 import { shapeDefinitions } from "@/features/board/domain/shapeDefinitions";
 import { SHEET_DOT_GRID, type SheetLayout } from "../domain/sheetLayout";
@@ -66,9 +67,11 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
         const { x, y, width, height, color } = shape;
         const rotation = normalizeRotation(shape.rotation);
         const vertices = shapeDefinitions[shape.type].points;
+        const roundedPath = roundedShapePath(shape.type, shape.cornerRounding);
         return (
           <g key={shape.id} transform={`translate(${x} ${y}) rotate(${rotation} ${width / 2} ${height / 2})`}>
-            {shape.type === "circle"
+            {roundedPath ? <path d={roundedPath} transform={`scale(${width / 100} ${height / 100})`} fill={color} />
+              : shape.type === "circle"
               ? <ellipse cx={width / 2} cy={height / 2} rx={width / 2} ry={height / 2} fill={color} />
               : vertices
                 ? <polygon fill={color} points={vertices.map(([px, py]) => `${width * px / 100},${height * py / 100}`).join(" ")} />

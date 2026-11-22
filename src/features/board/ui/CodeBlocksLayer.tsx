@@ -73,6 +73,7 @@ export function CodeBlocksLayer() {
           "--item-font-style": format.fontStyle,
           "--item-text-decoration": format.textDecoration,
           "--item-text-align": format.textAlign,
+          "--item-text-color": format.color,
           "--item-font-family": format.fontFamily,
           "--item-font-size": format.fontSize ? `${format.fontSize}px` : undefined,
         } as React.CSSProperties;
@@ -161,7 +162,7 @@ export function CodeBlocksLayer() {
 
               <CodeMirror
                 value={block.code}
-                className="w-full h-full"
+                className={`w-full h-full ${format.color ? "[&_.cm-content]:!text-[var(--item-text-color)] [&_.cm-content_span]:!text-[var(--item-text-color)]" : ""}`}
                 height="100%"
                 width="100%"
                 extensions={codeExtensions}

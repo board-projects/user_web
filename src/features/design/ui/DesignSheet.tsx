@@ -55,7 +55,7 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
               <TextLink link={connection.textFormat?.link}>
                 <text x={midpoint.x} y={midpoint.y}
                   textAnchor={connection.textFormat?.align === "left" ? "start" : connection.textFormat?.align === "right" ? "end" : "middle"}
-                  dominantBaseline="central" fontSize={13} style={getTextStyles(connection.textFormat)}>{connection.label}</text>
+                  dominantBaseline="central" fontSize={13} fill={getTextStyles(connection.textFormat).color} style={getTextStyles(connection.textFormat)}>{connection.label}</text>
               </TextLink>
             )}
           </g>

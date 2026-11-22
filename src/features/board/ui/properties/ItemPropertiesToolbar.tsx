@@ -77,6 +77,12 @@ export function ItemPropertiesToolbar({ viewport }: {
 
   if (!properties || !anchorSelector) return null;
 
+  const inlineEditor = editor && editor.itemId === selection?.id ? editor : null;
+  const canEditInline = selection?.type === "shape" || selection?.type === "table";
+  const textFields = inlineEditor
+    ? formatFields(inlineEditor.format, inlineEditor.apply, "center", true)
+    : properties.textFields ?? (canEditInline ? formatFields(undefined, () => {}) : undefined);
+
   const deleteButton = (
     <button
       type="button"
@@ -96,25 +102,38 @@ export function ItemPropertiesToolbar({ viewport }: {
       role="group"
       aria-label="Selected item properties"
       data-ui="true"
-      className={`absolute z-[70] flex gap-2 rounded-xl border border-stone-200 bg-white p-1.5 shadow-lg ${
+      className={`absolute z-[70] flex flex-col rounded-xl border border-stone-200 bg-white shadow-lg ${
         isPage
-          ? "max-h-[calc(100%-1rem)] w-max flex-col items-stretch overflow-y-auto [overflow-wrap:anywhere] [&>label]:justify-between"
-          : "items-center overflow-x-auto whitespace-nowrap"
+          ? "max-h-[calc(100%-1rem)] w-max gap-2 overflow-y-auto p-1.5 [overflow-wrap:anywhere] [&>label]:justify-between"
+          : "w-max overflow-hidden whitespace-nowrap"
       }`}
       style={{ maxWidth: isPage ? "min(14rem, calc(100% - 1rem))" : "calc(100% - 1rem)", visibility: "hidden" }}
     >
-      {editor && editor.itemId === selection?.id && (
-        <div data-inline-text-tools className="flex shrink-0 items-center gap-2"
-          onMouseDown={(event) => {
-            if (event.target instanceof Element && event.target.closest("button")) event.preventDefault();
-          }}>
-          {formatFields(editor.format, editor.apply, "center", true).map((field) => <ItemPropertyControl key={field.label} field={field} />)}
-        </div>
+      {isPage ? (
+        <>
+          {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
+          <PageItemActions key={selection.id} itemId={selection.id} deleteButton={deleteButton} />
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-2 overflow-x-auto px-2 py-1.5">
+            {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
+            {deleteButton}
+          </div>
+          {textFields && (
+            <div data-inline-text-tools role="group" aria-label="Text formatting"
+              className="overflow-x-auto border-t border-stone-200 bg-stone-50/70"
+              onMouseDown={(event) => {
+                if (inlineEditor && event.target instanceof Element && event.target.closest("button")) event.preventDefault();
+              }}>
+              <fieldset disabled={canEditInline && !inlineEditor}
+                className="flex w-max min-w-full items-center gap-1.5 px-2 py-1.5 disabled:opacity-50">
+                {textFields.map((field) => <ItemPropertyControl key={field.label} field={field} compact />)}
+              </fieldset>
+            </div>
+          )}
+        </>
       )}
-      {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
-      {isPage
-        ? <PageItemActions key={selection.id} itemId={selection.id} deleteButton={deleteButton} />
-        : deleteButton}
     </div>
   );
 }

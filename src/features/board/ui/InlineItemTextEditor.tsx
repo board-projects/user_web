@@ -60,7 +60,10 @@ export function InlineItemTextEditor({ itemId, label, value, runs, maxLength, fo
         dirty.current = true;
       }
 
-      if ("link" in patch) {
+      const colorPickerFocused = "color" in patch &&
+        document.activeElement?.matches('[data-inline-text-tools] input[type="color"]');
+      if ("link" in patch || colorPickerFocused) {
+        if (colorPickerFocused && root) renderEditableText(root, text, draft.current.runs, format);
         const editor = useTextEditingStore.getState().editor;
         if (editor?.itemId === itemId) useTextEditingStore.setState({ editor: { ...editor, format: { ...editor.format, ...patch } } });
         return;

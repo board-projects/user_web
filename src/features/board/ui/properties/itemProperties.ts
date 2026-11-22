@@ -1,6 +1,6 @@
 import { TABLE_LIMITS } from "../../domain/tables";
 import { useTextEditingStore } from "../../store/textEditing.store";
-import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, type TextFormat } from "../../domain/textFormat";
+import { safeTextLink, TEXT_ALIGNMENTS, TEXT_FONTS, TEXT_SIZES, validTextColor, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
 import { clozeConnectable } from "../../domain/connectableItems";
@@ -17,6 +17,7 @@ export type ItemProperty =
 
 type ItemProperties = {
   fields: ItemProperty[];
+  textFields?: ItemProperty[];
 };
 
 export function getSelectedBoardItem(state: BoardState, selection: Selection) {
@@ -68,6 +69,7 @@ export function formatFields(format: TextFormat = {}, save: (format: TextFormat)
     ...toggles.map(({ key, label }): ItemProperty => ({
       kind: "toggle", label, value: format[key] ?? false, change: (value) => update({ [key]: value }),
     })),
+    { kind: "color", label: "Text color", value: validTextColor(format.color) ?? "#1c1917", change: (color) => update({ color }) },
     {
       kind: "select", label: "Align", options: TEXT_ALIGNMENTS, value: format.align ?? align,
       change: (value) => {
@@ -96,9 +98,9 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       ? [{ kind: "text" as const, label: "Text", value: Array.from(state.marqueeSelection?.lines ?? []).find((line) => line.label)?.label ?? "", change: (value: string) => state.labelSelectedDrawing(value) }]
       : [];
     return {
+      textFields: groups.size === 1 ? formatFields(drawing.textFormat, (textFormat) => state.styleSelectedLines({ textFormat })) : undefined,
       fields: [
         ...label,
-        ...(groups.size === 1 ? formatFields(drawing.textFormat, (textFormat) => state.styleSelectedLines({ textFormat })) : []),
         colorField(drawing.color, (color) => state.styleSelectedLines({ color })),
         thicknessField(drawing.size, 256, (size) => state.styleSelectedLines({ size })),
       ],
@@ -122,9 +124,9 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       const item = state.codeBlocks.find((block) => block.id === id);
       if (!item) return null;
       return {
+        textFields: formatFields(item.textFormat, (textFormat) => state.updateCodeBlock(id, { textFormat }), "left"),
         fields: [
           ...sizeFields(item, (size) => state.updateCodeBlock(id, size), 200, 100),
-          ...formatFields(item.textFormat, (textFormat) => state.updateCodeBlock(id, { textFormat }), "left"),
           { kind: "action", label: "Edit code", run: () => state.startEditingCodeBlock(id) },
         ],
       };
@@ -133,10 +135,10 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       const item = state.clozeTests.find((block) => block.id === id);
       if (!item) return null;
       return {
+        textFields: formatFields(item.textFormat, (textFormat) => state.updateClozeTest(id, { textFormat }), "left"),
         fields: [
           { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
           ...sizeFields(clozeConnectable(item), (size) => state.updateClozeTest(id, size), 140, 100),
-          ...formatFields(item.textFormat, (textFormat) => state.updateClozeTest(id, { textFormat }), "left"),
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
         ],
       };
@@ -187,9 +189,9 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       const item = state.connections.find((connection) => connection.id === id);
       if (!item) return null;
       return {
+        textFields: formatFields(item.textFormat, (textFormat) => state.updateConnection(id, { textFormat })),
         fields: [
           colorField(item.color ?? "#44403c", (color) => state.updateConnection(id, { color })),
-          ...formatFields(item.textFormat, (textFormat) => state.updateConnection(id, { textFormat })),
           thicknessField(item.size ?? 2, 48, (size) => state.updateConnection(id, { size })),
           { kind: "text", label: "Label", value: item.label ?? "", change: (label) => state.updateConnection(id, { label }) },
           {

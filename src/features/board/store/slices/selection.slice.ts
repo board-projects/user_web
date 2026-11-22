@@ -1,4 +1,4 @@
-import { drawingId, getDrawingFrame, scaleDrawingLine, translateDrawingLine, type DrawingFrame } from "../../domain/drawings";
+import { drawingId, getDrawingFrame, groupDrawingLines, scaleDrawingLine, translateDrawingLine, type DrawingFrame } from "../../domain/drawings";
 import type { DrawLine, Point } from "../../domain/types";
 import type { StateCreator } from "zustand";
 import type { BoardState } from "../board.store";
@@ -25,6 +25,7 @@ export type MoveScope = { items: ReadonlySet<string>; lineIds: ReadonlySet<strin
 export type SelectionSlice = {
   selection: Selection;
   marqueeSelection: MarqueeSelection | null;
+  labelSelectedDrawing: (label: string) => void;
   styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size">>) => void;
   deleteSelected: () => boolean;
   moveMarquee: (delta: Point, scope?: MoveScope) => void;
@@ -74,6 +75,16 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         return next;
       });
       return { lines: updated, marqueeSelection: { ...selected, anchor: to, lines } };
+    }),
+
+    labelSelectedDrawing: (label) => set((state) => {
+      const selected = state.marqueeSelection;
+      if (!selected || selected.items.size || groupDrawingLines(selected.lines).size !== 1) return state;
+      const first = Array.from(selected.lines).find((line) => line.label) ?? selected.lines.values().next().value;
+      if (!first || (first.label ?? "") === label) return state;
+      const updated = { ...first, label };
+      const lines = new Set(Array.from(selected.lines, (line) => line === first ? updated : line));
+      return { lines: state.lines.map((line) => line === first ? updated : line), marqueeSelection: { ...selected, lines } };
     }),
 
     styleSelectedLines: (style) => set((state) => {

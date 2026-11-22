@@ -4,6 +4,7 @@ export type TableItem = Point & {
   id: string;
   rows: number[];
   columns: number[];
+  cells?: Record<string, string>;
   width: number;
   height: number;
 };
@@ -13,6 +14,7 @@ export type Point = { x: number; y: number };
 export type DrawLine = {
   id: string;
   strokeId?: string;
+  label?: string;
   from: Point;
   to: Point;
   color: string;
@@ -24,6 +26,7 @@ export type ShapeType = "rect" | "circle" | "star";
 export type Shape = {
   id: string;
   type: ShapeType;
+  label?: string;
   x: number;
   y: number;
   width: number;

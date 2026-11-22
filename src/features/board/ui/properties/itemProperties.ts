@@ -1,4 +1,5 @@
 import { TABLE_LIMITS } from "../../domain/tables";
+import { groupDrawingLines } from "../../domain/drawings";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
 import { clozeConnectable } from "../../domain/connectableItems";
 import { SHEET_LIMITS, SHEET_PRESETS } from "@/features/design/domain/sheetLayout";
@@ -58,8 +59,13 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
   if (!selection) {
     const drawing = state.marqueeSelection?.lines.values().next().value;
     if (!drawing || state.marqueeSelection?.items.size) return null;
+    const groups = groupDrawingLines(state.marqueeSelection?.lines ?? []);
+    const label = groups.size === 1
+      ? [{ kind: "text" as const, label: "Text", value: Array.from(state.marqueeSelection?.lines ?? []).find((line) => line.label)?.label ?? "", change: (value: string) => state.labelSelectedDrawing(value) }]
+      : [];
     return {
       fields: [
+        ...label,
         colorField(drawing.color, (color) => state.styleSelectedLines({ color })),
         thicknessField(drawing.size, 256, (size) => state.styleSelectedLines({ size })),
       ],
@@ -73,6 +79,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       if (!item) return null;
       return {
         fields: [
+          { kind: "text", label: "Text", value: item.label ?? "", change: (label) => state.updateShape(id, { label }) },
           colorField(item.color, (color) => state.updateShape(id, { color })),
           ...sizeFields(item, (size) => state.updateShape(id, size), 10, 10, item.type !== "rect"),
         ],

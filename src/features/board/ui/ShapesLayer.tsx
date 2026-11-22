@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import { ITEM_LABEL_LIMIT } from "../domain/itemText";
+import { InlineItemTextEditor } from "./InlineItemTextEditor";
+import { ShapeText } from "./ItemText";
 import { Rnd } from "react-rnd";
 import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
@@ -11,6 +14,8 @@ import { ConnectionPorts } from "./ConnectionPorts";
 import { STAR_CLIP_PATH } from "../domain/shapeGeometry";
 
 export function ShapesLayer() {
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const canEdit = useBoardStore((state) => state.tool === "select" && !state.panMode);
   const connections = useBoardStore((s) => s.connections);
   const connectedIds = React.useMemo(
     () => new Set(connections.flatMap(({ sourceId, targetId }) => [sourceId, targetId])),
@@ -58,11 +63,12 @@ export function ShapesLayer() {
             onResizeStart={() => select({ type: "shape", id: shape.id })}
             onResize={connected ? updateSize : undefined}
             onResizeStop={updateSize}
-            cancel="[data-connection-handle]"
+            cancel="[data-connection-handle], textarea"
             enableResizing
             resizeHandleComponent={selected ? itemResizeHandles : undefined}
             lockAspectRatio={shape.type === "circle" || isStar}
             className="pointer-events-auto"
+            onDoubleClick={() => { if (canEdit) setEditingId(shape.id); }}
             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
               e.stopPropagation();
               selectBoardItem({ type: "shape", id: shape.id });
@@ -84,6 +90,15 @@ export function ShapesLayer() {
                   className="absolute inset-0"
                   style={{ backgroundColor: shape.color, clipPath: STAR_CLIP_PATH }}
                 />
+              )}
+              <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
+                <ShapeText width={shape.width} height={shape.height} text={shape.label} />
+              </svg>
+              {editingId === shape.id && (
+                <div className="absolute inset-x-[15%] inset-y-[25%] z-10">
+                  <InlineItemTextEditor label="Shape text" value={shape.label ?? ""} maxLength={ITEM_LABEL_LIMIT}
+                    commit={(label) => updateShape(shape.id, { label })} close={() => setEditingId(null)} />
+                </div>
               )}
               <ConnectionPorts item={shape} selected={selected} />
             </div>

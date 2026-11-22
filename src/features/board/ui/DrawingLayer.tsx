@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, type ComponentProps } from "react";
+import { DrawingText } from "./DrawingText";
 import { Rnd } from "react-rnd";
 import { getDrawingFrame, groupDrawingLines, type DrawingFrame } from "../domain/drawings";
 import { useDrawingDrag } from "../hooks/useDrawingDrag";
@@ -79,6 +80,7 @@ export function DrawingLayer() {
             }}
           />
         ))}
+        {Array.from(drawings, ([id, segments]) => <DrawingText key={id} lines={segments} />)}
       </svg>
       {frame && <DrawingResizeFrame frame={frame} zoom={zoom} />}
     </>

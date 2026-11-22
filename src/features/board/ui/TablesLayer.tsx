@@ -7,6 +7,7 @@ import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { useBoardStore } from "../store/board.store";
 import { selectionKey } from "../store/slices/selection.slice";
 import { ConnectionPorts } from "./ConnectionPorts";
+import { TableCellEditors } from "./TableCellEditors";
 import { TableDividers } from "./TableDividers";
 import { TableGrid } from "./TableGrid";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
@@ -20,6 +21,7 @@ function TableFrame({ table }: { table: TableItem }) {
   const inGroup = useBoardStore((state) => state.marqueeSelection?.items.has(key));
   const moveTable = useBoardStore((state) => state.moveTable);
   const resizeTable = useBoardStore((state) => state.resizeTable);
+  const setCell = useBoardStore((state) => state.setTableCell);
   const setTracks = useBoardStore((state) => state.setTableTracks);
   const dragItem = useBoardItemDrag();
   const initialSize = useRef<TableItem | null>(null);
@@ -46,7 +48,7 @@ function TableFrame({ table }: { table: TableItem }) {
         resize(...args);
         initialSize.current = null;
       }}
-      cancel="[data-connection-handle], [data-table-divider]"
+      cancel="[data-connection-handle], [data-table-divider], textarea"
       data-board-selection-key={key}
       data-board-connectable-id={table.id}
       data-interactive="true"
@@ -62,6 +64,8 @@ function TableFrame({ table }: { table: TableItem }) {
           aria-label={`Table with ${table.rows.length} rows and ${table.columns.length} columns`}>
           <TableGrid {...table} />
         </svg>
+        {canEdit && <TableCellEditors table={table} keyboardEnabled={selected}
+          save={(row, column, text) => setCell(table.id, row, column, text)} />}
       </div>
       {selected && canEdit && (
         <>

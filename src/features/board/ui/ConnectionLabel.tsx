@@ -74,7 +74,7 @@ export function ConnectionLabel({ point, format, zoom, label, editing, interacti
       dominantBaseline="central"
       fontSize={13 / zoom}
       fontWeight={600}
-      fill="#1c1917"
+      fill={getTextStyles(format).color ?? "#1c1917"}
       style={{ ...getTextStyles(format), pointerEvents: interactive ? "all" : "none", cursor: "pointer" }}
     >
       {label}

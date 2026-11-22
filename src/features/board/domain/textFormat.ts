@@ -6,6 +6,7 @@ export const TEXT_SIZES = [10, 12, 14, 16, 18, 20, 24, 28, 32, 40, 48, 64] as co
 export type TextFormat = {
   font?: (typeof TEXT_FONTS)[number];
   size?: number;
+  color?: string;
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -13,7 +14,11 @@ export type TextFormat = {
   link?: string;
 };
 
+export const validTextColor = (value?: string) =>
+  typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : undefined;
+
 export const getTextStyles = (format?: TextFormat, defaultAlign: TextFormat["align"] = "center") => ({
+  color: validTextColor(format?.color),
   fontFamily: TEXT_FONTS.find((font) => font === format?.font),
   fontSize: TEXT_SIZES.find((size) => size === format?.size),
   fontWeight: format?.bold ? 700 : "normal",

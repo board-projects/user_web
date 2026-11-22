@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { PageItemActions } from "@/features/design/ui/PageItemActions";
 import { FaTrash } from "react-icons/fa";
 import { useBoardStore } from "../../store/board.store";
@@ -22,10 +22,17 @@ export function ItemPropertiesToolbar({ viewport }: {
   const isPage = selection?.type === "page";
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const properties = getItemProperties(useBoardStore.getState());
+  const inlineEditor = editor && editor.itemId === selection?.id ? editor : null;
+  const editingText = inlineEditor !== null;
+  const [tab, setTab] = useState<"item" | "text">("item");
 
   const anchorSelector = selection && selectedItem
     ? `[data-board-selection-key="${CSS.escape(selectionKey(selection.type, selection.id))}"]`
     : marquee?.lines.size && !marquee.items.size ? "[data-board-drawing-selection]" : null;
+
+  useLayoutEffect(() => {
+    setTab(editingText ? "text" : "item");
+  }, [anchorSelector, editingText]);
 
   useLayoutEffect(() => {
     const board = viewport.current;
@@ -92,7 +99,6 @@ export function ItemPropertiesToolbar({ viewport }: {
 
   if (!properties || !anchorSelector) return null;
 
-  const inlineEditor = editor && editor.itemId === selection?.id ? editor : null;
   const canEditInline = selection?.type === "shape" || selection?.type === "table";
   const textFields = inlineEditor
     ? formatFields(inlineEditor.format, inlineEditor.apply, "center", true)
@@ -120,7 +126,7 @@ export function ItemPropertiesToolbar({ viewport }: {
       className={`absolute inset-x-2 bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+3.5rem)] z-[70] flex flex-col rounded-xl border border-stone-200 bg-white shadow-lg sm:inset-x-auto sm:bottom-auto ${
         isPage
           ? "max-h-[min(45dvh,21rem)] gap-2 overflow-y-auto p-1.5 [overflow-wrap:anywhere] [&>label]:justify-between sm:max-h-[calc(100%-1rem)] sm:w-max sm:max-w-[min(14rem,calc(100%-1rem))]"
-          : "overflow-hidden whitespace-nowrap sm:w-max sm:max-w-[calc(100%-1rem)]"
+          : "max-h-[min(45dvh,21rem)] overflow-x-hidden overflow-y-auto whitespace-nowrap sm:max-h-none sm:w-max sm:max-w-[calc(100%-1rem)] sm:overflow-hidden"
       }`}
       style={{ visibility: "hidden" }}
     >
@@ -131,18 +137,32 @@ export function ItemPropertiesToolbar({ viewport }: {
         </>
       ) : (
         <>
-          <div className="flex items-center gap-2 overflow-x-auto px-2 py-1.5">
+          {textFields && (
+            <div data-inline-text-tools role="group" aria-label="Property sections"
+              className="flex shrink-0 gap-1 border-b border-stone-200 p-1.5 sm:hidden">
+              {(["item", "text"] as const).map((section) => (
+                <button key={section} type="button" aria-pressed={tab === section}
+                  className="min-h-9 flex-1 rounded-md px-3 text-xs font-medium text-stone-600 aria-pressed:bg-stone-100 aria-pressed:text-stone-950"
+                  onClick={() => setTab(section)}>
+                  {section === "item" ? "Item" : "Text"}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className={`items-center gap-2 px-2 py-1.5 sm:flex-nowrap sm:overflow-x-auto ${
+            tab === "text" && textFields ? "hidden sm:flex" : "flex flex-wrap"
+          }`}>
             {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
             {deleteButton}
           </div>
           {textFields && (
             <div data-inline-text-tools role="group" aria-label="Text formatting"
-              className="overflow-x-auto border-t border-stone-200 bg-stone-50/70"
+              className={`bg-stone-50/70 sm:border-t sm:border-stone-200 sm:overflow-x-auto ${tab === "text" ? "block" : "hidden sm:block"}`}
               onMouseDown={(event) => {
                 if (inlineEditor && event.target instanceof Element && event.target.closest("button")) event.preventDefault();
               }}>
               <fieldset disabled={canEditInline && !inlineEditor}
-                className="flex w-max min-w-full items-center gap-1.5 px-2 py-1.5 disabled:opacity-50">
+                className="flex w-full min-w-0 flex-wrap items-center gap-1.5 px-2 py-1.5 disabled:opacity-50 sm:w-max sm:min-w-full sm:flex-nowrap">
                 {textFields.map((field) => <ItemPropertyControl key={field.label} field={field} compact />)}
               </fieldset>
             </div>

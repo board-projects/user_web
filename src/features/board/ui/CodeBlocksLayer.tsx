@@ -21,6 +21,8 @@ const codeExtensions = [
       fontStyle: "var(--item-font-style)",
       textDecoration: "var(--item-text-decoration)",
       textAlign: "var(--item-text-align)",
+      fontFamily: "var(--item-font-family, monospace)",
+      fontSize: "var(--item-font-size, inherit)",
     },
   }),
 ];
@@ -71,6 +73,8 @@ export function CodeBlocksLayer() {
           "--item-font-style": format.fontStyle,
           "--item-text-decoration": format.textDecoration,
           "--item-text-align": format.textAlign,
+          "--item-font-family": format.fontFamily,
+          "--item-font-size": format.fontSize ? `${format.fontSize}px` : undefined,
         } as React.CSSProperties;
         const selected = selection?.type === "codeblock" && selection.id === block.id;
         const key = selectionKey("codeblock", block.id);

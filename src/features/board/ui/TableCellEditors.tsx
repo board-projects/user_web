@@ -1,11 +1,12 @@
 import { useRef, type MouseEvent } from "react";
 import { CELL_TEXT_LIMIT, tableCellKey } from "../domain/itemText";
+import type { TextRun } from "../domain/richText";
 import type { TableItem } from "../domain/types";
 import { InlineItemTextEditor } from "./InlineItemTextEditor";
 
 export function TableCellEditors({ table, save, keyboardEnabled, active, setActive }: {
   table: TableItem;
-  save: (row: number, column: number, text: string) => void;
+  save: (row: number, column: number, text: string, runs: TextRun[]) => void;
   keyboardEnabled: boolean;
   active: string | null;
   setActive: (key: string | null) => void;
@@ -24,8 +25,8 @@ export function TableCellEditors({ table, save, keyboardEnabled, active, setActi
         const value = table.cells?.[key] ?? "";
         const label = `Row ${row + 1}, column ${column + 1}`;
         if (active === key) {
-          return <InlineItemTextEditor key={key} label={label} value={value} maxLength={CELL_TEXT_LIMIT} format={table.textFormat} background="#ffffff"
-            commit={(text) => save(row, column, text)} close={() => setActive(null)} />;
+          return <InlineItemTextEditor key={key} itemId={table.id} label={label} runs={table.cellRuns?.[key]} value={value} maxLength={CELL_TEXT_LIMIT} formatWholeText format={table.textFormat} background="#ffffff"
+            commit={(text, runs) => save(row, column, text, runs)} close={() => setActive(null)} />;
         }
         return (
           <button key={key} type="button" aria-label={value ? `${label}: ${value}` : label}

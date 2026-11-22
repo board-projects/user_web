@@ -1,3 +1,4 @@
+import type { TextRun } from "./richText";
 import type { TextFormat } from "./textFormat";
 
 export type BoardId = string;
@@ -8,6 +9,7 @@ export type TableItem = Point & {
   rows: number[];
   columns: number[];
   cells?: Record<string, string>;
+  cellRuns?: Record<string, TextRun[]>;
   width: number;
   height: number;
 };
@@ -31,6 +33,7 @@ export type Shape = {
   textFormat?: TextFormat;
   id: string;
   type: ShapeType;
+  textRuns?: TextRun[];
   label?: string;
   x: number;
   y: number;

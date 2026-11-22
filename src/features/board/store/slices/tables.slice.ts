@@ -1,13 +1,13 @@
 import type { StateCreator } from "zustand";
 import { appendTableTrack, resizeTableTracks, tableSize, type TableAxis } from "../../domain/tables";
+import type { TextRun } from "../../domain/richText";
 import { withTableCell } from "../../domain/itemText";
 import type { Point, TableItem } from "../../domain/types";
 import type { BoardState } from "../board.store";
 
 export type TablesSlice = {
   tables: TableItem[];
-  formatTableText: (id: string, textFormat: TableItem["textFormat"]) => void;
-  setTableCell: (id: string, row: number, column: number, text: string) => void;
+  setTableCell: (id: string, row: number, column: number, text: string, runs?: TextRun[]) => void;
   addTable: (table: TableItem) => void;
   moveTable: (id: string, position: Point) => void;
   resizeTable: (id: string, size: Partial<Pick<TableItem, "width" | "height">>, position?: Point, initial?: Pick<TableItem, "rows" | "columns">) => void;
@@ -26,8 +26,7 @@ export const createTablesSlice: StateCreator<BoardState, [], [], TablesSlice> = 
 
   return {
     tables: [],
-    formatTableText: (id, textFormat) => update(id, (table) => ({ ...table, textFormat })),
-    setTableCell: (id, row, column, text) => update(id, (table) => withTableCell(table, row, column, text)),
+    setTableCell: (id, row, column, text, runs) => update(id, (table) => withTableCell(table, row, column, text, runs)),
     addTable: (table) => set((state) => ({ tables: [...state.tables, table] })),
     moveTable: (id, position) => update(id, (table) => ({ ...table, ...position })),
     resizeTable: (id, { width, height }, position, initial) => update(id, (table) => {

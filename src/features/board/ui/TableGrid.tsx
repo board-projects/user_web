@@ -3,7 +3,9 @@ import { ItemText } from "./ItemText";
 import { tableDividers } from "../domain/tables";
 import type { TableItem } from "../domain/types";
 
-export function TableGrid({ width, height, rows, columns, cells }: Pick<TableItem, "width" | "height" | "rows" | "columns" | "cells">) {
+type TableGridProps = Pick<TableItem, "width" | "height" | "rows" | "columns" | "cells" | "textFormat"> & { hiddenCell?: string; linksEnabled?: boolean };
+
+export function TableGrid({ width, height, rows, columns, cells, textFormat, hiddenCell, linksEnabled }: TableGridProps) {
   const verticals = tableDividers(columns).map((x) => `M${x} 0V${height}`);
   const horizontals = tableDividers(rows).map((y) => `M0 ${y}H${width}`);
 
@@ -16,7 +18,7 @@ export function TableGrid({ width, height, rows, columns, cells }: Pick<TableIte
       <path d={[...verticals, ...horizontals].join(" ")} fill="none" stroke="#a8a29e" />
       {cells && rows.map((height, row) => columns.map((width, column) => {
         const key = tableCellKey(row, column);
-        return <ItemText key={key} x={columnStarts[column]} y={rowStarts[row]} width={width} height={height} text={cells[key]} />;
+        return <ItemText key={key} x={columnStarts[column]} y={rowStarts[row]} width={width} height={height} text={key === hiddenCell ? undefined : cells[key]} format={textFormat} background="#ffffff" linksEnabled={linksEnabled} />;
       }))}
     </>
   );

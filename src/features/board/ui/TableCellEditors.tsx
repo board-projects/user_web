@@ -1,14 +1,15 @@
-import { useRef, useState, type MouseEvent } from "react";
+import { useRef, type MouseEvent } from "react";
 import { CELL_TEXT_LIMIT, tableCellKey } from "../domain/itemText";
 import type { TableItem } from "../domain/types";
 import { InlineItemTextEditor } from "./InlineItemTextEditor";
 
-export function TableCellEditors({ table, save, keyboardEnabled }: {
+export function TableCellEditors({ table, save, keyboardEnabled, active, setActive }: {
   table: TableItem;
   save: (row: number, column: number, text: string) => void;
   keyboardEnabled: boolean;
+  active: string | null;
+  setActive: (key: string | null) => void;
 }) {
-  const [active, setActive] = useState<string | null>(null);
   const touch = useRef<{ id: number; x: number; y: number } | null>(null);
   const open = (event: MouseEvent, key: string) => {
     event.stopPropagation();
@@ -23,7 +24,7 @@ export function TableCellEditors({ table, save, keyboardEnabled }: {
         const value = table.cells?.[key] ?? "";
         const label = `Row ${row + 1}, column ${column + 1}`;
         if (active === key) {
-          return <InlineItemTextEditor key={key} label={label} value={value} maxLength={CELL_TEXT_LIMIT}
+          return <InlineItemTextEditor key={key} label={label} value={value} maxLength={CELL_TEXT_LIMIT} format={table.textFormat} background="#ffffff"
             commit={(text) => save(row, column, text)} close={() => setActive(null)} />;
         }
         return (

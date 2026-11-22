@@ -1,6 +1,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
+import { contrastingTextColor, getTextStyles, type TextFormat } from "../domain/textFormat";
+
 type Props = {
+  format?: TextFormat;
+  background?: string;
   label: string;
   value: string;
   maxLength: number;
@@ -8,7 +12,7 @@ type Props = {
   close: () => void;
 };
 
-export function InlineItemTextEditor({ label, value, maxLength, commit, close }: Props) {
+export function InlineItemTextEditor({ label, value, maxLength, commit, close, format, background }: Props) {
   const [draft, setDraft] = useState(value);
   const initialValue = useRef(value);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -40,7 +44,9 @@ export function InlineItemTextEditor({ label, value, maxLength, commit, close }:
         }
       }}
       onClick={(event) => event.stopPropagation()}
-      className="h-full w-full resize-none rounded-sm border border-blue-600 bg-white p-0.5 text-center text-xs leading-tight text-stone-900 outline-none"
+      dir="auto"
+      style={{ ...getTextStyles(format), color: contrastingTextColor(background) }}
+      className="h-full w-full resize-none rounded-sm border border-blue-600 bg-transparent p-0.5 text-xs leading-tight outline-none"
     />
   );
 }

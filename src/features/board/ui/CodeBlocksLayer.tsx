@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { codeConnectable } from "../domain/connectableItems";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
@@ -10,7 +10,20 @@ import { javascript } from "@codemirror/lang-javascript";
 import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
-import type { EditorView } from "@codemirror/view";
+import { getTextStyles } from "../domain/textFormat";
+import { EditorView } from "@codemirror/view";
+
+const codeExtensions = [
+  javascript(),
+  EditorView.theme({
+    "& .cm-content": {
+      fontWeight: "var(--item-font-weight)",
+      fontStyle: "var(--item-font-style)",
+      textDecoration: "var(--item-text-decoration)",
+      textAlign: "var(--item-text-align)",
+    },
+  }),
+];
 
 export function CodeBlocksLayer() {
   const dragItem = useBoardItemDrag();
@@ -27,8 +40,6 @@ export function CodeBlocksLayer() {
   const editingCodeBlockId = useBoardStore((s) => s.editingCodeBlockId);
   const startEditingCodeBlock = useBoardStore((s) => s.startEditingCodeBlock);
   const stopEditingCodeBlock = useBoardStore((s) => s.stopEditingCodeBlock);
-
-  const extensions = useMemo(() => [javascript()], []);
 
   // نگه داشتن ref به EditorView هر بلاک برای focus کردن
   const viewsRef = useRef<Record<string, EditorView | null>>({});
@@ -54,6 +65,13 @@ export function CodeBlocksLayer() {
       }}
     >
       {codeBlocks.map((block) => {
+        const format = getTextStyles(block.textFormat, "left");
+        const editorStyle = {
+          "--item-font-weight": format.fontWeight,
+          "--item-font-style": format.fontStyle,
+          "--item-text-decoration": format.textDecoration,
+          "--item-text-align": format.textAlign,
+        } as React.CSSProperties;
         const selected = selection?.type === "codeblock" && selection.id === block.id;
         const key = selectionKey("codeblock", block.id);
         const inMarquee = marqueeItems?.has(key);
@@ -139,10 +157,11 @@ export function CodeBlocksLayer() {
 
               <CodeMirror
                 value={block.code}
-                className="text-left w-full h-full"
+                className="w-full h-full"
                 height="100%"
                 width="100%"
-                extensions={extensions}
+                extensions={codeExtensions}
+                style={editorStyle}
                 onChange={(value) => updateCodeBlock(block.id, { code: value })}
                 theme="dark"
                 editable={isEditing}

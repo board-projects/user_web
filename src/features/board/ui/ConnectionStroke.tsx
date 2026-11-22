@@ -90,6 +90,7 @@ export function ConnectionStroke({ connection, source, target, selected, interac
         fill="none"
       />
       <ConnectionLabel
+        format={connection.textFormat}
         point={midpoint}
         zoom={zoom}
         label={connection.label ?? ""}

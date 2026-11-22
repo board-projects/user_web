@@ -1,4 +1,4 @@
-import { useRef, type ComponentProps } from "react";
+import { useRef, useState, type ComponentProps } from "react";
 import { Rnd } from "react-rnd";
 import { tableConnectable } from "../domain/connectableItems";
 import { TABLE_LIMITS } from "../domain/tables";
@@ -13,6 +13,7 @@ import { TableGrid } from "./TableGrid";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 
 function TableFrame({ table }: { table: TableItem }) {
+  const [activeCell, setActiveCell] = useState<string | null>(null);
   const zoom = useBoardStore((state) => state.zoom);
   const canEdit = useBoardStore((state) => state.tool === "select" && !state.panMode);
   const item = { type: "table" as const, id: table.id };
@@ -62,9 +63,9 @@ function TableFrame({ table }: { table: TableItem }) {
       >
         <svg className="pointer-events-none block h-full w-full" viewBox={`0 0 ${table.width} ${table.height}`} role="img"
           aria-label={`Table with ${table.rows.length} rows and ${table.columns.length} columns`}>
-          <TableGrid {...table} />
+          <TableGrid {...table} hiddenCell={canEdit ? activeCell ?? undefined : undefined} />
         </svg>
-        {canEdit && <TableCellEditors table={table} keyboardEnabled={selected}
+        {canEdit && <TableCellEditors table={table} keyboardEnabled={selected} active={activeCell} setActive={setActiveCell}
           save={(row, column, text) => setCell(table.id, row, column, text)} />}
       </div>
       {selected && canEdit && (

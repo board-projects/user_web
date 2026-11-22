@@ -1,4 +1,5 @@
 import { TABLE_LIMITS } from "../../domain/tables";
+import { safeTextLink, TEXT_ALIGNMENTS, type TextFormat } from "../../domain/textFormat";
 import { groupDrawingLines } from "../../domain/drawings";
 import { CONNECTOR_PATTERNS, CONNECTOR_ROUTES, PAGE_UNITS } from "../../domain/types";
 import { clozeConnectable } from "../../domain/connectableItems";
@@ -8,7 +9,7 @@ import type { Selection } from "../../store/slices/selection.slice";
 
 export type ItemProperty =
   | { kind: "number"; label: string; value: number; min: number; max: number; change: (value: number) => void }
-  | { kind: "color" | "text"; label: string; value: string; change: (value: string) => void }
+  | { kind: "color" | "text"; label: string; value: string; maxLength?: number; change: (value: string) => void }
   | { kind: "select"; label: string; value: string; options: readonly string[]; change: (value: string) => void }
   | { kind: "toggle"; label: string; value: boolean; change: (value: boolean) => void }
   | { kind: "action"; label: string; run: () => void };
@@ -54,6 +55,29 @@ const colorField = (value: string, change: (value: string) => void): ItemPropert
 const thicknessField = (value: number, max: number, change: (value: number) => void): ItemProperty =>
   ({ kind: "number", label: "Line width", value, min: 1, max, change });
 
+function formatFields(format: TextFormat = {}, save: (format: TextFormat) => void, align: TextFormat["align"] = "center"): ItemProperty[] {
+  const toggles = [
+    { key: "bold", label: "Bold" },
+    { key: "italic", label: "Italic" },
+    { key: "underline", label: "Underline" },
+  ] as const;
+  const link = safeTextLink(format.link);
+  return [
+    ...toggles.map(({ key, label }): ItemProperty => ({
+      kind: "toggle", label, value: format[key] ?? false, change: (value) => save({ ...format, [key]: value }),
+    })),
+    {
+      kind: "select", label: "Align", options: TEXT_ALIGNMENTS, value: format.align ?? align,
+      change: (value) => {
+        const alignment = TEXT_ALIGNMENTS.find((option) => option === value);
+        if (alignment) save({ ...format, align: alignment });
+      },
+    },
+    { kind: "text", label: "Link URL", value: format.link ?? "", maxLength: 2048, change: (url) => save({ ...format, link: url }) },
+    ...(link ? [{ kind: "action" as const, label: "Open link", run: () => window.open(link, "_blank", "noopener,noreferrer") }] : []),
+  ];
+}
+
 export function getItemProperties(state: BoardState): ItemProperties | null {
   const selection = state.selection;
   if (!selection) {
@@ -66,6 +90,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
     return {
       fields: [
         ...label,
+        ...(groups.size === 1 ? formatFields(drawing.textFormat, (textFormat) => state.styleSelectedLines({ textFormat })) : []),
         colorField(drawing.color, (color) => state.styleSelectedLines({ color })),
         thicknessField(drawing.size, 256, (size) => state.styleSelectedLines({ size })),
       ],
@@ -80,6 +105,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         fields: [
           { kind: "text", label: "Text", value: item.label ?? "", change: (label) => state.updateShape(id, { label }) },
+          ...formatFields(item.textFormat, (textFormat) => state.updateShape(id, { textFormat })),
           colorField(item.color, (color) => state.updateShape(id, { color })),
           ...sizeFields(item, (size) => state.updateShape(id, size), 10, 10, item.type !== "rect"),
         ],
@@ -91,6 +117,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         fields: [
           ...sizeFields(item, (size) => state.updateCodeBlock(id, size), 200, 100),
+          ...formatFields(item.textFormat, (textFormat) => state.updateCodeBlock(id, { textFormat }), "left"),
           { kind: "action", label: "Edit code", run: () => state.startEditingCodeBlock(id) },
         ],
       };
@@ -102,6 +129,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
         fields: [
           { kind: "text", label: "Title", value: item.title, change: (title) => state.updateClozeTest(id, { title }) },
           ...sizeFields(clozeConnectable(item), (size) => state.updateClozeTest(id, size), 140, 100),
+          ...formatFields(item.textFormat, (textFormat) => state.updateClozeTest(id, { textFormat }), "left"),
           { kind: "action", label: "Edit content", run: () => state.startEditingClozeTest(id) },
         ],
       };
@@ -111,6 +139,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       if (!table) return null;
       return {
         fields: [
+          ...formatFields(table.textFormat, (textFormat) => state.formatTableText(id, textFormat)),
           ...sizeFields(table, (size) => state.resizeTable(id, size),
             table.columns.length * TABLE_LIMITS.minTrack, table.rows.length * TABLE_LIMITS.minTrack, false, TABLE_LIMITS.maxSize),
           ...(table.rows.length < TABLE_LIMITS.tracks ? [{ kind: "action" as const, label: "Add row", run: () => state.addTableTrack(id, "rows") }] : []),
@@ -154,6 +183,7 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         fields: [
           colorField(item.color ?? "#44403c", (color) => state.updateConnection(id, { color })),
+          ...formatFields(item.textFormat, (textFormat) => state.updateConnection(id, { textFormat })),
           thicknessField(item.size ?? 2, 48, (size) => state.updateConnection(id, { size })),
           { kind: "text", label: "Label", value: item.label ?? "", change: (label) => state.updateConnection(id, { label }) },
           {

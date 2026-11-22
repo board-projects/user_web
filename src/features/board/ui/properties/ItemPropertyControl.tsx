@@ -48,7 +48,7 @@ export function ItemPropertyControl({ field }: { field: ItemProperty }) {
           }}
         />
       ) : field.kind === "select" ? (
-        <select value={field.value} className={fieldClass} onChange={(event) => field.change(event.target.value)}>
+        <select aria-label={field.label} value={field.value} className={fieldClass} onChange={(event) => field.change(event.target.value)}>
           {field.options.map((option) => (
             <option key={option} value={option}>{option[0].toUpperCase() + option.slice(1)}</option>
           ))}
@@ -57,7 +57,7 @@ export function ItemPropertyControl({ field }: { field: ItemProperty }) {
         <input
           type={field.kind}
           value={field.value}
-          maxLength={field.kind === "text" ? 80 : undefined}
+          maxLength={field.kind === "text" ? field.maxLength ?? 80 : undefined}
           className={field.kind === "color" ? "h-9 w-10 cursor-pointer rounded border border-stone-300 bg-white p-1" : `${fieldClass} w-28 sm:w-36`}
           onChange={(event) => field.change(event.target.value)}
         />

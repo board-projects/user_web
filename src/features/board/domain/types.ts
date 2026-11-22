@@ -1,6 +1,9 @@
+import type { TextFormat } from "./textFormat";
+
 export type BoardId = string;
 
 export type TableItem = Point & {
+  textFormat?: TextFormat;
   id: string;
   rows: number[];
   columns: number[];
@@ -12,6 +15,7 @@ export type TableItem = Point & {
 export type Point = { x: number; y: number };
 
 export type DrawLine = {
+  textFormat?: TextFormat;
   id: string;
   strokeId?: string;
   label?: string;
@@ -24,6 +28,7 @@ export type DrawLine = {
 export type ShapeType = "rect" | "circle" | "star";
 
 export type Shape = {
+  textFormat?: TextFormat;
   id: string;
   type: ShapeType;
   label?: string;
@@ -43,6 +48,7 @@ export type ConnectorRoute = (typeof CONNECTOR_ROUTES)[number];
 export type ConnectorPattern = (typeof CONNECTOR_PATTERNS)[number];
 
 export type ShapeConnection = {
+  textFormat?: TextFormat;
   id: string;
   sourceId: string;
   sourcePort: ShapePort;
@@ -58,6 +64,7 @@ export type ShapeConnection = {
 };
 
 export type CodeBlock = {
+  textFormat?: TextFormat;
   id: string;
   code: string;
   x: number;
@@ -67,6 +74,7 @@ export type CodeBlock = {
 };
 
 export type ClozeTest = {
+  textFormat?: TextFormat;
   id: string;
   type: "cloze_test";
   x: number;

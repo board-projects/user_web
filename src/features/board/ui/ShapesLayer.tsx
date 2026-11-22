@@ -92,11 +92,11 @@ export function ShapesLayer() {
                 />
               )}
               <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
-                <ShapeText width={shape.width} height={shape.height} text={shape.label} />
+                <ShapeText width={shape.width} height={shape.height} text={editingId === shape.id ? undefined : shape.label} format={shape.textFormat} background={shape.color} />
               </svg>
               {editingId === shape.id && (
                 <div className="absolute inset-x-[15%] inset-y-[25%] z-10">
-                  <InlineItemTextEditor label="Shape text" value={shape.label ?? ""} maxLength={ITEM_LABEL_LIMIT}
+                  <InlineItemTextEditor label="Shape text" value={shape.label ?? ""} maxLength={ITEM_LABEL_LIMIT} format={shape.textFormat} background={shape.color}
                     commit={(label) => updateShape(shape.id, { label })} close={() => setEditingId(null)} />
                 </div>
               )}

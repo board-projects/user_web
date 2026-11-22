@@ -158,7 +158,7 @@ export function InlineItemTextEditor({ itemId, shape, label, value, runs, maxLen
       }}
       onClick={(event) => event.stopPropagation()}
       style={{ color: contrastingTextColor(background), clipPath: shapeTextClip(shape) }}
-      className={`relative z-10 h-full w-full overflow-auto break-words bg-transparent p-1 text-xs leading-tight outline-none ${shape === "circle" ? "" : "ring-1 ring-inset ring-blue-600"}`}
+      className="relative z-10 h-full w-full overflow-auto break-words bg-transparent p-1 text-xs leading-tight outline-none ring-1 ring-inset ring-blue-600"
     />
   );
 }

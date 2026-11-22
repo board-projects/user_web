@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
+import { getTextStyles, type TextFormat } from "../domain/textFormat";
 import type { Point } from "../domain/types";
 
 type Props = {
   point: Point;
+  format?: TextFormat;
   zoom: number;
   label: string;
   editing: boolean;
@@ -11,7 +13,7 @@ type Props = {
   onSave: (label: string) => void;
 };
 
-export function ConnectionLabel({ point, zoom, label, editing, interactive, onCancel, onSave }: Props) {
+export function ConnectionLabel({ point, format, zoom, label, editing, interactive, onCancel, onSave }: Props) {
   const input = useRef<HTMLInputElement | null>(null);
   const cancelled = useRef(false);
 
@@ -41,8 +43,8 @@ export function ConnectionLabel({ point, zoom, label, editing, interactive, onCa
           placeholder="Add label"
           maxLength={80}
           defaultValue={label}
-          className="h-full w-full rounded border border-blue-400 bg-white px-1 text-center text-stone-900 outline-none"
-          style={{ fontSize: 13 / zoom }}
+          className="h-full w-full rounded border border-blue-400 bg-transparent px-1 text-stone-900 outline-none"
+          style={{ ...getTextStyles(format), fontSize: 13 / zoom }}
           onBlur={(event) => {
             if (!cancelled.current) onSave(event.currentTarget.value);
           }}
@@ -68,16 +70,12 @@ export function ConnectionLabel({ point, zoom, label, editing, interactive, onCa
     <text
       x={point.x}
       y={point.y}
-      textAnchor="middle"
+      textAnchor={format?.align === "left" ? "start" : format?.align === "right" ? "end" : "middle"}
       dominantBaseline="central"
       fontSize={13 / zoom}
       fontWeight={600}
       fill="#1c1917"
-      stroke="white"
-      strokeWidth={5 / zoom}
-      strokeLinejoin="round"
-      paintOrder="stroke"
-      style={{ pointerEvents: interactive ? "all" : "none", cursor: "pointer" }}
+      style={{ ...getTextStyles(format), pointerEvents: interactive ? "all" : "none", cursor: "pointer" }}
     >
       {label}
     </text>

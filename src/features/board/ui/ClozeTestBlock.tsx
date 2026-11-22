@@ -1,5 +1,6 @@
 "use client";
 
+import { getTextStyles } from "../domain/textFormat";
 import React from "react";
 import { ClozeTest } from "../domain/types";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
@@ -10,7 +11,7 @@ import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
 
-export const ClozeTestBlock = ({ id, content, title, x, y, width, height }: ClozeTest) => {
+export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFormat }: ClozeTest) => {
 
     const isEditing = useBoardStore((s) => s.editingClozeTestId === id);
     const startEditing = useBoardStore((s) => s.startEditingClozeTest);
@@ -89,12 +90,13 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height }: Cloz
                         value={content}
                         onChange={(e) => updateClozeTest(id, { content: e.target.value })}
                         onBlur={stopEditing}
-                        className="w-full text-gray-800 leading-loose outline-none bg-gray-50 p-2 rounded border border-dashed border-gray-300 resize-none overflow-hidden"
+                        className="w-full text-gray-800 leading-loose outline-none bg-transparent p-2 rounded border border-dashed border-gray-300 resize-none overflow-hidden"
+                        style={getTextStyles(textFormat, "left")}
                         rows={3}
                         data-interactive="true"
                     />
                 ) : (
-                    <div className="leading-loose text-gray-800 cursor-text">
+                    <div className="leading-loose text-gray-800 cursor-text" style={getTextStyles(textFormat, "left")}>
                         {renderContent()}
                     </div>
                 )}

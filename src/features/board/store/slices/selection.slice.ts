@@ -26,7 +26,7 @@ export type SelectionSlice = {
   selection: Selection;
   marqueeSelection: MarqueeSelection | null;
   labelSelectedDrawing: (label: string) => void;
-  styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size">>) => void;
+  styleSelectedLines: (style: Partial<Pick<DrawLine, "color" | "size" | "textFormat">>) => void;
   deleteSelected: () => boolean;
   moveMarquee: (delta: Point, scope?: MoveScope) => void;
   selectDrawing: (id: string) => void;

@@ -1,4 +1,6 @@
 import { TableGrid } from "@/features/board/ui/TableGrid";
+import { getTextStyles } from "@/features/board/domain/textFormat";
+import { TextLink } from "@/features/board/ui/TextLink";
 import { DrawingText } from "@/features/board/ui/DrawingText";
 import { ShapeText } from "@/features/board/ui/ItemText";
 import { groupDrawingLines } from "@/features/board/domain/drawings";
@@ -34,7 +36,7 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
         <line key={line.id} x1={line.from.x} y1={line.from.y} x2={line.to.x} y2={line.to.y}
           stroke={line.color} strokeWidth={line.size} strokeLinecap="round" />
       ))}
-      {Array.from(groupDrawingLines(board.lines), ([id, lines]) => <DrawingText key={id} lines={lines} />)}
+      {Array.from(groupDrawingLines(board.lines), ([id, lines]) => <DrawingText key={id} lines={lines} linksEnabled />)}
       {board.connections.map((connection) => {
         const source = items.get(connection.sourceId);
         const target = items.get(connection.targetId);
@@ -49,8 +51,13 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
             <path d={connectorPath(points)} fill="none" stroke={color} strokeWidth={width}
               strokeLinecap="round" strokeLinejoin="round" strokeDasharray={connectorDashArray(connection)} />
             {arrow && <polygon points={arrow} fill={color} />}
-            {connection.label && <text x={midpoint.x} y={midpoint.y} textAnchor="middle" dominantBaseline="central"
-              fontSize={13} stroke="white" strokeWidth={5} paintOrder="stroke">{connection.label}</text>}
+            {connection.label && (
+              <TextLink link={connection.textFormat?.link}>
+                <text x={midpoint.x} y={midpoint.y}
+                  textAnchor={connection.textFormat?.align === "left" ? "start" : connection.textFormat?.align === "right" ? "end" : "middle"}
+                  dominantBaseline="central" fontSize={13} style={getTextStyles(connection.textFormat)}>{connection.label}</text>
+              </TextLink>
+            )}
           </g>
         );
       })}
@@ -65,12 +72,12 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
       })}
       {board.shapes.map((shape) => shape.label && (
         <g key={shape.id} transform={`translate(${shape.x} ${shape.y})`}>
-          <ShapeText width={shape.width} height={shape.height} text={shape.label} />
+          <ShapeText width={shape.width} height={shape.height} text={shape.label} format={shape.textFormat} background={shape.color} linksEnabled />
         </g>
       ))}
       {board.codeBlocks.map((block) => (
         <foreignObject key={block.id} x={block.x} y={block.y} width={block.width} height={block.height}>
-          <pre className="m-0 h-full overflow-hidden whitespace-pre-wrap break-words rounded-lg bg-stone-900 p-3 font-mono text-sm text-white">{block.code}</pre>
+          <pre className="m-0 h-full overflow-hidden whitespace-pre-wrap break-words rounded-lg bg-stone-900 p-3 font-mono text-sm text-white" style={getTextStyles(block.textFormat, "left")}><TextLink link={block.textFormat?.link}>{block.code}</TextLink></pre>
         </foreignObject>
       ))}
       {board.clozeTests.map((cloze) => {
@@ -79,14 +86,14 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
           <foreignObject key={cloze.id} x={x} y={y} width={width} height={height}>
             <div className="h-full overflow-hidden break-words rounded-lg border border-stone-200 bg-white p-4 text-sm text-stone-800">
               <strong className="mb-2 block">{cloze.title || "Cloze Test"}</strong>
-              <div className="whitespace-pre-wrap">{cloze.content.replace(/\[[^\]]*\]|\{\{[^}]*\}\}/g, "______")}</div>
+              <div className="whitespace-pre-wrap" style={getTextStyles(cloze.textFormat, "left")}><TextLink link={cloze.textFormat?.link}>{cloze.content.replace(/\[[^\]]*\]|\{\{[^}]*\}\}/g, "______")}</TextLink></div>
             </div>
           </foreignObject>
         );
       })}
       {board.tables.map((table) => (
         <g key={table.id} transform={`translate(${table.x} ${table.y})`}>
-          <TableGrid {...table} />
+          <TableGrid {...table} linksEnabled />
         </g>
       ))}
     </svg>

@@ -8,6 +8,7 @@ export type Selection =
   | { type: "connection"; id: string }
   | { type: "codeblock"; id: string }
   | { type: "cloze"; id: string }
+  | { type: "question"; id: string }
   | { type: "page"; id: string }
   | { type: "table"; id: string }
   | null;
@@ -39,6 +40,9 @@ export type SelectionSlice = {
   startEditingCodeBlock: (id: string) => void;
   stopEditingCodeBlock: () => void;
   
+  editingQuestionId: string | null;
+  startEditingQuestion: (id: string) => void;
+  stopEditingQuestion: () => void;
   editingClozeTestId: string | null;
   startEditingClozeTest: (id: string) => void;
   stopEditingClozeTest: () => void;
@@ -58,6 +62,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         selection: null,
         marqueeSelection: { items: new Set(), lines: new Set(lines), anchor },
         editingCodeBlockId: null,
+        editingQuestionId: null,
         editingClozeTestId: null,
       };
     }),
@@ -114,12 +119,13 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
 
         const has = (type: Exclude<Selection, null>["type"], id: string) =>
           items?.has(selectionKey(type, id)) ?? false;
-        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id) || has("page", id) || has("table", id);
+        const endpointDeleted = (id: string) => has("shape", id) || has("codeblock", id) || has("cloze", id) || has("page", id) || has("table", id) || has("question", id);
         return {
           shapes: state.shapes.filter((shape) => !has("shape", shape.id)),
           codeBlocks: state.codeBlocks.filter((block) => !has("codeblock", block.id)),
           clozeTests: state.clozeTests.filter((cloze) => !has("cloze", cloze.id)),
           tables: state.tables.filter((table) => !has("table", table.id)),
+          questions: state.questions.filter((item) => !has("question", item.id)),
           sheets: state.sheets.filter((page) => !has("page", page.id)),
           connections: state.connections.filter((connection) =>
             !has("connection", connection.id) &&
@@ -131,6 +137,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
           selection: null,
           marqueeSelection: null,
           editingCodeBlockId: null,
+          editingQuestionId: null,
           editingClozeTestId: null,
         };
       });
@@ -151,7 +158,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       });
       const moveItems = <T extends Point & { id: string }>(
         collection: T[],
-        type: "shape" | "codeblock" | "cloze" | "page" | "table",
+        type: "shape" | "codeblock" | "cloze" | "page" | "table" | "question",
       ) => {
         const next = collection.map((item) => items?.has(selectionKey(type, item.id)) ? translate(item) : item);
         return next.some((item, index) => item !== collection[index]) ? next : collection;
@@ -170,6 +177,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         codeBlocks: moveItems(state.codeBlocks, "codeblock"),
         clozeTests: moveItems(state.clozeTests, "cloze"),
         tables: moveItems(state.tables, "table"),
+        questions: moveItems(state.questions, "question"),
         sheets: moveItems(state.sheets, "page"),
         lines: nextLines,
         marqueeSelection: selected ? {
@@ -184,6 +192,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
       selection: null,
       marqueeSelection,
       editingCodeBlockId: null,
+      editingQuestionId: null,
       editingClozeTestId: null,
     }),
 
@@ -192,6 +201,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         selection: sel,
         marqueeSelection: null,
         editingCodeBlockId: null,
+        editingQuestionId: null,
         editingClozeTestId: null,
       })),
 
@@ -200,6 +210,7 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
         selection: null,
         marqueeSelection: null,
         editingCodeBlockId: null,
+        editingQuestionId: null,
         editingClozeTestId: null,
       })),
 
@@ -207,7 +218,10 @@ export const createSelectionSlice: StateCreator<BoardState, [], [], SelectionSli
     startEditingCodeBlock: (id) => set(() => ({ editingCodeBlockId: id })),
     stopEditingCodeBlock: () => set(() => ({ editingCodeBlockId: null })),
 
+    editingQuestionId: null,
     editingClozeTestId: null,
+    startEditingQuestion: (id) => set({ editingQuestionId: id }),
+    stopEditingQuestion: () => set({ editingQuestionId: null }),
     startEditingClozeTest: (id) => set(() => ({ editingClozeTestId: id })),
     stopEditingClozeTest: () => set(() => ({ editingClozeTestId: null })),
   });

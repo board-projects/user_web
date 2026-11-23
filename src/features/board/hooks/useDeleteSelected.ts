@@ -12,6 +12,7 @@ export function useDeleteSelected() {
         state.cancelConnecting();
         if (state.marqueeSelection) state.clearSelection();
         if (state.editingCodeBlockId) state.stopEditingCodeBlock();
+        if (state.editingQuestionId) state.stopEditingQuestion();
         if (state.editingClozeTestId) state.stopEditingClozeTest();
         return;
       }

@@ -35,6 +35,8 @@ import {
 } from "@/features/board/domain/factories";
 import { GridCanvas } from '@/features/board/ui/GridCanvas';
 import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
+import { QuestionItemsLayer } from "./QuestionItemsLayer";
+import { createMultipleChoice, QUESTION_MIN_SIZE } from "../domain/multipleChoice";
 import { ClozeTestLayer } from "@/features/board/ui/ClozeTestLayer";
 
 export function BoardEditor({ reference }: { reference: string }) {
@@ -57,6 +59,8 @@ export function BoardEditor({ reference }: { reference: string }) {
 
   const addShape = useBoardStore((s) => s.addShape);
   const addCodeBlock = useBoardStore((s) => s.addCodeBlock);
+  const addQuestion = useBoardStore((s) => s.addQuestion);
+  const startEditingQuestion = useBoardStore((s) => s.startEditingQuestion);
   const addClozeTest = useBoardStore((s) => s.addClozeTest);
   const addTable = useBoardStore((s) => s.addTable);
   const setTool = useBoardStore((s) => s.setTool);
@@ -102,6 +106,18 @@ export function BoardEditor({ reference }: { reference: string }) {
           addTable(table);
           setTool("select");
           select({ type: "table", id: table.id });
+        }}
+        onAddMultipleChoice={() => {
+          const viewportWidth = boardAreaRef.current?.clientWidth ?? 0;
+          const inset = viewportWidth && viewportWidth < 640 ? 16 : 72;
+          const item = createMultipleChoice({ x: (inset - panX) / zoom, y: (112 - panY) / zoom });
+          if (viewportWidth && viewportWidth < 640) {
+            item.width = Math.max(QUESTION_MIN_SIZE.width, Math.min(item.width, (viewportWidth - inset * 2 - 44) / zoom));
+          }
+          addQuestion(item);
+          setTool("select");
+          select({ type: "question", id: item.id });
+          startEditingQuestion(item.id);
         }}
         onAddPage={() => {
           const id = crypto.randomUUID();
@@ -152,6 +168,7 @@ export function BoardEditor({ reference }: { reference: string }) {
           <ShapesLayer />
           <CodeBlocksLayer />
           <ClozeTestLayer />
+          <QuestionItemsLayer />
           <TablesLayer />
           <DrawingLayer />
         </BoardViewport>

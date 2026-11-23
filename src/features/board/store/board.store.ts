@@ -1,3 +1,4 @@
+import { createQuestionsSlice, type QuestionsSlice } from "./slices/questions.slice";
 import { createTablesSlice, type TablesSlice } from "./slices/tables.slice";
 import { create } from "zustand";
 import { createPagesSlice, type PagesSlice } from "./slices/pages.slice";
@@ -21,11 +22,13 @@ export type BoardState = PenSlice &
   ClozeTestSlice &
   PagesSlice &
   TablesSlice &
+  QuestionsSlice &
   ConnectionsSlice;
 
 export const useBoardStore = create<BoardState>((set, get, store) => ({
   ...createPenSlice(set),
   ...createTablesSlice(set, get, store),
+  ...createQuestionsSlice(set, get, store),
   ...createViewportSlice(set, get),
   ...createShapesSlice(set, get, store),
   ...createBlocksSlice(set),

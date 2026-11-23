@@ -23,6 +23,9 @@ export function pageMovementScope(board: BoardContent, selected: MoveScope): Mov
     for (const table of board.tables) {
       if (pageContainsItem(page, table)) items.add(selectionKey("table", table.id));
     }
+    for (const question of board.questions) {
+      if (pageContainsItem(page, question)) items.add(selectionKey("question", question.id));
+    }
     for (const nested of board.sheets) {
       const smaller = nested.width < page.width || nested.height < page.height;
       if (smaller && pageContainsItem(page, nested)) items.add(selectionKey("page", nested.id));

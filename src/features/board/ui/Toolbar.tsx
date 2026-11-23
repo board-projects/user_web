@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaCode, FaMousePointer } from "react-icons/fa";
 import {
   TbTable,
+  TbListCheck,
   TbUsers,
   TbCopy,
   TbLock,
@@ -32,6 +33,7 @@ type ToolbarProps = {
   onAddCode?: () => void;
   onAddShape?: (type: ShapeType) => void;
   onAddClozeTest?: () => void;
+  onAddMultipleChoice?: () => void;
   onAddPage?: () => void;
   onAddTable?: (rows: number, columns: number) => void;
 
@@ -89,7 +91,7 @@ function IconButton(props: {
       onClick={props.onClick}
       data-ui="true"
       className={cn(
-        "grid place-items-center h-10 w-9 rounded-xl sm:w-10",
+        "grid place-items-center h-10 w-8 rounded-xl min-[360px]:w-9 sm:w-10",
         "border backdrop-blur",
         "shadow-[0_1px_0_rgba(0,0,0,0.04)]",
         "transition active:scale-[0.98]",
@@ -313,6 +315,10 @@ export function Toolbar(props: ToolbarProps) {
             }}
           >
             <TbSquareRoundedLetterT />
+          </IconButton>
+
+          <IconButton title="Add multiple-choice question" onClick={props.onAddMultipleChoice}>
+            <TbListCheck />
           </IconButton>
 
           <IconButton title="Add page item" onClick={props.onAddPage}>

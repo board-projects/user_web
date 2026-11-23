@@ -19,7 +19,7 @@ export function prepareBoardImport(value: unknown, createId: () => string = () =
   const items: Array<{ kind: BoardChange["kind"]; item: Record<string, unknown> }> = [];
   for (const kind of BOARD_COLLECTIONS) {
     const collection = value.content[kind];
-    if (kind === "tables" && collection === undefined) continue;
+    if ((kind === "tables" || kind === "questions") && collection === undefined) continue;
     if (!Array.isArray(collection)) throw new Error("The JSON file is missing a board collection");
 
     for (const item of collection) {

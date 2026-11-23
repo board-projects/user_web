@@ -12,6 +12,7 @@ export function useWheelZoom(containerRef: RefObject<HTMLElement | null>) {
     if (!el) return;
 
     const onWheel = (e: WheelEvent) => {
+      if (e.target instanceof Element && e.target.closest("[data-board-scroll]")) return;
       e.preventDefault();
 
       const rect = el.getBoundingClientRect();

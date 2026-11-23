@@ -46,9 +46,9 @@ export default function LoginPage() {
 
       const { origin, search } = window.location;
       const next = new URLSearchParams(search).get("next");
-      if (next?.startsWith("/board/")) {
+      if (next?.startsWith("/")) {
         const destination = new URL(next, origin);
-        if (destination.origin === origin && destination.pathname.startsWith("/board/")) {
+        if (destination.origin === origin && (destination.pathname.startsWith("/board/") || destination.pathname === "/dashboard")) {
           window.location.assign(destination.href);
           return;
         }

@@ -12,7 +12,7 @@ export const accessCookieOptions = (secure: boolean) => ({
   maxAge: 86400,
 });
 
-export function getSessionCredentials(req: NextRequest) {
+export function getSessionCredentials(req: { cookies: Pick<NextRequest['cookies'], 'get'> }) {
   return {
     access_token: req.cookies.get(ACCESS_COOKIE)?.value ?? req.cookies.get(LEGACY_ACCESS_COOKIE)?.value,
     refresh_token: req.cookies.get(REFRESH_COOKIE)?.value,

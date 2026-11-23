@@ -1,3 +1,4 @@
+import { PublishedExam } from "@/features/design/ui/PublishedExam";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -29,7 +30,9 @@ export default async function PublishedTestPage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full" style={{ maxWidth: layout.width }}>
-      <DesignSheet board={board} layout={layout} title={title} />
+      <PublishedExam key={params.reference}>
+        <DesignSheet board={board} layout={layout} title={title} />
+      </PublishedExam>
     </main>
   );
 }

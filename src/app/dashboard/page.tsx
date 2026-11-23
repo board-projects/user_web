@@ -62,7 +62,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 <ul className="grid gap-2">
                   {result.data.tests.map((test) => (
                     <li key={test.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-cyan-200 bg-white px-4 py-3">
-                      <span className="min-w-0 break-words font-semibold">{test.label || "Untitled test"}</span>
+                      {result.data.role === "student"
+                        ? <Link className="min-w-0 break-words font-semibold text-cyan-900 hover:underline" href={`/dashboard/tests/${test.id}`}>{test.label || "Untitled test"}</Link>
+                        : <span className="min-w-0 break-words font-semibold">{test.label || "Untitled test"}</span>}
                       <span className="text-sm text-cyan-800">{statusText[test.status] ?? test.status}</span>
                     </li>
                   ))}

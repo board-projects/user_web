@@ -7,6 +7,7 @@ import { capturePage } from "../domain/capturePage";
 import { applyBoardChanges, EMPTY_BOARD, type BoardUpdate } from "@/features/board/domain/boardSync";
 import { propertyButtonClass } from "@/features/board/ui/properties/ItemPropertyControl";
 import type { SheetLayout } from "../domain/sheetLayout";
+import { AssignExamDialog } from "./AssignExamDialog";
 import { DesignSheet } from "./DesignSheet";
 
 type PrintPage = { title: string; layout: SheetLayout; snapshot: BoardUpdate };
@@ -34,7 +35,8 @@ function PrintablePage({ page, close }: { page: PrintPage; close: () => void }) 
   );
 }
 
-export function PageItemActions({ itemId, deleteButton }: { itemId: string; deleteButton: ReactNode }) {
+export function PageItemActions({ reference, itemId, deleteButton }: { reference: string; itemId: string; deleteButton: ReactNode }) {
+  const [assigning, setAssigning] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [print, setPrint] = useState<PrintPage | null>(null);
   const [error, setError] = useState("");
@@ -97,12 +99,14 @@ export function PageItemActions({ itemId, deleteButton }: { itemId: string; dele
         </button>
         {deleteButton}
       </div>
+      <button type="button" className={propertyButtonClass} onClick={() => setAssigning(true)}>Assign</button>
       {publishedPath && (
         <a className={`${propertyButtonClass} inline-flex items-center`} href={publishedPath} target="_blank" rel="noopener noreferrer">
           Open public page
         </a>
       )}
       {error && <span role="alert" className="shrink-0 px-2 text-xs text-red-700">{error}</span>}
+      {assigning && <AssignExamDialog reference={reference} itemId={itemId} close={() => setAssigning(false)} />}
       {print && <PrintablePage page={print} close={closePrint} />}
     </>
   );

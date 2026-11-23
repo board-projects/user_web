@@ -12,7 +12,8 @@ import { getPropertiesToolbarPosition } from "./toolbarPosition";
 
 const PHONE_VIEWPORT = "(max-width: 639px)";
 
-export function ItemPropertiesToolbar({ viewport }: {
+export function ItemPropertiesToolbar({ reference, viewport }: {
+  reference: string;
   viewport: RefObject<HTMLElement | null>;
 }) {
   const selection = useBoardStore((state) => state.selection);
@@ -133,7 +134,7 @@ export function ItemPropertiesToolbar({ viewport }: {
       {isPage ? (
         <>
           {properties.fields.map((field) => <ItemPropertyControl key={field.label} field={field} />)}
-          <PageItemActions key={selection.id} itemId={selection.id} deleteButton={deleteButton} />
+          <PageItemActions reference={reference} key={selection.id} itemId={selection.id} deleteButton={deleteButton} />
         </>
       ) : (
         <>

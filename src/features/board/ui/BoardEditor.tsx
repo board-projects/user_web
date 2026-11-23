@@ -130,7 +130,7 @@ export function BoardEditor({ reference }: { reference: string }) {
       />
 
       <BoardNavigation viewport={boardAreaRef} />
-      <ItemPropertiesToolbar viewport={boardAreaRef} />
+      <ItemPropertiesToolbar reference={reference} viewport={boardAreaRef} />
 
       <div
         ref={boardAreaRef}

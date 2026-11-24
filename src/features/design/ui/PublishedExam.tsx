@@ -20,7 +20,7 @@ export function PublishedExam({ children, reference, submitted = false }: {
     }
 
     const selected = new Map<string, string[]>();
-    for (const input of event.currentTarget.querySelectorAll<HTMLInputElement>("input[data-question-id]:checked")) {
+    for (const input of event.currentTarget.querySelectorAll<HTMLInputElement>("input[data-question-id]:checked, input[data-cloze-blank]")) {
       const id = input.dataset.questionId;
       if (id) selected.set(id, [...(selected.get(id) ?? []), input.value]);
     }
@@ -46,7 +46,10 @@ export function PublishedExam({ children, reference, submitted = false }: {
   };
 
   return (
-    <form onSubmit={finish}>
+    <form onSubmit={finish} onKeyDown={(event) => {
+      if (event.key === "Enter" && event.target instanceof HTMLInputElement &&
+          event.target.hasAttribute("data-cloze-blank")) event.preventDefault();
+    }}>
       <fieldset disabled={finished || busy} className="m-0 min-w-0 border-0 p-0">
         {children}
       </fieldset>

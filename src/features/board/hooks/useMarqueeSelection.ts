@@ -3,6 +3,7 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { boxBetween, boxesIntersect, segmentIntersectsBox } from "../domain/marqueeGeometry";
 import { connectorIntersectsBox, getConnectorPoints } from "../domain/connectorGeometry";
+import { pageContainsPoint } from "../domain/pageGeometry";
 import { drawingId } from "../domain/drawings";
 import { getConnectableItems } from "../domain/connectableItems";
 import type { Point } from "../domain/types";
@@ -12,6 +13,23 @@ import { isBoardInteractiveTarget } from "./boardPointer";
 
 type BoardPointerEvent = PointerEvent<HTMLDivElement>;
 const DRAG_THRESHOLD = 4;
+
+function boardPoint(area: HTMLDivElement, point: Point) {
+  const { panX, panY, zoom } = useBoardStore.getState();
+  const rect = area.getBoundingClientRect();
+  return { x: (point.x - rect.left - panX) / zoom, y: (point.y - rect.top - panY) / zoom };
+}
+
+function selectPageAt(area: HTMLDivElement, point: Point) {
+  const { sheets, select } = useBoardStore.getState();
+  const position = boardPoint(area, point);
+  for (let index = sheets.length - 1; index >= 0; index--) {
+    const page = sheets[index];
+    if (!pageContainsPoint(page, position)) continue;
+    select({ type: "page", id: page.id });
+    return;
+  }
+}
 
 function selectInside(area: HTMLDivElement, start: Point, end: Point) {
   const state = useBoardStore.getState();
@@ -30,12 +48,7 @@ function selectInside(area: HTMLDivElement, start: Point, end: Point) {
     if (key && hits) items.add(key);
   }
 
-  const rect = area.getBoundingClientRect();
-  const toWorld = (point: Point): Point => ({
-    x: (point.x - rect.left - state.panX) / state.zoom,
-    y: (point.y - rect.top - state.panY) / state.zoom,
-  });
-  const worldBox = boxBetween(toWorld(start), toWorld(end));
+  const worldBox = boxBetween(boardPoint(area, start), boardPoint(area, end));
   const shapes = new Map(getConnectableItems(state).map((item) => [item.id, item]));
   for (const connection of state.connections) {
     const source = shapes.get(connection.sourceId);
@@ -97,9 +110,11 @@ export function useMarqueeSelection() {
 
     const end = { x: event.clientX, y: event.clientY };
     const state = useBoardStore.getState();
-    if (state.tool === "select" && !state.panMode &&
-      Math.hypot(end.x - current.start.x, end.y - current.start.y) >= DRAG_THRESHOLD) {
+    if (state.tool !== "select" || state.panMode) return;
+    if (Math.hypot(end.x - current.start.x, end.y - current.start.y) >= DRAG_THRESHOLD) {
       selectInside(event.currentTarget, current.start, end);
+    } else {
+      selectPageAt(event.currentTarget, end);
     }
   };
 

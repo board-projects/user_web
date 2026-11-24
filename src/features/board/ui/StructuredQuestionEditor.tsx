@@ -4,6 +4,7 @@ import {
 } from "../domain/questions";
 import { getTextStyles } from "../domain/textFormat";
 import { useBoardStore } from "../store/board.store";
+import { QuestionEditorCard } from "./QuestionCard";
 import { QuestionImagePicker } from "./QuestionImagePicker";
 
 type StructuredQuestion = MatchingQuestion | OrderingQuestion | ImageQuestion;
@@ -85,20 +86,14 @@ export function StructuredQuestionEditor({ item }: { item: StructuredQuestion })
   const update = useBoardStore((state) => state.updateQuestion);
   const stopEditing = useBoardStore((state) => state.stopEditingQuestion);
   return (
-    <div data-question-editor data-board-scroll className="h-full touch-pan-y overflow-auto rounded-lg border border-stone-200 bg-white text-stone-900">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white px-3">
-        <span className="text-xs font-semibold">{QUESTION_TYPES[item.kind]}</span>
-        <button type="button" className={actionClass} onClick={stopEditing}>Done</button>
-      </div>
-      <div className="grid gap-3 p-3">
-        <label className="grid gap-1 text-xs">Question
-          <textarea rows={2} className={fieldClass} style={getTextStyles(item.textFormat, "left")} value={item.prompt}
-            onChange={(event) => update(item.id, { prompt: event.currentTarget.value })} />
-        </label>
-        {item.kind === "matching" && <MatchingEditor item={item} />}
-        {item.kind === "ordering" && <OrderingEditor item={item} />}
-        {item.kind === "image_spot" && <ImageEditor item={item} />}
-      </div>
-    </div>
+    <QuestionEditorCard title={QUESTION_TYPES[item.kind]} done={stopEditing}>
+      <label className="grid gap-1 text-xs">Question
+        <textarea rows={2} className={fieldClass} style={getTextStyles(item.textFormat, "left")} value={item.prompt}
+          onChange={(event) => update(item.id, { prompt: event.currentTarget.value })} />
+      </label>
+      {item.kind === "matching" && <MatchingEditor item={item} />}
+      {item.kind === "ordering" && <OrderingEditor item={item} />}
+      {item.kind === "image_spot" && <ImageEditor item={item} />}
+    </QuestionEditorCard>
   );
 }

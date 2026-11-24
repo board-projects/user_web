@@ -40,7 +40,7 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
   const [publishing, setPublishing] = useState(false);
   const [print, setPrint] = useState<PrintPage | null>(null);
   const [error, setError] = useState("");
-  const [publishedPath, setPublishedPath] = useState("");
+  const [fallbackPath, setFallbackPath] = useState("");
   const running = useRef(false);
   const closePrint = useCallback(() => setPrint(null), []);
 
@@ -63,6 +63,7 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
       publicTab = window.open("about:blank", "_blank");
       if (publicTab) publicTab.opener = null;
 
+      setFallbackPath("");
       setPublishing(true);
       const response = await fetch("/api/test/publications", {
         method: "POST",
@@ -75,9 +76,10 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
       if (typeof data.reference !== "string") throw new Error("Published link is unavailable");
 
       const path = `/test/${encodeURIComponent(data.reference)}`;
-      setPublishedPath(path);
       if (publicTab && !publicTab.closed) {
         publicTab.location.replace(new URL(path, window.location.origin).href);
+      } else {
+        setFallbackPath(path);
       }
     } catch (cause) {
       publicTab?.close();
@@ -100,9 +102,9 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
         {deleteButton}
       </div>
       <button type="button" className={propertyButtonClass} onClick={() => setAssigning(true)}>Assign</button>
-      {publishedPath && (
-        <a className={`${propertyButtonClass} inline-flex items-center`} href={publishedPath} target="_blank" rel="noopener noreferrer">
-          Open public page
+      {fallbackPath && (
+        <a className={`${propertyButtonClass} inline-flex items-center`} href={fallbackPath} target="_blank" rel="noopener noreferrer">
+          Published link
         </a>
       )}
       {error && <span role="alert" className="shrink-0 px-2 text-xs text-red-700">{error}</span>}

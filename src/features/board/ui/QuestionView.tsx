@@ -6,6 +6,7 @@ import { getTextStyles } from "../domain/textFormat";
 import type { Point } from "../domain/types";
 import { MultipleChoiceView } from "./MultipleChoiceView";
 import { QuestionImagePicker } from "./QuestionImagePicker";
+import { QuestionCard } from "./QuestionCard";
 import { TextLink } from "./TextLink";
 
 function AnswerValue({ id, value }: { id: string; value: string }) {
@@ -86,8 +87,7 @@ export function QuestionView({ item, answering = false, selection = [] }: {
   if (isChoiceQuestion(item)) return <MultipleChoiceView item={item} answering={answering} selection={selection} />;
 
   return (
-    <div className="h-full overflow-y-auto rounded-lg border border-stone-200 bg-white p-3 text-sm text-stone-900">
-      <div className="mb-1 text-xs font-semibold text-stone-500">{item.label || QUESTION_TYPES[item.kind]}</div>
+    <QuestionCard label={item.label || QUESTION_TYPES[item.kind]}>
       <div className="mb-2 whitespace-pre-wrap break-words" style={getTextStyles(item.textFormat, "left")}>
         <TextLink link={answering ? item.textFormat?.link : undefined}>{item.prompt.trim() || "Question"}</TextLink>
       </div>
@@ -111,6 +111,6 @@ export function QuestionView({ item, answering = false, selection = [] }: {
           {answering && point && <AnswerValue id={item.id} value={`${point.x.toFixed(4)},${point.y.toFixed(4)}`} />}
         </>
       )}
-    </div>
+    </QuestionCard>
   );
 }

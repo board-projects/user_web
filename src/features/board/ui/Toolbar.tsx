@@ -12,7 +12,6 @@ import {
   TbShape,
   TbPencil,
   TbFileDescription,
-  TbSquareRoundedLetterT,
 } from "react-icons/tb";
 import { useBoardStore } from "@/features/board/store/board.store";
 
@@ -33,7 +32,6 @@ type PresenceUser = {
 type ToolbarProps = {
   onAddCode?: () => void;
   onAddShape?: (type: ShapeType) => void;
-  onAddClozeTest?: () => void;
   onAddQuestion?: (kind: QuestionType) => void;
   onAddPage?: () => void;
   onAddTable?: (rows: number, columns: number) => void;
@@ -308,17 +306,6 @@ export function Toolbar(props: ToolbarProps) {
             }}
           >
             <FaCode />
-          </IconButton>
-
-          { /* Cloze test */}
-          <IconButton
-            title="Add cloze test"
-
-            onClick={() => {
-              props.onAddClozeTest?.();
-            }}
-          >
-            <TbSquareRoundedLetterT />
           </IconButton>
 
           {props.onAddQuestion && (

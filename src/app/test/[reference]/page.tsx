@@ -38,7 +38,7 @@ export default async function PublishedTestPage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full" style={{ maxWidth: layout.width }}>
-      <PublishedExam key={params.reference} reference={assigned ? params.reference : undefined} submitted={Boolean(submittedAt)}>
+      <PublishedExam key={`${params.reference}:${submittedAt ?? "open"}`} reference={assigned ? params.reference : undefined} submitted={Boolean(submittedAt)}>
         <DesignSheet board={board} layout={layout} title={title} answers={answers} />
       </PublishedExam>
     </main>

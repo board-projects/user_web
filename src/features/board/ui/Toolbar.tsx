@@ -18,6 +18,7 @@ import { useBoardStore } from "@/features/board/store/board.store";
 
 import { SHAPE_TYPES, type ShapeType } from "../domain/types";
 import { shapeDefinitions } from "../domain/shapeDefinitions";
+import { QUESTION_TYPES, type QuestionType } from "../domain/questions";
 import { ShapeIcon } from "./ShapeIcon";
 import { TableCreatePanel } from "./TableCreatePanel";
 
@@ -33,7 +34,7 @@ type ToolbarProps = {
   onAddCode?: () => void;
   onAddShape?: (type: ShapeType) => void;
   onAddClozeTest?: () => void;
-  onAddMultipleChoice?: () => void;
+  onAddQuestion?: (kind: QuestionType) => void;
   onAddPage?: () => void;
   onAddTable?: (rows: number, columns: number) => void;
 
@@ -148,6 +149,9 @@ function PresenceMini({ users = [], viewerCount }: { users?: PresenceUser[]; vie
 }
 
 export function Toolbar(props: ToolbarProps) {
+  const [questionsOpen, setQuestionsOpen] = useState(false);
+  const questionsRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside([questionsRef], () => setQuestionsOpen(false), questionsOpen);
   const panelPlacement = "absolute bottom-12 left-0 lg:bottom-auto lg:left-12 lg:top-0";
   const tool = useBoardStore((s) => s.tool);
   const setTool = useBoardStore((s) => s.setTool);
@@ -317,9 +321,25 @@ export function Toolbar(props: ToolbarProps) {
             <TbSquareRoundedLetterT />
           </IconButton>
 
-          <IconButton title="Add multiple-choice question" onClick={props.onAddMultipleChoice}>
-            <TbListCheck />
-          </IconButton>
+          {props.onAddQuestion && (
+            <div ref={questionsRef} className="relative" data-ui="true" onKeyDown={(event) => {
+              if (event.key === "Escape") setQuestionsOpen(false);
+            }}>
+              <IconButton title="Add question" active={questionsOpen} onClick={() => setQuestionsOpen(!questionsOpen)}>
+                <TbListCheck />
+              </IconButton>
+              {questionsOpen && (
+                <div className={cn(panelPlacement, "z-30 grid w-44 gap-0.5 rounded-xl border border-stone-200 bg-white p-1.5 shadow-lg")}>
+                  {(Object.keys(QUESTION_TYPES) as QuestionType[]).map((kind) => (
+                    <button key={kind} type="button" className="min-h-10 rounded-lg px-2 text-left text-sm hover:bg-stone-100"
+                      onClick={() => { props.onAddQuestion?.(kind); setQuestionsOpen(false); }}>
+                      {QUESTION_TYPES[kind]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <IconButton title="Add page item" onClick={props.onAddPage}>
             <TbFileDescription />

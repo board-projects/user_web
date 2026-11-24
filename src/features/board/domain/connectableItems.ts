@@ -1,4 +1,4 @@
-import type { MultipleChoiceItem } from "./multipleChoice";
+import type { QuestionItem } from "./questions";
 import type { ClozeTest, CodeBlock, PageItem, Shape, TableItem } from "./types";
 
 export type ConnectableItem = Omit<Shape, "color">;
@@ -9,7 +9,7 @@ type BoardItems = {
   clozeTests: readonly ClozeTest[];
   sheets: readonly PageItem[];
   tables: readonly TableItem[];
-  questions: readonly MultipleChoiceItem[];
+  questions: readonly QuestionItem[];
 };
 
 // Older cloze blocks use the same default size on every client.
@@ -24,7 +24,7 @@ export const pageConnectable = (page: PageItem): ConnectableItem => ({ ...page, 
 
 export const tableConnectable = (table: TableItem): ConnectableItem => ({ ...table, type: "rect" });
 
-export const questionConnectable = (item: MultipleChoiceItem): ConnectableItem => ({ ...item, type: "rect" });
+export const questionConnectable = (item: QuestionItem): ConnectableItem => ({ ...item, type: "rect" });
 
 export function getConnectableItems({ shapes, codeBlocks, clozeTests, sheets, tables, questions }: BoardItems): ConnectableItem[] {
   return [...shapes, ...codeBlocks.map(codeConnectable), ...clozeTests.map(clozeConnectable), ...sheets.map(pageConnectable), ...tables.map(tableConnectable), ...questions.map(questionConnectable)];

@@ -7,14 +7,18 @@ export type ChoiceOption = {
   correct?: boolean;
 };
 
-export type MultipleChoiceItem = Point & {
+export type QuestionFrame = Point & {
   id: string;
   label: string;
   prompt: string;
   width: number;
   height: number;
-  options: ChoiceOption[];
   textFormat?: TextFormat;
+};
+
+export type MultipleChoiceItem = QuestionFrame & {
+  kind?: "true_false";
+  options: ChoiceOption[];
   multiple?: boolean;
 };
 

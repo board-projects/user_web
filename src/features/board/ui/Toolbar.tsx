@@ -193,7 +193,7 @@ export function Toolbar(props: ToolbarProps) {
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
   return (
-    <div className={cn("z-50", "absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 lg:bottom-auto lg:left-3 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2", props.className)} data-ui="true">
+    <div className={cn("z-[80]", "absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 lg:bottom-auto lg:left-3 lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2", props.className)} data-ui="true">
       <div
         className={cn(
           "rounded-2xl border border-stone-200/80 bg-stone-100/60 backdrop-blur",

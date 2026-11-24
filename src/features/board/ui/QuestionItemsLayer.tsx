@@ -2,16 +2,18 @@ import type { ComponentProps } from "react";
 import type { Rnd } from "react-rnd";
 import { BoardResizable } from "./BoardResizable";
 import { questionConnectable } from "../domain/connectableItems";
-import { QUESTION_MIN_SIZE, type MultipleChoiceItem } from "../domain/multipleChoice";
+import { QUESTION_MIN_SIZE } from "../domain/multipleChoice";
+import { isChoiceQuestion, type QuestionItem } from "../domain/questions";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { useBoardStore } from "../store/board.store";
 import { selectionKey } from "../store/slices/selection.slice";
 import { ConnectionPorts } from "./ConnectionPorts";
 import { MultipleChoiceEditor } from "./MultipleChoiceEditor";
-import { MultipleChoiceView } from "./MultipleChoiceView";
+import { QuestionView } from "./QuestionView";
+import { StructuredQuestionEditor } from "./StructuredQuestionEditor";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 
-function QuestionFrame({ item }: { item: MultipleChoiceItem }) {
+function QuestionFrame({ item }: { item: QuestionItem }) {
   const key = selectionKey("question", item.id);
   const selected = useBoardStore((state) => state.selection?.type === "question" && state.selection.id === item.id);
   const inGroup = useBoardStore((state) => state.marqueeSelection?.items.has(key));
@@ -43,7 +45,7 @@ function QuestionFrame({ item }: { item: MultipleChoiceItem }) {
       onResize={resize}
       onResizeStop={resize}
       cancel="[data-connection-handle], [data-question-editor]"
-      className="pointer-events-auto"
+      className={selected ? "pointer-events-auto z-10" : "pointer-events-auto"}
       {...dragItem(selection, item, (position) => update(item.id, position), true)}
     >
       <div className="h-full rounded-lg" style={itemSelectionStyle(selected || !!inGroup)}
@@ -53,7 +55,8 @@ function QuestionFrame({ item }: { item: MultipleChoiceItem }) {
           useBoardStore.getState().select(selection);
           startEditing(item.id);
         }}>
-        {editing ? <MultipleChoiceEditor item={item} /> : <MultipleChoiceView item={item} />}
+        {editing && (isChoiceQuestion(item) ? <MultipleChoiceEditor item={item} /> : <StructuredQuestionEditor item={item} />)}
+        {!editing && <QuestionView item={item} />}
       </div>
       <ConnectionPorts item={questionConnectable(item)} selected={selected && !editing} />
     </BoardResizable>
@@ -62,8 +65,9 @@ function QuestionFrame({ item }: { item: MultipleChoiceItem }) {
 
 export function QuestionItemsLayer() {
   const questions = useBoardStore((state) => state.questions);
+  const editing = useBoardStore((state) => state.editingQuestionId !== null);
   return (
-    <div className="pointer-events-none absolute inset-0 z-20">
+    <div className={`pointer-events-none absolute inset-0 ${editing ? "z-[61]" : "z-20"}`}>
       {questions.map((item) => <QuestionFrame key={item.id} item={item} />)}
     </div>
   );

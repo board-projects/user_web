@@ -20,7 +20,7 @@ export function PublishedExam({ children, reference, submitted = false }: {
     }
 
     const selected = new Map<string, string[]>();
-    for (const input of event.currentTarget.querySelectorAll<HTMLInputElement>("input[data-question-id]:checked, input[data-cloze-blank]")) {
+    for (const input of event.currentTarget.querySelectorAll<HTMLInputElement>("input[data-question-id]:checked, input[data-cloze-blank], input[data-question-answer]")) {
       const id = input.dataset.questionId;
       if (id) selected.set(id, [...(selected.get(id) ?? []), input.value]);
     }

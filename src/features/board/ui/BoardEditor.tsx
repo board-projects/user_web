@@ -36,7 +36,8 @@ import {
 import { GridCanvas } from '@/features/board/ui/GridCanvas';
 import { useDeleteSelected } from '@/features/board/hooks/useDeleteSelected';
 import { QuestionItemsLayer } from "./QuestionItemsLayer";
-import { createMultipleChoice, QUESTION_MIN_SIZE } from "../domain/multipleChoice";
+import { QUESTION_MIN_SIZE } from "../domain/multipleChoice";
+import { createQuestion } from "../domain/questions";
 import { ClozeTestLayer } from "@/features/board/ui/ClozeTestLayer";
 
 export function BoardEditor({ reference }: { reference: string }) {
@@ -111,10 +112,20 @@ export function BoardEditor({ reference }: { reference: string }) {
           setTool("select");
           select({ type: "table", id: table.id });
         }}
-        onAddMultipleChoice={() => {
+        onAddQuestion={(kind) => {
           const viewportWidth = boardAreaRef.current?.clientWidth ?? 0;
           const inset = viewportWidth && viewportWidth < 640 ? 16 : 72;
-          const item = createMultipleChoice({ x: (inset - panX) / zoom, y: (112 - panY) / zoom });
+          const state = useBoardStore.getState();
+          const page = state.selection?.type === "page"
+            ? state.sheets.find(({ id }) => id === state.selection?.id)
+            : undefined;
+          const item = createQuestion(kind, page
+            ? { x: page.x + 12, y: page.y + 12 }
+            : { x: (inset - panX) / zoom, y: (112 - panY) / zoom });
+          if (page) {
+            item.width = Math.max(QUESTION_MIN_SIZE.width, Math.min(item.width, page.width - 24));
+            item.height = Math.max(QUESTION_MIN_SIZE.height, Math.min(item.height, page.height - 24));
+          }
           if (viewportWidth && viewportWidth < 640) {
             item.width = Math.max(QUESTION_MIN_SIZE.width, Math.min(item.width, (viewportWidth - inset * 2 - 44) / zoom));
           }

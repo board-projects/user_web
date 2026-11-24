@@ -30,8 +30,8 @@ const getPublishedPage = cache(async (reference: string): Promise<{ page: TestPa
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { page: { title } } = await getPublishedPage(params.reference);
-  return { title };
+  const { page: { title }, assigned } = await getPublishedPage(params.reference);
+  return { title, ...(assigned && { robots: { index: false, follow: false } }) };
 }
 
 export default async function PublishedTestPage({ params }: Props) {

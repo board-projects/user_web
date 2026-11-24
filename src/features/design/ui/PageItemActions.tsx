@@ -36,6 +36,8 @@ function PrintablePage({ page, close }: { page: PrintPage; close: () => void }) 
 }
 
 export function PageItemActions({ reference, itemId, deleteButton }: { reference: string; itemId: string; deleteButton: ReactNode }) {
+  const isPublic = useBoardStore((state) => state.sheets.find((page) => page.id === itemId)?.visibility === "public");
+  const [notice, setNotice] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [print, setPrint] = useState<PrintPage | null>(null);
@@ -48,6 +50,7 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
     if (running.current) return;
     running.current = true;
     setError("");
+    setNotice("");
     let publicTab: Window | null = null;
     try {
       const board = useBoardStore.getState();
@@ -59,20 +62,22 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
         return;
       }
 
-      // Open while the click still grants popup permission.
-      publicTab = window.open("about:blank", "_blank");
+      if (page.visibility === "public") publicTab = window.open("about:blank", "_blank");
       if (publicTab) publicTab.opener = null;
 
       setFallbackPath("");
       setPublishing(true);
-      const response = await fetch("/api/test/publications", {
+      const response = await fetch(`/api/boards/${encodeURIComponent(reference)}/pages/${encodeURIComponent(itemId)}/publish`, {
         method: "POST",
-        credentials: "omit",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ page: capture.page, changes: capture.snapshot.changes }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.message === "string" ? data.message : "Could not publish the page");
+      if (data.visibility === "private") {
+        setNotice("Private access saved.");
+        return;
+      }
       if (typeof data.reference !== "string") throw new Error("Published link is unavailable");
 
       const path = `/test/${encodeURIComponent(data.reference)}`;
@@ -97,16 +102,17 @@ export function PageItemActions({ reference, itemId, deleteButton }: { reference
           Export PDF
         </button>
         <button type="button" className={propertyButtonClass} disabled={publishing} onClick={() => void run("publish")}>
-          {publishing ? "Publishing…" : "Publish"}
+          {publishing ? "Saving…" : isPublic ? "Publish" : "Save private"}
         </button>
         {deleteButton}
       </div>
       <button type="button" className={propertyButtonClass} onClick={() => setAssigning(true)}>Assign</button>
-      {fallbackPath && (
+      {isPublic && fallbackPath && (
         <a className={`${propertyButtonClass} inline-flex items-center`} href={fallbackPath} target="_blank" rel="noopener noreferrer">
           Published link
         </a>
       )}
+      {notice && <span role="status" className="px-2 text-xs text-stone-700">{notice}</span>}
       {error && <span role="alert" className="shrink-0 px-2 text-xs text-red-700">{error}</span>}
       {assigning && <AssignExamDialog reference={reference} itemId={itemId} close={() => setAssigning(false)} />}
       {print && <PrintablePage page={print} close={closePrint} />}

@@ -105,4 +105,8 @@ export type PageItem = Point & {
   dots: boolean;
   unit: PageUnit;
   backgroundColor?: string;
+  visibility?: "private" | "public";
+  topic?: string;
+  level?: string;
+  locale?: string;
 };

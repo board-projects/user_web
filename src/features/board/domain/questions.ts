@@ -1,8 +1,9 @@
-import { createMultipleChoice, type MultipleChoiceItem, type QuestionFrame } from "./multipleChoice";
+import { createMultipleChoice, QUESTION_SIZE, type MultipleChoiceItem, type QuestionFrame } from "./multipleChoice";
 import type { Point } from "./types";
 
 export const QUESTION_TYPES = {
   multiple_choice: "Multiple choice",
+  cloze_test: "Fill in the blanks",
   matching: "Matching",
   ordering: "Ordering",
   image_spot: "Select on image",
@@ -52,8 +53,8 @@ export function questionImageUrl(value: string) {
   }
 }
 
-export function createQuestion(kind: QuestionType, position: Point): QuestionItem {
-  const frame: QuestionFrame = { ...position, id: crypto.randomUUID(), width: 320, height: 280, label: "", prompt: "" };
+export function createQuestion(kind: Exclude<QuestionType, "cloze_test">, position: Point): QuestionItem {
+  const frame: QuestionFrame = { ...position, id: crypto.randomUUID(), ...QUESTION_SIZE, label: "", prompt: "" };
   switch (kind) {
     case "multiple_choice":
       return createMultipleChoice(position);

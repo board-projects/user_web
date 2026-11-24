@@ -1,4 +1,6 @@
+import { QUESTION_TYPES } from "../domain/questions";
 import { useRef } from "react";
+import { QuestionEditorCard } from "./QuestionCard";
 import { getTextStyles, type TextFormat } from "../domain/textFormat";
 
 export function ClozeQuestionEditor({ content, textFormat, update, done }: {
@@ -20,16 +22,13 @@ export function ClozeQuestionEditor({ content, textFormat, update, done }: {
   };
 
   return (
-    <div data-cloze-editor className="grid gap-2">
+    <QuestionEditorCard title={QUESTION_TYPES.cloze_test} done={done}>
       <textarea ref={input} autoFocus rows={3} aria-label="Question text" value={content}
         onChange={(event) => update(event.currentTarget.value)}
         style={getTextStyles(textFormat, "left")}
         className="w-full resize-y rounded-md border border-stone-300 bg-transparent p-2 leading-snug outline-none focus:border-blue-500" />
       <p className="text-xs text-stone-600">Put each correct answer inside {"{{ }}"}.</p>
-      <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-        <button type="button" className="min-h-9 rounded-md border border-stone-200 px-2" onClick={addBlank}>Add blank</button>
-        <button type="button" className="min-h-9 rounded-md px-2 text-blue-700" onClick={done}>Done</button>
-      </div>
-    </div>
+      <button type="button" className="min-h-9 justify-self-start rounded-md border border-stone-200 px-2 text-xs font-semibold" onClick={addBlank}>Add blank</button>
+    </QuestionEditorCard>
   );
 }

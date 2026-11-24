@@ -101,11 +101,6 @@ export function BoardEditor({ reference }: { reference: string }) {
       <Toolbar
         onAddShape={(type) => addShape(createShape(type))}
         onAddCode={() => addCodeBlock(createCodeBlock())}
-        onAddClozeTest={() => {
-          const { selection, sheets } = useBoardStore.getState();
-          const page = selection?.type === "page" ? sheets.find((item) => item.id === selection.id) : undefined;
-          addClozeTest(createClozeTest(page));
-        }}
         onAddTable={(rows, columns) => {
           const table = createTable({ x: (72 - panX) / zoom, y: (112 - panY) / zoom }, rows, columns);
           addTable(table);
@@ -119,9 +114,10 @@ export function BoardEditor({ reference }: { reference: string }) {
           const page = state.selection?.type === "page"
             ? state.sheets.find(({ id }) => id === state.selection?.id)
             : undefined;
-          const item = createQuestion(kind, page
+          const position = page
             ? { x: page.x + 12, y: page.y + 12 }
-            : { x: (inset - panX) / zoom, y: (112 - panY) / zoom });
+            : { x: (inset - panX) / zoom, y: (112 - panY) / zoom };
+          const item = kind === "cloze_test" ? createClozeTest(position) : createQuestion(kind, position);
           if (page) {
             item.width = Math.max(QUESTION_MIN_SIZE.width, Math.min(item.width, page.width - 24));
             item.height = Math.max(QUESTION_MIN_SIZE.height, Math.min(item.height, page.height - 24));
@@ -129,8 +125,14 @@ export function BoardEditor({ reference }: { reference: string }) {
           if (viewportWidth && viewportWidth < 640) {
             item.width = Math.max(QUESTION_MIN_SIZE.width, Math.min(item.width, (viewportWidth - inset * 2 - 44) / zoom));
           }
-          addQuestion(item);
           setTool("select");
+          if ("type" in item) {
+            addClozeTest(item);
+            select({ type: "cloze", id: item.id });
+            state.startEditingClozeTest(item.id);
+            return;
+          }
+          addQuestion(item);
           select({ type: "question", id: item.id });
           startEditingQuestion(item.id);
         }}

@@ -22,6 +22,8 @@ export type MultipleChoiceItem = QuestionFrame & {
   multiple?: boolean;
 };
 
+export const QUESTION_SIZE = { width: 320, height: 280 };
+
 export const QUESTION_MIN_SIZE = { width: 200, height: 160 };
 
 export function createChoiceOption(): ChoiceOption {
@@ -31,7 +33,7 @@ export function createChoiceOption(): ChoiceOption {
 export function createMultipleChoice(position: Point): MultipleChoiceItem {
   return {
     ...position, id: crypto.randomUUID(), label: "", prompt: "",
-    width: 320, height: 280, options: [createChoiceOption(), createChoiceOption()],
+    ...QUESTION_SIZE, options: [createChoiceOption(), createChoiceOption()],
   };
 }
 

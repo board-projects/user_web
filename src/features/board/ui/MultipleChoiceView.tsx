@@ -1,6 +1,8 @@
+import { QUESTION_TYPES } from "../domain/questions";
 import { useId } from "react";
 import { allowsMultipleAnswers, type MultipleChoiceItem } from "../domain/multipleChoice";
 import { getTextStyles } from "../domain/textFormat";
+import { QuestionCard } from "./QuestionCard";
 import { TextLink } from "./TextLink";
 
 export function MultipleChoiceView({ item, answering = false, selection }: { item: MultipleChoiceItem; answering?: boolean; selection?: string[] }) {
@@ -10,8 +12,7 @@ export function MultipleChoiceView({ item, answering = false, selection }: { ite
   const inputType = multiple ? "checkbox" : "radio";
 
   return (
-    <div className="h-full overflow-y-auto rounded-lg border border-stone-200 bg-white p-3 text-sm text-stone-900">
-      {item.label && <div className="mb-1 text-xs font-semibold text-stone-500">{item.label}</div>}
+    <QuestionCard label={item.label || QUESTION_TYPES[item.kind ?? "multiple_choice"]}>
       <fieldset className="min-w-0" style={getTextStyles(item.textFormat, "left")}>
         <legend className="w-full whitespace-pre-wrap break-words">
           <TextLink link={answering ? item.textFormat?.link : undefined}>{prompt}</TextLink>
@@ -30,6 +31,6 @@ export function MultipleChoiceView({ item, answering = false, selection }: { ite
           ))}
         </div>
       </fieldset>
-    </div>
+    </QuestionCard>
   );
 }

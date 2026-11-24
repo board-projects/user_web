@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   }
   try {
     const response = await backendPost(`exam/assignments/board/${body.reference}/pages/${body.pageId}`,
-      { ...credentials, draft: body.draft, emails: body.emails });
+      { ...credentials, draft: body.draft, emails: body.emails, timing: body.timing });
     return NextResponse.json(await response.json(), { status: response.status });
   } catch {
     return NextResponse.json({ message: "Exam assignment is temporarily unavailable." }, { status: 503 });

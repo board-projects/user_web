@@ -1,13 +1,13 @@
 import {
   createMatchingPair, createQuestionOption, QUESTION_ENTRY_LIMIT, QUESTION_TYPES,
-  type ImageQuestion, type MatchingQuestion, type OrderingQuestion, type QuestionOption,
+  type EssayQuestion, type ImageQuestion, type MatchingQuestion, type OrderingQuestion, type QuestionOption,
 } from "../domain/questions";
 import { getTextStyles } from "../domain/textFormat";
 import { useBoardStore } from "../store/board.store";
 import { QuestionEditorCard } from "./QuestionCard";
 import { QuestionImagePicker } from "./QuestionImagePicker";
 
-type StructuredQuestion = MatchingQuestion | OrderingQuestion | ImageQuestion;
+type StructuredQuestion = MatchingQuestion | OrderingQuestion | ImageQuestion | EssayQuestion;
 const fieldClass = "min-w-0 rounded-md border border-stone-300 p-2 text-sm focus:border-blue-500";
 const actionClass = "min-h-9 rounded-md px-2 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-40";
 

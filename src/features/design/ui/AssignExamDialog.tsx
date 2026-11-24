@@ -28,10 +28,22 @@ export function AssignExamDialog({ reference, itemId, close }: { reference: stri
       setError("Enter at least one email address.");
       return;
     }
+    const form = new FormData(event.currentTarget);
+    const opens = String(form.get("opensAt") ?? "");
+    const closes = String(form.get("closesAt") ?? "");
+    const duration = String(form.get("durationMinutes") ?? "");
     setBusy(true);
     setError("");
     setResult(null);
     try {
+      const timing = {
+        opensAt: opens ? new Date(opens).toISOString() : undefined,
+        closesAt: closes ? new Date(closes).toISOString() : undefined,
+        durationMinutes: duration ? Number(duration) : undefined,
+      };
+      if (timing.opensAt && timing.closesAt && timing.opensAt >= timing.closesAt) {
+        throw new Error("The closing date must be after the opening date.");
+      }
       const board = useBoardStore.getState();
       const page = board.sheets.find((item) => item.id === itemId);
       if (!page) throw new Error("Page item not found.");
@@ -39,7 +51,7 @@ export function AssignExamDialog({ reference, itemId, close }: { reference: stri
       const response = await fetch("/api/exam/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reference, pageId: itemId, emails: recipients, draft: { page: capture.page, changes: capture.snapshot.changes } }),
+        body: JSON.stringify({ reference, pageId: itemId, emails: recipients, timing, draft: { page: capture.page, changes: capture.snapshot.changes } }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.message === "string" ? data.message : "Could not assign the exam.");
@@ -64,6 +76,19 @@ export function AssignExamDialog({ reference, itemId, close }: { reference: stri
             placeholder="student@example.com" autoCapitalize="none" spellCheck={false}
             className="w-full resize-y rounded-lg border border-stone-300 p-2 font-normal focus:border-blue-600 focus:outline-none" />
         </label>
+        <fieldset disabled={busy} className="grid gap-2 rounded-lg border border-stone-200 p-3 text-sm">
+          <legend className="px-1 font-medium">Timing (optional)</legend>
+          <label className="grid gap-1">Opens at
+            <input type="datetime-local" name="opensAt" className="min-w-0 rounded-md border border-stone-300 p-2" />
+          </label>
+          <label className="grid gap-1">Closes at
+            <input type="datetime-local" name="closesAt" className="min-w-0 rounded-md border border-stone-300 p-2" />
+          </label>
+          <label className="grid gap-1">Minutes from start
+            <input type="number" name="durationMinutes" min={1} max={1440} step={1} className="min-w-0 rounded-md border border-stone-300 p-2" />
+          </label>
+          <p className="text-xs text-stone-600">Dates use your device’s time zone. The closing date can shorten the time available.</p>
+        </fieldset>
         {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
         {result && (
           <div role="status" className="grid gap-1 break-words text-sm text-stone-700">

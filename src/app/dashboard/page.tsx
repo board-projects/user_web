@@ -63,7 +63,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                   {result.data.tests.map((test) => (
                     <li key={test.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-cyan-200 bg-white px-4 py-3">
                       {result.data.role === "student"
-                        ? <Link className="min-w-0 break-words font-semibold text-cyan-900 hover:underline" href={test.testId ? `/test/${test.testId}` : `/dashboard/tests/${test.id}`}>{test.label || "Untitled test"}</Link>
+                        ? <Link prefetch={false} className="min-w-0 break-words font-semibold text-cyan-900 hover:underline" href={test.testId ? `/test/${test.testId}` : `/dashboard/tests/${test.id}`}>{test.label || "Untitled test"}</Link>
                         : <span className="min-w-0 break-words font-semibold">{test.label || "Untitled test"}</span>}
                       <span className="text-sm text-cyan-800">{statusText[test.status] ?? test.status}</span>
                     </li>

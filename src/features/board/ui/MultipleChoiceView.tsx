@@ -3,7 +3,7 @@ import { allowsMultipleAnswers, type MultipleChoiceItem } from "../domain/multip
 import { getTextStyles } from "../domain/textFormat";
 import { TextLink } from "./TextLink";
 
-export function MultipleChoiceView({ item, answering = false }: { item: MultipleChoiceItem; answering?: boolean }) {
+export function MultipleChoiceView({ item, answering = false, selection }: { item: MultipleChoiceItem; answering?: boolean; selection?: string[] }) {
   const name = useId();
   const multiple = allowsMultipleAnswers(item);
   const prompt = item.prompt.trim() || "Question";
@@ -21,7 +21,7 @@ export function MultipleChoiceView({ item, answering = false }: { item: Multiple
           {item.options.map((option, index) => (
             <label key={option.id} className="flex gap-2 rounded-md border border-stone-100 px-2 py-1.5">
               {answering ? (
-                <input type={inputType} name={name} value={option.id} className="mt-1 h-4 w-4 shrink-0 accent-blue-600" />
+                <input type={inputType} name={name} value={option.id} data-question-id={item.id} defaultChecked={selection?.includes(option.id)} className="mt-1 h-4 w-4 shrink-0 accent-blue-600" />
               ) : (
                 <span aria-hidden="true" className={`mt-1 h-3.5 w-3.5 shrink-0 border ${multiple ? "rounded-sm" : "rounded-full"} ${option.correct ? "border-emerald-600 bg-emerald-600" : "border-stone-400"}`} />
               )}

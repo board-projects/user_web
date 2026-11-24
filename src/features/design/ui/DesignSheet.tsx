@@ -14,7 +14,7 @@ import { normalizeRotation } from "@/features/board/domain/shapeRotation";
 import { shapeDefinitions } from "@/features/board/domain/shapeDefinitions";
 import { SHEET_DOT_GRID, type SheetLayout } from "../domain/sheetLayout";
 
-export function DesignSheet({ layout, board, title }: { layout: SheetLayout; board: BoardContent; title: string }) {
+export function DesignSheet({ layout, board, title, answers }: { layout: SheetLayout; board: BoardContent; title: string; answers?: Record<string, string[]> }) {
   const gridId = useId();
   const items = new Map(getConnectableItems(board).map((item) => [item.id, item]));
 
@@ -105,7 +105,7 @@ export function DesignSheet({ layout, board, title }: { layout: SheetLayout; boa
       ))}
       {board.questions.map((question) => (
         <foreignObject key={question.id} x={question.x} y={question.y} width={question.width} height={question.height}>
-          <MultipleChoiceView item={question} answering />
+          <MultipleChoiceView item={question} answering selection={answers?.[question.id]} />
         </foreignObject>
       ))}
     </svg>

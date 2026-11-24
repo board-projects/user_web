@@ -8,10 +8,13 @@ import { ClozeTest } from "../domain/types";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 import { clozeConnectable } from "../domain/connectableItems";
 import { ConnectionPorts } from "./ConnectionPorts";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
+
+const clozeResizeCorners = { topLeft: true, topRight: true, bottomLeft: true, bottomRight: true };
 
 export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFormat }: ClozeTest) => {
 
@@ -34,7 +37,7 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
 
 
     return (
-        <Rnd
+        <BoardResizable
             data-interactive="true"
             data-board-selection-key={key}
             data-board-connectable-id={id}
@@ -44,9 +47,12 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
             size={{ width: item.width, height: item.height }}
             minWidth={140}
             minHeight={100}
-            enableResizing={!isEditing}
+            enableResizing={isSelected ? clozeResizeCorners : false}
+            resizeHandleWrapperClass="touch-none"
             resizeHandleComponent={isSelected ? itemResizeHandles : undefined}
-            onResizeStart={() => selectBoardItem({ type: "cloze", id })}
+            onResizeStart={() => {
+                if (!isEditing) selectBoardItem({ type: "cloze", id });
+            }}
             onResize={connected ? resize : undefined}
             onResizeStop={resize}
             {...dragItem({ type: "cloze", id }, { x, y }, (position) => updateClozeTest(id, position), connected)}
@@ -58,11 +64,11 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
             className="z-50"
         >
             <div data-board-scroll
-                className="flex h-full w-full flex-col gap-2 touch-pan-y overflow-auto break-words rounded-lg border border-stone-200 bg-white p-4 shadow-lg"
+                className="flex h-full w-full flex-col gap-1.5 touch-pan-y overflow-auto break-words rounded-lg border border-stone-200 bg-white p-3 shadow-lg"
                 style={itemSelectionStyle(isSelected || inMarquee)}
                 onDoubleClick={() => startEditing(id)}
             >
-                <div className="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
+                <div className="flex justify-between items-center border-b border-gray-100 pb-1">
                     <span className="text-[10px] font-bold text-gray-400 uppercase">{title || "Cloze Test"}</span>
                     {isEditing && <span className="text-[10px] text-green-600 font-bold">Editing...</span>}
                 </div>
@@ -71,7 +77,7 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
                     <ClozeQuestionEditor content={content} textFormat={textFormat} done={stopEditing}
                         update={(content) => updateClozeTest(id, { content })} />
                 ) : (
-                    <div className="whitespace-pre-wrap leading-loose text-gray-800" style={getTextStyles(textFormat, "left")}>
+                    <div className="whitespace-pre-wrap leading-relaxed text-gray-800" style={getTextStyles(textFormat, "left")}>
                         <ClozeAnswerFields itemId={id} content={content} />
                     </div>
                 )}
@@ -83,6 +89,6 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
                 )}
             </div>
             <ConnectionPorts item={item} selected={isSelected} />
-        </Rnd>
+        </BoardResizable>
     );
 };

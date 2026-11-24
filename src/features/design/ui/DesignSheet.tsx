@@ -94,7 +94,7 @@ export function DesignSheet({ layout, board, title, answers }: { layout: SheetLa
           <foreignObject key={cloze.id} x={x} y={y} width={width} height={height}>
             <div className="h-full overflow-hidden break-words rounded-lg border border-stone-200 bg-white p-4 text-sm text-stone-800">
               <strong className="mb-2 block">{cloze.title || "Cloze Test"}</strong>
-              <div className="whitespace-pre-wrap" style={getTextStyles(cloze.textFormat, "left")}><ClozeAnswerFields itemId={cloze.id} content={cloze.content} answers={answers?.[cloze.id]} link={cloze.textFormat?.link} /></div>
+              <div className="whitespace-pre-wrap leading-relaxed" style={getTextStyles(cloze.textFormat, "left")}><ClozeAnswerFields itemId={cloze.id} content={cloze.content} answers={answers?.[cloze.id]} link={cloze.textFormat?.link} /></div>
             </div>
           </foreignObject>
         );

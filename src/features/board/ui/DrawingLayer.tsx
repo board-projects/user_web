@@ -2,7 +2,8 @@
 
 import { useMemo, useRef, type ComponentProps } from "react";
 import { DrawingText } from "./DrawingText";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { getDrawingFrame, groupDrawingLines, type DrawingFrame } from "../domain/drawings";
 import { useDrawingDrag } from "../hooks/useDrawingDrag";
 import { useBoardStore } from "../store/board.store";
@@ -19,7 +20,7 @@ function DrawingResizeFrame({ frame, zoom }: { frame: DrawingFrame; zoom: number
   };
 
   return (
-    <Rnd
+    <BoardResizable
       data-interactive="true"
       className="pointer-events-none z-[60]"
       scale={zoom}
@@ -39,7 +40,7 @@ function DrawingResizeFrame({ frame, zoom }: { frame: DrawingFrame; zoom: number
       onResizeStop={(...args) => { resize(...args); previous.current = null; }}
     >
       <div data-board-drawing-selection className="h-full w-full" style={itemSelectionStyle(true)} />
-    </Rnd>
+    </BoardResizable>
   );
 }
 

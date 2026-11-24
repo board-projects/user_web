@@ -7,7 +7,8 @@ import { ShapeRotationHandle } from "./ShapeRotationHandle";
 import { roundedShapePath } from "../domain/shapeCorners";
 import { normalizeRotation } from "../domain/shapeRotation";
 import { ShapeText } from "./ItemText";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { useBoardStore } from "../store/board.store";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { selectionKey } from "../store/slices/selection.slice";
@@ -58,7 +59,7 @@ export function ShapesLayer() {
           });
 
         return (
-          <Rnd
+          <BoardResizable
             key={shape.id}
             data-interactive="true"
             data-board-selection-key={key}
@@ -124,7 +125,7 @@ export function ShapesLayer() {
             {selected && canEdit && editingId !== shape.id && (
               <ShapeRotationHandle shape={shape} zoom={zoom} rotate={(rotation) => updateShape(shape.id, { rotation })} />
             )}
-          </Rnd>
+          </BoardResizable>
         );
       })}
     </div>

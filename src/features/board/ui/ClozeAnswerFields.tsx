@@ -15,7 +15,7 @@ export function ClozeAnswerFields({ itemId, content, answers, link }: {
       <input key={index} type="text" aria-label={`Blank ${blankIndex + 1}`}
         data-question-id={itemId} data-cloze-blank data-interactive="true"
         defaultValue={answers?.[blankIndex]}
-        className="mx-1 inline-block w-24 max-w-full rounded-sm border-b border-blue-500 bg-blue-50 px-1 text-center align-baseline text-stone-900 outline-none focus:ring-2 focus:ring-blue-300" />
+        className="mx-0.5 inline-block h-[1.45em] w-[clamp(2.5rem,20%,4.5rem)] max-w-full rounded-sm border-b border-blue-500 bg-blue-50 px-1 text-center align-baseline text-stone-900 outline-none focus:ring-2 focus:ring-blue-300" />
     );
   });
 }

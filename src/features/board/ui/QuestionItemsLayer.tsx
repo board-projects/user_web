@@ -45,7 +45,7 @@ function QuestionFrame({ item }: { item: QuestionItem }) {
       onResize={resize}
       onResizeStop={resize}
       cancel="[data-connection-handle], [data-question-editor]"
-      className="pointer-events-auto"
+      className={selected ? "pointer-events-auto z-10" : "pointer-events-auto"}
       {...dragItem(selection, item, (position) => update(item.id, position), true)}
     >
       <div className="h-full rounded-lg" style={itemSelectionStyle(selected || !!inGroup)}
@@ -65,8 +65,9 @@ function QuestionFrame({ item }: { item: QuestionItem }) {
 
 export function QuestionItemsLayer() {
   const questions = useBoardStore((state) => state.questions);
+  const editing = useBoardStore((state) => state.editingQuestionId !== null);
   return (
-    <div className="pointer-events-none absolute inset-0 z-20">
+    <div className={`pointer-events-none absolute inset-0 ${editing ? "z-[61]" : "z-20"}`}>
       {questions.map((item) => <QuestionFrame key={item.id} item={item} />)}
     </div>
   );

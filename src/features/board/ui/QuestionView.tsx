@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { isChoiceQuestion, QUESTION_TYPES, type MatchingQuestion, type OrderingQuestion, type QuestionItem } from "../domain/questions";
+import { ESSAY_ANSWER_LIMIT, isChoiceQuestion, QUESTION_TYPES, type MatchingQuestion, type OrderingQuestion, type QuestionItem } from "../domain/questions";
 import { getTextStyles } from "../domain/textFormat";
 import type { Point } from "../domain/types";
 import { MultipleChoiceView } from "./MultipleChoiceView";
@@ -91,6 +91,16 @@ export function QuestionView({ item, answering = false, selection = [] }: {
       <div className="mb-2 whitespace-pre-wrap break-words" style={getTextStyles(item.textFormat, "left")}>
         <TextLink link={answering ? item.textFormat?.link : undefined}>{item.prompt.trim() || "Question"}</TextLink>
       </div>
+      {item.kind === "essay" && (answering ? (
+        <label className="grid gap-1 text-xs font-medium text-stone-600">
+          Answer
+          <textarea rows={5} maxLength={ESSAY_ANSWER_LIMIT} defaultValue={selection[0]}
+            data-question-id={item.id} data-question-answer
+            className="w-full min-w-0 resize-none rounded-md border border-stone-300 bg-white p-2 text-sm font-normal text-stone-900 focus-visible:outline-2 focus-visible:outline-blue-600" />
+        </label>
+      ) : (
+        <div aria-hidden="true" className="h-28 rounded-md border border-stone-300" />
+      ))}
       {item.kind === "matching" && (answering ? <MatchAnswers item={item} selection={selection} /> : (
         <ul className="grid gap-1.5">{item.pairs?.map(({ left, right }) => (
           <li key={left.id} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 rounded-md border border-stone-200 p-2">

@@ -8,6 +8,7 @@ export const QUESTION_TYPES = {
   ordering: "Ordering",
   image_spot: "Select on image",
   true_false: "True or false",
+  essay: "Essay",
 } as const;
 
 export type QuestionType = keyof typeof QUESTION_TYPES;
@@ -26,7 +27,8 @@ export type ImageQuestion = QuestionFrame & {
   imageAlt: string;
   target?: Point & { radius: number };
 };
-export type QuestionItem = MultipleChoiceItem | MatchingQuestion | OrderingQuestion | ImageQuestion;
+export type EssayQuestion = QuestionFrame & { kind: "essay" };
+export type QuestionItem = MultipleChoiceItem | MatchingQuestion | OrderingQuestion | ImageQuestion | EssayQuestion;
 export type QuestionPatch = Partial<Omit<QuestionFrame, "id">> & {
   pairs?: MatchingPair[];
   steps?: QuestionOption[];
@@ -36,6 +38,7 @@ export type QuestionPatch = Partial<Omit<QuestionFrame, "id">> & {
 };
 
 export const QUESTION_ENTRY_LIMIT = 50;
+export const ESSAY_ANSWER_LIMIT = 10_000;
 
 export const createQuestionOption = (): QuestionOption => ({ id: crypto.randomUUID(), text: "" });
 export const createMatchingPair = (): MatchingPair => ({ left: createQuestionOption(), right: createQuestionOption() });
@@ -64,6 +67,8 @@ export function createQuestion(kind: Exclude<QuestionType, "cloze_test">, positi
       return { ...frame, kind, pairs: [createMatchingPair(), createMatchingPair()] };
     case "ordering":
       return { ...frame, kind, steps: [createQuestionOption(), createQuestionOption()] };
+    case "essay":
+      return { ...frame, kind };
     case "image_spot":
       return { ...frame, kind, imageUrl: "", imageAlt: "" };
   }

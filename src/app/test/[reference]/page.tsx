@@ -1,3 +1,4 @@
+import { ExamGradeSummary, type ExamGrade } from "@/features/design/ui/ExamGradeSummary";
 import { PublishedExam } from "@/features/design/ui/PublishedExam";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: { reference: string } };
 
-type TestPage = { title: string; layout: SheetLayout; snapshot: BoardUpdate; submittedAt?: string | null; answers?: Record<string, string[]> };
+type TestPage = { title: string; layout: SheetLayout; snapshot: BoardUpdate; submittedAt?: string | null; answers?: Record<string, string[]>; grade?: ExamGrade };
 
 const getPublishedPage = cache(async (reference: string): Promise<{ page: TestPage; assigned: boolean }> => {
   const response = await backendRequest(`boards/${encodeURIComponent(reference)}/published`);
@@ -33,11 +34,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PublishedTestPage({ params }: Props) {
-  const { page: { title, layout, snapshot, submittedAt, answers }, assigned } = await getPublishedPage(params.reference);
+  const { page: { title, layout, snapshot, submittedAt, answers, grade }, assigned } = await getPublishedPage(params.reference);
   const board = applyBoardChanges(EMPTY_BOARD, snapshot.changes);
 
   return (
     <main className="mx-auto w-full" style={{ maxWidth: layout.width }}>
+      {assigned && submittedAt && grade && <ExamGradeSummary grade={grade} />}
       <PublishedExam key={`${params.reference}:${submittedAt ?? "open"}`} reference={assigned ? params.reference : undefined} submitted={Boolean(submittedAt)}>
         <DesignSheet board={board} layout={layout} title={title} answers={answers} />
       </PublishedExam>

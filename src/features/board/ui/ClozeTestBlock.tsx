@@ -1,5 +1,7 @@
 "use client";
 
+import { ClozeAnswerFields } from "./ClozeAnswerFields";
+import { ClozeQuestionEditor } from "./ClozeQuestionEditor";
 import { getTextStyles } from "../domain/textFormat";
 import React from "react";
 import { ClozeTest } from "../domain/types";
@@ -30,32 +32,13 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
     const resize: React.ComponentProps<typeof Rnd>["onResize"] = (_, __, ref, ___, position) =>
         updateClozeTest(id, { ...position, width: ref.offsetWidth, height: ref.offsetHeight });
 
-    const renderContent = () => {
-        const parts = content.split(/(\[.*?\])/g);
-        return parts.map((part, index) => {
-            if (part.startsWith("[") && part.endsWith("]")) {
-                const answer = part.slice(1, -1);
-                return (
-                    <input 
-                        key={index}
-                        type="text" 
-                        placeholder="..."
-                        style={{ width: `${answer.length + 2}ch` }} // تنظیم عرض بر اساس طول کلمه
-                        className="mx-1 max-w-full border-b-2 border-blue-500 bg-blue-50 text-center outline-none focus:border-blue-700"
-                        data-interactive="true"
-                    />
-                );
-            }
-            return <span key={index}>{part}</span>;
-        });
-    };
 
     return (
         <Rnd
             data-interactive="true"
             data-board-selection-key={key}
             data-board-connectable-id={id}
-            cancel="[data-connection-handle], input, textarea"
+            cancel="[data-connection-handle], [data-cloze-editor], input"
             scale={zoom}
             position={{ x, y }}
             size={{ width: item.width, height: item.height }}
@@ -74,8 +57,8 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
             disableDragging={isEditing}
             className="z-50"
         >
-            <div
-                className="flex h-full w-full flex-col gap-2 overflow-auto break-words rounded-lg border border-stone-200 bg-white p-4 shadow-lg"
+            <div data-board-scroll
+                className="flex h-full w-full flex-col gap-2 touch-pan-y overflow-auto break-words rounded-lg border border-stone-200 bg-white p-4 shadow-lg"
                 style={itemSelectionStyle(isSelected || inMarquee)}
                 onDoubleClick={() => startEditing(id)}
             >
@@ -85,19 +68,11 @@ export const ClozeTestBlock = ({ id, content, title, x, y, width, height, textFo
                 </div>
 
                 {isEditing ? (
-                    <textarea
-                        autoFocus
-                        value={content}
-                        onChange={(e) => updateClozeTest(id, { content: e.target.value })}
-                        onBlur={stopEditing}
-                        className="w-full text-gray-800 leading-loose outline-none bg-transparent p-2 rounded border border-dashed border-gray-300 resize-none overflow-hidden"
-                        style={getTextStyles(textFormat, "left")}
-                        rows={3}
-                        data-interactive="true"
-                    />
+                    <ClozeQuestionEditor content={content} textFormat={textFormat} done={stopEditing}
+                        update={(content) => updateClozeTest(id, { content })} />
                 ) : (
-                    <div className="leading-loose text-gray-800 cursor-text" style={getTextStyles(textFormat, "left")}>
-                        {renderContent()}
+                    <div className="whitespace-pre-wrap leading-loose text-gray-800" style={getTextStyles(textFormat, "left")}>
+                        <ClozeAnswerFields itemId={id} content={content} />
                     </div>
                 )}
 

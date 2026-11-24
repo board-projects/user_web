@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { questionConnectable } from "../domain/connectableItems";
 import { QUESTION_MIN_SIZE, type MultipleChoiceItem } from "../domain/multipleChoice";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
@@ -25,7 +26,7 @@ function QuestionFrame({ item }: { item: MultipleChoiceItem }) {
     update(item.id, { ...position, width: element.offsetWidth, height: element.offsetHeight });
 
   return (
-    <Rnd
+    <BoardResizable
       data-interactive="true"
       data-board-selection-key={key}
       data-board-connectable-id={item.id}
@@ -55,7 +56,7 @@ function QuestionFrame({ item }: { item: MultipleChoiceItem }) {
         {editing ? <MultipleChoiceEditor item={item} /> : <MultipleChoiceView item={item} />}
       </div>
       <ConnectionPorts item={questionConnectable(item)} selected={selected && !editing} />
-    </Rnd>
+    </BoardResizable>
   );
 }
 

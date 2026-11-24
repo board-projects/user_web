@@ -1,7 +1,8 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { pageConnectable } from "../domain/connectableItems";
 import { selectBoardItem, useBoardItemDrag } from "../hooks/useBoardItemDrag";
 import { useBoardStore } from "../store/board.store";
@@ -31,7 +32,7 @@ export function PageItemsLayer() {
           updatePage(page.id, { ...position, width: node.offsetWidth, height: node.offsetHeight });
 
         return (
-          <Rnd
+          <BoardResizable
             key={page.id}
             position={{ x: page.x, y: page.y }}
             size={{ width: page.width, height: page.height }}
@@ -76,7 +77,7 @@ export function PageItemsLayer() {
               </>
             )}
             <ConnectionPorts item={pageConnectable(page)} selected={selected} />
-          </Rnd>
+          </BoardResizable>
         );
       })}
     </div>

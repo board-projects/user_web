@@ -1,5 +1,6 @@
 import { useRef, useState, type ComponentProps } from "react";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { tableConnectable } from "../domain/connectableItems";
 import { TABLE_LIMITS } from "../domain/tables";
 import type { TableItem } from "../domain/types";
@@ -32,7 +33,7 @@ function TableFrame({ table }: { table: TableItem }) {
   };
 
   return (
-    <Rnd
+    <BoardResizable
       position={{ x: table.x, y: table.y }}
       size={{ width: table.width, height: table.height }}
       scale={zoom}
@@ -76,7 +77,7 @@ function TableFrame({ table }: { table: TableItem }) {
         </>
       )}
       <ConnectionPorts item={tableConnectable(table)} selected={selected} />
-    </Rnd>
+    </BoardResizable>
   );
 }
 

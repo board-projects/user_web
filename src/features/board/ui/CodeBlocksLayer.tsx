@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Rnd } from "react-rnd";
+import type { Rnd } from "react-rnd";
+import { BoardResizable } from "./BoardResizable";
 import { codeConnectable } from "../domain/connectableItems";
 import { itemResizeHandles, itemSelectionStyle } from "./itemSelection";
 import { ConnectionPorts } from "./ConnectionPorts";
@@ -86,7 +87,7 @@ export function CodeBlocksLayer() {
           updateCodeBlock(block.id, { ...position, width: ref.offsetWidth, height: ref.offsetHeight });
 
         return (
-          <Rnd
+          <BoardResizable
             key={block.id}
             data-interactive="true"
             data-board-selection-key={key}
@@ -186,7 +187,7 @@ export function CodeBlocksLayer() {
               />
             </div>
             <ConnectionPorts item={codeConnectable(block)} selected={selected} />
-          </Rnd>
+          </BoardResizable>
         );
       })}
     </div>

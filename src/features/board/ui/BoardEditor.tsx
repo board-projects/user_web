@@ -100,7 +100,11 @@ export function BoardEditor({ reference }: { reference: string }) {
       <Toolbar
         onAddShape={(type) => addShape(createShape(type))}
         onAddCode={() => addCodeBlock(createCodeBlock())}
-        onAddClozeTest={() => addClozeTest(createClozeTest())}
+        onAddClozeTest={() => {
+          const { selection, sheets } = useBoardStore.getState();
+          const page = selection?.type === "page" ? sheets.find((item) => item.id === selection.id) : undefined;
+          addClozeTest(createClozeTest(page));
+        }}
         onAddTable={(rows, columns) => {
           const table = createTable({ x: (72 - panX) / zoom, y: (112 - panY) / zoom }, rows, columns);
           addTable(table);

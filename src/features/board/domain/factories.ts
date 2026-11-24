@@ -1,5 +1,6 @@
+import { CLOZE_SIZE } from "./connectableItems";
 import { shapeDefinitions } from "./shapeDefinitions";
-import type { CodeBlock, Shape, ShapeType } from "@/features/board/domain/types";
+import type { CodeBlock, PageItem, Shape, ShapeType } from "@/features/board/domain/types";
 
 export const randomColor = () =>
   `#${Math.floor(Math.random() * 16777215)
@@ -21,11 +22,19 @@ export const createCodeBlock = (): CodeBlock => ({
   height: 200,
 });
 
-export const createClozeTest = () => ({
-  id: crypto.randomUUID(),
-  type: "cloze_test" as const,
-  x: 100,
-  y: 100,
-  content: "The capital of France is {{paris}}.",
-  title: "capital name",
-});
+export function createClozeTest(page?: PageItem) {
+  const inset = 12;
+  const placement = page ? {
+    x: page.x + inset,
+    y: page.y + inset,
+    width: Math.min(CLOZE_SIZE.width, page.width - inset * 2),
+    height: Math.min(CLOZE_SIZE.height, page.height - inset * 2),
+  } : { x: 100, y: 100 };
+  return {
+    id: crypto.randomUUID(),
+    type: "cloze_test" as const,
+    ...placement,
+    content: "The capital of France is {{paris}}.",
+    title: "capital name",
+  };
+}

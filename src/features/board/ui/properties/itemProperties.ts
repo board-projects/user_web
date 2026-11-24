@@ -1,3 +1,4 @@
+import { examLevels, examLocales } from "@/features/catalog/filters";
 import { TABLE_LIMITS } from "../../domain/tables";
 import { MAX_CORNER_ROUNDING, normalizeCornerRounding } from "../../domain/shapeCorners";
 import { QUESTION_MIN_SIZE } from "../../domain/multipleChoice";
@@ -194,6 +195,16 @@ export function getItemProperties(state: BoardState): ItemProperties | null {
       return {
         fields: [
           labelField(page.title, (title) => state.updatePage(id, { title })),
+          {
+            kind: "select", label: "Access", value: page.visibility === "public" ? "Public" : "Private",
+            options: ["Private", "Public"],
+            change: (value) => state.updatePage(id, { visibility: value === "Public" ? "public" : "private" }),
+          },
+          ...(page.visibility === "public" ? [
+            { kind: "text", label: "Topic", value: page.topic ?? "", maxLength: 80, change: (topic) => state.updatePage(id, { topic }) },
+            { kind: "select", label: "Level", value: page.level || "Unspecified", options: ["Unspecified", ...examLevels], change: (value) => state.updatePage(id, { level: value === "Unspecified" ? "" : value }) },
+            { kind: "select", label: "Language", value: page.locale || "Unspecified", options: ["Unspecified", ...examLocales], change: (value) => state.updatePage(id, { locale: value === "Unspecified" ? "" : value }) },
+          ] satisfies ItemProperty[] : []),
           { kind: "color", label: "Background", value: page.backgroundColor ?? "#ffffff", change: (backgroundColor) => state.updatePage(id, { backgroundColor }) },
           {
             kind: "select", label: "Resolution", value: presets.includes(resolution) ? resolution : "Custom",

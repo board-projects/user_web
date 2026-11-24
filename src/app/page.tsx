@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EntryActions } from "@/features/main/components/EntryActions";
 
 export const metadata = {
@@ -50,6 +51,7 @@ export default function Home() {
         <div className="w-full flex justify-center mt-2">
           <EntryActions />
         </div>
+        <Link href="/search" className="mt-4 rounded-lg px-4 py-2 text-sm font-semibold text-cyan-900 underline">Browse public exams</Link>
       </section>
 
       <div className="text-xs sm:text-sm text-cyan-950/70 text-center space-y-1 w-full z-30 bg-cyan-50/80 backdrop-blur-sm py-2">

@@ -3,7 +3,7 @@ import { backendPost, getSessionCredentials } from "@/features/auth/services/ses
 
 export type DashboardRole = "teacher" | "student";
 
-type ExamSummary = { id: string; label: string; status: string };
+type ExamSummary = { id: string; testId?: string; label: string; status: string };
 type DashboardOverview = { role: DashboardRole; roles: DashboardRole[]; tests: ExamSummary[] };
 type DashboardResult = { status: "success"; data: DashboardOverview } | { status: "unauthorized" | "forbidden" | "unavailable" };
 

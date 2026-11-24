@@ -15,7 +15,8 @@ export default async function AssignedExamPage({ params }: { params: { assignmen
   if (response.status === 400 || response.status === 404) notFound();
   if (!response.ok) throw new Error("Assigned exam is unavailable");
 
-  const { title, layout, snapshot } = await response.json() as { title: string; layout: SheetLayout; snapshot: BoardUpdate };
+  const { title, layout, snapshot, testId } = await response.json() as { title: string; layout: SheetLayout; snapshot: BoardUpdate; testId?: string };
+  if (testId) redirect(`/test/${testId}`);
   return (
     <main className="mx-auto w-full" style={{ maxWidth: layout.width }}>
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-100 px-4 py-3">

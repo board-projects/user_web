@@ -17,16 +17,24 @@ type Props = { params: { reference: string } };
 type TestPage = { title: string; layout: SheetLayout; snapshot?: BoardUpdate; access?: ExamAccess; submittedAt?: string | null; answers?: Record<string, string[]>; grade?: ExamGrade };
 
 const getPublishedPage = cache(async (reference: string): Promise<{ page: TestPage; assigned: boolean }> => {
-  const response = await backendRequest(`boards/${encodeURIComponent(reference)}/published`);
+  const id = encodeURIComponent(reference);
+  const credentials = getSessionCredentials({ cookies: cookies() });
+  const hasSession = Boolean(credentials.access_token || credentials.refresh_token);
+  let authenticationRequired = !hasSession;
+  if (hasSession) {
+    const assigned = await backendPost(`exam/assignments/test/${id}`, credentials);
+    if (assigned.ok) return { page: await assigned.json(), assigned: true };
+    if (assigned.status === 400) notFound();
+    if (assigned.status !== 404 && assigned.status !== 401) throw new Error("Assigned exam is unavailable");
+    authenticationRequired = assigned.status === 401;
+  }
+
+  const response = await backendRequest(`boards/${id}/published`);
   if (response.ok) return { page: await response.json(), assigned: false };
   if (response.status === 400) notFound();
   if (response.status !== 404) throw new Error("Published page is unavailable");
-
-  const assigned = await backendPost(`exam/assignments/test/${encodeURIComponent(reference)}`, getSessionCredentials({ cookies: cookies() }));
-  if (assigned.status === 401) redirect(`/login?next=${encodeURIComponent(`/test/${reference}`)}`);
-  if (assigned.status === 400 || assigned.status === 404) notFound();
-  if (!assigned.ok) throw new Error("Assigned exam is unavailable");
-  return { page: await assigned.json(), assigned: true };
+  if (authenticationRequired) redirect(`/login?next=${encodeURIComponent(`/test/${reference}`)}`);
+  notFound();
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
